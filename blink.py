@@ -1,5 +1,6 @@
 from typing import List, Dict, Any
 from logging import Logger
+import json
 
 import sys
 import os
@@ -27,10 +28,14 @@ from main_dense import (
     _run_biencoder,
     _process_crossencoder_dataloader,
     _run_crossencoder,
+    _load_candidates,
 )
+
+blink_models_path = "BLINK/models"
 
 blink_config = {
     "fast": False,
+    "top_k": 1,
     "biencoder_model": os.path.join(blink_models_path, "biencoder_wiki_large.bin"),
     "biencoder_config": os.path.join(blink_models_path, "biencoder_wiki_large.json"),
     "entity_catalogue": os.path.join(blink_models_path, "entity.jsonl"),
@@ -42,7 +47,7 @@ blink_config = {
 
 assert blink_config["faiss_index"] in ("flat", "hnsw")
 if blink_config["faiss_index"] == "flat":
-    blink_config["index_path"] = path.join(blink_models_path, "faiss_flat_index.pkl")
+    blink_config["index_path"] = os.path.join(blink_models_path, "faiss_flat_index.pkl")
 else:
     blink_config["index_path"] = os.path.join(blink_models_path, "faiss_hnsw_index.pkl")
 
@@ -201,8 +206,14 @@ def _run_blink_prediction(
 def run_blink_prediction(query_text: str):
     fast = blink_config.pop("fast")
     top_k = blink_config.pop("top_k")
+
+    print("Loading BLINK models...")
     blink_models = load_models(**blink_config)
+    print("done.")
+
+    print("Loading NER model...")
     ner_model = NER.get_model()
+    print("done.")
 
     arguments = {
         "query_text": query_text,
@@ -215,4 +226,8 @@ def run_blink_prediction(query_text: str):
     return _run_blink_prediction(**arguments)
 
 def main():
-    pass
+    print(run_blink_prediction(query_text="BERT and ERNIE are Muppets."))
+
+
+if __name__ == '__main__':
+    main()

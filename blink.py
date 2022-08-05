@@ -1,5 +1,6 @@
 from typing import List, Dict, Any
 from logging import Logger
+from functools import lru_cache
 import json
 
 import sys
@@ -52,7 +53,21 @@ else:
     blink_config["index_path"] = os.path.join(blink_models_path, "faiss_hnsw_index.pkl")
 
 
-def load_models(
+@lru_cache(maxsize=None)
+def load_blink_and_ner_models():
+    print("Loading BLINK models...")
+    fast = blink_config.pop("fast")
+    top_k = blink_config.pop("top_k")
+    blink_models = load_blink_models(**blink_config)
+    print("done.")
+
+    print("Loading NER model...")
+    ner_model = load_ner_model()
+    print("done.")
+    return blink_models, ner_model
+
+
+def load_blink_models(
         biencoder_config: str,
         biencoder_model: str,
         crossencoder_config: str,
@@ -203,18 +218,9 @@ def _run_blink_prediction(
     return predictions
 
 
+
 def run_blink_prediction(query_text: str):
-    fast = blink_config.pop("fast")
-    top_k = blink_config.pop("top_k")
-
-    print("Loading BLINK models...")
-    blink_models = load_models(**blink_config)
-    print("done.")
-
-    print("Loading NER model...")
-    ner_model = NER.get_model()
-    print("done.")
-
+    blink_models, ner_model = load_blink_and_ner_models()
     arguments = {
         "query_text": query_text,
         "top_k": top_k,
@@ -222,7 +228,6 @@ def run_blink_prediction(query_text: str):
         "ner_model": ner_model,
         **blink_models
     }
-
     return _run_blink_prediction(**arguments)
 
 def main():

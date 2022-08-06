@@ -10,11 +10,12 @@ git clone https://github.com/facebookresearch/BLINK
 # Either do this ...
 beaker dataset fetch harsh-trivedi/blink_models --output BLINK/models
 # ... or 
-# cd BLINK
-# chmod +x download_blink_models.sh
-# ./download_blink_models.sh
-# http://dl.fbaipublicfiles.com/BLINK//faiss_flat_index.pkl -o models/
-# http://dl.fbaipublicfiles.com/BLINK/faiss_hnsw_index.pkl -o models/
+cd BLINK
+chmod +x download_blink_models.sh
+./download_blink_models.sh
+wget http://dl.fbaipublicfiles.com/BLINK//faiss_flat_index.pkl -o models/
+wget http://dl.fbaipublicfiles.com/BLINK/faiss_hnsw_index.pkl -o models/
+cd ..
 
 conda create -n retriever_server python=3.8 -y && conda activate retriever_server
 

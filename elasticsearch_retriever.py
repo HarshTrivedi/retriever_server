@@ -44,7 +44,7 @@ class ElasticsearchRetriever:
         if is_abstract is not None:
             query["query"]["bool"]["must"].append({"match": {"is_abstract": is_abstract}})
 
-        result = self.es.search(index=self._index_name, body=query)
+        result = self._es.search(index=self._index_name, body=query)
 
         retrieval = []
         if result.get('hits') is not None and result['hits'].get('hits') is not None:
@@ -80,7 +80,7 @@ class ElasticsearchRetriever:
             }
         }
 
-        result = self.es.search(index=self._index_name, body=query)
+        result = self._es.search(index=self._index_name, body=query)
 
         retrieval = []
         if result.get('hits') is not None and result['hits'].get('hits') is not None:

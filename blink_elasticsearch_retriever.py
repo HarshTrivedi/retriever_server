@@ -129,14 +129,14 @@ class BlinkElasticsearchRetriever:
         }
 
         es_titles = [
-            self.retrieve_titles(query_text=blink_title, max_hits_count=1)[0]
+            self._elasticsearch_retriever.retrieve_titles(query_text=blink_title, max_hits_count=1)[0]
             for blink_title in blink_titles
         ]
 
         if not one_es_per_blink:
         # Option 3
             is_abstract = self._limit_to_abstracts
-            results = self.retrieve_paragraphs(
+            results = self._elasticsearch_retriever.retrieve_paragraphs(
                 query_text=query_text,
                 is_abstract=is_abstract,
                 allowed_titles=es_titles,
@@ -149,7 +149,7 @@ class BlinkElasticsearchRetriever:
             results = []
             for es_title in es_titles:
                 is_abstract = self._limit_to_abstracts
-                result = self.retrieve_paragraphs(
+                result = self._elasticsearch_retriever.retrieve_paragraphs(
                     query_text=query_text,
                     is_abstract=is_abstract,
                     allowed_titles=[es_title],

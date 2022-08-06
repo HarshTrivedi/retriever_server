@@ -89,14 +89,12 @@ class BlinkElasticsearchRetriever:
             1. Get blink titles
             2. Return abstract paragraphs corresponding to them (ignore the corpus).
         """
-        blink_titles_results = self._blink_retriever.retrieve_paragraphs(
-            query_text, max_hits_count=max_hits_count
-        )
+        blink_titles_results = self._blink_retriever.retrieve_paragraphs(query_text)
 
         results = [
             {"title": result["title"], "text": result["text"]}
             for result in blink_titles_results
-        ]
+        ][:max_hits_count]
         raise results
 
 

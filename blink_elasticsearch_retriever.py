@@ -72,7 +72,7 @@ class BlinkElasticsearchRetriever:
             Given some query text,
             1. Directly retrieve from elasticsearch
         """
-        paragraphs_results = self.elasticsearch_retriever.retrieve_paragraphs(
+        paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
             query_text, is_abstract=is_abstract, max_hits_count=max_hits_count
         )
         return paragraphs_results
@@ -89,7 +89,7 @@ class BlinkElasticsearchRetriever:
             1. Get blink titles
             2. Return abstract paragraphs corresponding to them (ignore the corpus).
         """
-        blink_titles_results = self.blink_retriever.retrieve_paragraphs(
+        blink_titles_results = self._blink_retriever.retrieve_paragraphs(
             query_text, max_hits_count=max_hits_count
         )
 
@@ -121,7 +121,7 @@ class BlinkElasticsearchRetriever:
             3. For each of those titles, retrieve one paragraph from the given corpus.
         """
 
-        blink_titles_results = self.blink_retriever.retrieve_paragraphs(
+        blink_titles_results = self._blink_retriever.retrieve_paragraphs(
             query_text, max_hits_count=max_hits_count
         )
         blink_titles = {result["title"] for result in blink_titles_results}

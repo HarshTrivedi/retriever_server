@@ -7,3 +7,4 @@ fastapi
 jsonnet
 pygments
 uvicorn
+requests

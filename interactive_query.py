@@ -14,7 +14,7 @@ def main():
         required=True
     )
     parser.add_argument("--host", type=str, help="host", required=False)
-    parser.add_argument("--port", type=int, help="port", required=False)
+    parser.add_argument("--port", type=int, help="port", required=False, default=443) # 443 is default for ngrok
     parser.add_argument("--max_hits_count", type=int, help="max_hits_count", default=3, required=False)
     args = parser.parse_args()
 
@@ -31,13 +31,18 @@ def main():
             "query_text": query_text,
             "max_hits_count": 3,
         }
-        response = requests.get(args.host.rstrip("/") + ":" + str(port) + "/retrieve", params=params)
-        result = response.json()
 
-        result_str = json.dumps(result, indent=4)
+        url = args.host.rstrip("/") + ":" + str(args.port) + "/retrieve"
+        result = requests.post(url, json=params)
 
-        result_str = highlight(result_str.encode("utf-8"), lexers.JsonLexer(), formatters.TerminalFormatter())
-        print(result_str)
+        if result.ok:
+            result_str = json.dumps(result.json(), indent=4)
+            result_str = highlight(result_str.encode("utf-8"), lexers.JsonLexer(), formatters.TerminalFormatter())
+            print(result_str)
+
+        else:
+            print("Something went wrong!\n\n")
+
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@ from typing import List, Dict, Any
 from logging import Logger
 from functools import lru_cache
 import json
+import copy
 
 import sys
 import os
@@ -56,9 +57,10 @@ else:
 @lru_cache(maxsize=None)
 def load_blink_and_ner_models():
     print("Loading BLINK models...")
-    fast = blink_config.pop("fast")
-    top_k = blink_config.pop("top_k")
-    blink_models = load_blink_models(**blink_config)
+    arguments = copy.deepcopy(blink_config)
+    fast = arguments.pop("fast")
+    top_k = arguments.pop("top_k")
+    blink_models = load_blink_models(**arguments)
     print("done.")
 
     print("Loading NER model...")
@@ -220,6 +222,8 @@ def _run_blink_prediction(
 
 def run_blink_prediction(query_text: str):
     blink_models, ner_model = load_blink_and_ner_models()
+    top_k = blink_config["top_k"]
+    fast = blink_config["fast"]
     arguments = {
         "query_text": query_text,
         "top_k": top_k,

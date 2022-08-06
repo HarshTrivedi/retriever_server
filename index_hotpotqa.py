@@ -1,15 +1,28 @@
 import argparse, elasticsearch, json
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
+from typing import Any
+import hashlib
+import io
+import dill
 from tqdm import tqdm
 import argparse
 import glob
 import bz2
+import base58
+
+def hash_object(o: Any) -> str:
+    """Returns a character hash code of arbitrary Python objects."""
+    m = hashlib.blake2b()
+    with io.BytesIO() as buffer:
+        dill.dump(o, buffer)
+        m.update(buffer.getbuffer())
+        return base58.b58encode(m.digest()).decode()
 
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Index Elasticsearch')
+    parser = argparse.ArgumentParser(description='Index HotpotQA paragraphs in Elasticsearch')
     parser.add_argument("--force", help='force delete before creating new index.',
                         action="store_true", default=False)
     parser.add_argument("--skip-if-exists", help='skip indexing if it already exists.',
@@ -53,6 +66,9 @@ if __name__ == "__main__":
                         "type": "text",
                         "analyzer": "english",
                     },
+                    "is_abstract": {
+                        "type": "boolean"
+                    }
                 }
         }
     }
@@ -80,27 +96,33 @@ if __name__ == "__main__":
 
     # Add documents
     def make_documents():
-        raw_glob_filepath = 'data/raw/hotpotqa-wikipedia/*/wiki_*.bz2'
+        raw_glob_filepath = "raw_data/hotpotqa-wikpedia-paragraphs/*/wiki_*.bz2"
         _idx = 1
         for filepath in tqdm(glob.glob(raw_glob_filepath)):
             for datum in bz2.BZ2File(filepath).readlines():
                 instance = json.loads(datum.strip())
-                id_ = int(instance["id"])
+
+                id_ = hash_object(instance)[:32]
                 title = instance["title"]
                 sentences_text = [e.strip() for e in instance["text"]]
                 paragraph_text = " ".join(sentences_text)
                 url = instance["url"]
-                es_fact = {
+                is_abstract = True
+                paragraph_idx = 0
+
+                es_paragraph = {
                     "id": id_,
                     "title": title,
                     "url": url,
                     "paragraph": paragraph_text,
+                    "is_abstract": is_abstract,
+                    "paragraph_idx": paragraph_idx,
                 }
                 document = {
                     "_op_type": 'create',
                     '_index': elasticsearch_index,
                     '_id': _idx,
-                    '_source': es_fact
+                    '_source': es_paragraph,
                 }
                 yield (document)
                 _idx += 1

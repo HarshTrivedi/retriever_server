@@ -62,7 +62,7 @@ def load_blink_and_ner_models():
     print("done.")
 
     print("Loading NER model...")
-    ner_model = load_ner_model()
+    ner_model = NER.get_model()
     print("done.")
     return blink_models, ner_model
 
@@ -216,7 +216,6 @@ def _run_blink_prediction(
         predictions.append({"id": e_id, "title": e_title, "text": e_text, "url": e_url})
 
     return predictions
-
 
 
 def run_blink_prediction(query_text: str):

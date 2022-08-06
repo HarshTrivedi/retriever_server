@@ -51,7 +51,7 @@ class ElasticsearchRetriever:
             retrieval = result['hits']['hits']
             text2retrieval = OrderedDict()
             for item in retrieval:
-                text = item["_source"]["text"].strip().lower()
+                text = item["_source"]["paragraph_text"].strip().lower()
                 text2retrieval[text] = item
             retrieval = list(text2retrieval.values())[:max_hits_count]
 

@@ -119,9 +119,7 @@ class BlinkElasticsearchRetriever:
             3. For each of those titles, retrieve one paragraph from the given corpus.
         """
 
-        blink_titles_results = self._blink_retriever.retrieve_paragraphs(
-            query_text, max_hits_count=max_hits_count
-        )
+        blink_titles_results = self._blink_retriever.retrieve_paragraphs(query_text)
         blink_titles = {result["title"] for result in blink_titles_results}
 
         skip_blink_titles = skip_blink_titles or []

@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 
 BLINK
+.DS_STORE

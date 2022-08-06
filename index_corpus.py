@@ -33,15 +33,15 @@ def make_hotpotqa_documents():
             paragraph_text = " ".join(sentences_text)
             url = instance["url"]
             is_abstract = True
-            paragraph_idx = 0
+            paragraph_index = 0
 
             es_paragraph = {
                 "id": id_,
                 "title": title,
+                "paragraph_index": paragraph_index,
+                "paragraph_text": paragraph_text,
                 "url": url,
-                "paragraph": paragraph_text,
                 "is_abstract": is_abstract,
-                "paragraph_idx": paragraph_idx,
             }
             document = {
                 "_op_type": 'create',
@@ -62,19 +62,19 @@ def make_strategyqa_documents():
 
             id_ = hash_object(instance)[:32]
             title = instance["title"]
-            paragraph_idx = instance["para_id"] - 1
-            assert paragraph_idx >= 0
+            paragraph_index = instance["para_id"] - 1
+            assert paragraph_index >= 0
             paragraph_text = instance["para"]
             url = ""
-            is_abstract = paragraph_idx == 0
+            is_abstract = paragraph_index == 0
 
             es_paragraph = {
                 "id": id_,
                 "title": title,
+                "paragraph_index": paragraph_index,
+                "paragraph_text": paragraph_text,
                 "url": url,
-                "paragraph": paragraph_text,
                 "is_abstract": is_abstract,
-                "paragraph_idx": paragraph_idx,
             }
             document = {
                 "_op_type": 'create',
@@ -113,23 +113,23 @@ if __name__ == "__main__":
     # Index name: {args.dataset_name}-wikipedia (database-name)
     # Type Name: paragraphs (table-name)
     # Properties (Field Names [type = datatype]) :
-    # field1: idx [keyword]
-    # field3: title
-    # field4: text
+    # field1: title
+    # field2: paragraph_index
+    # field3: paragraph_text
     # field4: url
-    # ...
+    # field4: is_abstract
 
     paragraphs_index_settings = {
         "mappings": {
                 "properties": {
-                    "idx": {
-                        "type": "integer"
-                    },
                     "title": {
                         "type": "text",
                         "analyzer": "english",
                     },
-                    "text": {
+                    "paragraph_index": {
+                        "type": "integer"
+                    },
+                    "paragraph_text": {
                         "type": "text",
                         "analyzer": "english",
                     },

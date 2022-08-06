@@ -17,7 +17,7 @@ class ElasticsearchRetriever:
             elastic_host: str = "localhost",
             elastic_port: int = 9200,
         ):
-        self._es = Elasticsearch( [elastic_host], scheme="http", port=9200)
+        self._es = Elasticsearch([elastic_host], scheme="http", port=elastic_port)
         self._index_name = f"{dataset_name}-wikipedia"
 
     def retrieve_paragraphs(
@@ -31,11 +31,11 @@ class ElasticsearchRetriever:
 
         query = {
             "size": max_buffer_count,
-            "_source": ["id", "title", "text", "url", "is_abstract"], # what records are needed in result
+            "_source": ["id", "title", "paragraph_text", "url", "is_abstract"], # what records are needed in result
             "query": {
                 "bool": {
                     "must": [
-                        {"match": {"text": query_text}},
+                        {"match": {"paragraph_text": query_text}},
                     ],
                 }
             }

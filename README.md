@@ -66,16 +66,28 @@ cd elasticsearch-7.10.2/
 curl http://localhost:9200/_cat/indices\?pretty
 ```
 
+## Index Corpuses
+
+```bash
+python index_corpus.py hotpotqa
+python index_corpus.py strategyqa
+```
+
+## Start Elasticsearch Server
+
+```bash
+./bin/elasticsearch --port 9200 # make sure to use this port
+```
+
+
 ## Start Main Retriever Server
 
 ```bash
 uvicorn retriever_server:app --reload --port 8000
 ```
 
-
-## Index Corpuses
+## Interactive Querying
 
 ```bash
-python index_corpus.py hotpotqa
-python index_corpus.py strategyqa
+python interactive_query.py --retrieval_method retrieve_from_blink --host TODO --port 8000
 ```

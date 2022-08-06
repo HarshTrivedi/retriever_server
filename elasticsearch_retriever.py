@@ -11,8 +11,13 @@ from elasticsearch.helpers import bulk
 
 class ElasticsearchRetriever:
 
-    def __init__(self, es: Elasticsearch, index_name: str):
-        self._es = es
+    def __init__(
+            self,
+            elastic_host: str,
+            elastic_port: int,
+            dataset_name: str
+        ):
+        self._es = Elasticsearch([{'host': elastic_host, 'port': elastic_port}])
         self._index_name = f"{dataset_name}-wikipedia"
 
     def retrieve_paragraphs(
@@ -97,20 +102,11 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    elastic_host = 'localhost'
-    elastic_port = 9200
-    es = Elasticsearch([{'host': elastic_host, 'port': elastic_port}])
-
-    retriever = ElasticsearchRetriever(es, args.paragraph_type, args.data_type)
+    retriever = ElasticsearchRetriever(
+        elastic_host, elastic_port, args.dataset_name
+    )
 
     results = retriever.retrieve_titles("injuries", "")
 
     for result in results:
         print(result)
-
-    # blink_titles
-    # for blink_title in blink_titles:
-    #   get title of wikipedia corresponding to that dataset.
-    #   get one paragraph/s corresponding to that title.
-
-    # keep maintaining a set of paragraph titles.

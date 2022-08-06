@@ -33,34 +33,33 @@ from main_dense import (
     _load_candidates,
 )
 
-blink_models_path = "BLINK/models"
-
-blink_config = {
-    "fast": False,
-    "top_k": 1,
-    "biencoder_model": os.path.join(blink_models_path, "biencoder_wiki_large.bin"),
-    "biencoder_config": os.path.join(blink_models_path, "biencoder_wiki_large.json"),
-    "entity_catalogue": os.path.join(blink_models_path, "entity.jsonl"),
-    "entity_encoding": os.path.join(blink_models_path, "all_entities_large.t7"),
-    "crossencoder_model": os.path.join(blink_models_path, "crossencoder_wiki_large.bin"),
-    "crossencoder_config": os.path.join(blink_models_path, "crossencoder_wiki_large.json"),
-    "faiss_index": "flat", # "flat" or "hnsw"
-}
-
-assert blink_config["faiss_index"] in ("flat", "hnsw")
-if blink_config["faiss_index"] == "flat":
-    blink_config["index_path"] = os.path.join(blink_models_path, "faiss_flat_index.pkl")
-else:
-    blink_config["index_path"] = os.path.join(blink_models_path, "faiss_hnsw_index.pkl")
-
+BLINK_MODELS_PATH = "BLINK/models"
 
 @lru_cache(maxsize=None)
-def load_blink_and_ner_models():
+def load_blink_and_ner_models(
+        biencoder_config: str,
+        biencoder_model: str,
+        crossencoder_config: str,
+        crossencoder_model: str,
+        entity_catalogue: str,
+        entity_encoding: str,
+        faiss_index: str,
+        index_path: str,
+        fast: bool,
+    ):
     print("Loading BLINK models...")
-    arguments = copy.deepcopy(blink_config)
-    fast = arguments.pop("fast")
-    top_k = arguments.pop("top_k")
-    blink_models = load_blink_models(**arguments)
+    blink_models = load_blink_models(
+        biencoder_config=biencoder_config,
+        biencoder_model=biencoder_model,
+        crossencoder_config=crossencoder_config,
+        crossencoder_model=crossencoder_model,
+        entity_catalogue=entity_catalogue,
+        entity_encoding=entity_encoding,
+        faiss_index=faiss_index,
+        index_path=index_path,
+        fast=fast,
+        logger=None
+    )
     print("done.")
 
     print("Loading NER model...")
@@ -220,18 +219,52 @@ def _run_blink_prediction(
     return predictions
 
 
-def run_blink_prediction(query_text: str):
-    blink_models, ner_model = load_blink_and_ner_models()
-    top_k = blink_config["top_k"]
-    fast = blink_config["fast"]
-    arguments = {
-        "query_text": query_text,
-        "top_k": top_k,
-        "fast": fast,
-        "ner_model": ner_model,
-        **blink_models
-    }
-    return _run_blink_prediction(**arguments)
+class BlinkRetriever:
+
+    def __init__(
+            self,
+            blink_models_path: str = BLINK_MODELS_PATH,
+            faiss_index: str = "flat", # "flat" or "hnsw",
+            fast: bool = False,
+            top_k: int = 1,
+        ):
+
+        assert faiss_index in ("flat", "hnsw")
+        biencoder_model = os.path.join(blink_models_path, "biencoder_wiki_large.bin"),
+        biencoder_config = os.path.join(blink_models_path, "biencoder_wiki_large.json"),
+        entity_catalogue = os.path.join(blink_models_path, "entity.jsonl"),
+        entity_encoding = os.path.join(blink_models_path, "all_entities_large.t7"),
+        crossencoder_model = os.path.join(blink_models_path, "crossencoder_wiki_large.bin"),
+        crossencoder_config = os.path.join(blink_models_path, "crossencoder_wiki_large.json"),
+
+        if faiss_index == "flat":
+            index_path = os.path.join(blink_models_path, "faiss_flat_index.pkl")
+        else:
+            index_path = os.path.join(blink_models_path, "faiss_hnsw_index.pkl")
+
+        self._blink_models, self._ner_model = load_blink_and_ner_models(
+            biencoder_model=biencoder_model,
+            biencoder_config=biencoder_config,
+            entity_catalogue=entity_catalogue,
+            entity_encoding=entity_encoding,
+            crossencoder_model=crossencoder_model,
+            crossencoder_config=crossencoder_config,
+            faiss_index=faiss_index,
+            index_path=index_path,
+            fast=fast,
+        )
+        self._top_k = top_k
+        self._fast = fast
+
+    def retrieve_paragraphs(self, query_text: str):
+        arguments = {
+            "query_text": query_text,
+            "top_k": self._top_k,
+            "fast": self._fast,
+            "ner_model": self._ner_model,
+            **self._blink_models
+        }
+        return _run_blink_prediction(**arguments)
 
 def main():
     print("Call one ....")

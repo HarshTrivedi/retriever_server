@@ -1,1 +1,5 @@
 gensim==3.5.0 # this version required for BLINK to work.
+elasticsearch
+tqdm
+dill
+base58

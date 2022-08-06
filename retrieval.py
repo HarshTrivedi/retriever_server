@@ -92,7 +92,9 @@ class Retrieval:
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='retrieve paragraphs or titles')
-    parser.add_argument('dataset_name', type=str, help='dataset_name', choices={"hotpotqa", "strategyqa"})
+    parser.add_argument(
+        'dataset_name', type=str, help='dataset_name', choices={"hotpotqa", "strategyqa"}
+    )
     args = parser.parse_args()
 
     elastic_host = 'localhost'

@@ -105,7 +105,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     retriever = ElasticsearchRetriever(
-        args.host, args.port, args.dataset_name
+        dataset_name=args.dataset_name, elastic_host=args.host, elastic_port=args.port, 
     )
 
     results = retriever.retrieve_titles("injuries", "")

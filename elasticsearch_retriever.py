@@ -55,6 +55,8 @@ class ElasticsearchRetriever:
                 text2retrieval[text] = item
             retrieval = list(text2retrieval.values())[:max_hits_count]
 
+        retrieval = [e["_source"] for e in retrieval]
+
         if allowed_titles is not None:
             retrieval = [item for item in retrieval if item["title"] in allowed_titles]
 
@@ -90,6 +92,8 @@ class ElasticsearchRetriever:
                 text = item["_source"]["title"].strip().lower()
                 text2retrieval[text] = item
             retrieval = list(text2retrieval.values())[:max_hits_count]
+
+        retrieval = [e["_source"] for e in retrieval]
 
         return retrieval
 

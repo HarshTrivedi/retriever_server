@@ -14,10 +14,10 @@ class ElasticsearchRetriever:
     def __init__(
             self,
             dataset_name: str,
-            elastic_host: str = "http://localhost",
+            elastic_host: str = "localhost",
             elastic_port: int = 9200,
         ):
-        self._es = Elasticsearch(elastic_host.rstrip("/") + str(elastic_port))
+        self._es = Elasticsearch( [elastic_host], scheme="http", port=9200)
         self._index_name = f"{dataset_name}-wikipedia"
 
     def retrieve_paragraphs(
@@ -35,7 +35,7 @@ class ElasticsearchRetriever:
             "query": {
                 "bool": {
                     "must": [
-                        {"match": {"paragraph": query_text}},
+                        {"match": {"text": query_text}},
                     ],
                 }
             }
@@ -73,7 +73,7 @@ class ElasticsearchRetriever:
             "query": {
                 "bool": {
                     "must": [
-                        {"match": {"paragraph": query_text}},
+                        {"match": {"title": query_text}},
                         {"match": {"is_abstract": True}}, # so that same title doesn't show up many times.
                     ],
                 }
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     parser.add_argument(
         'dataset_name', type=str, help='dataset_name', choices={"hotpotqa", "strategyqa"}
     )
-    parser.add_argument("--host", type=str, help="host", default="http://localhost")
+    parser.add_argument("--host", type=str, help="host", default="localhost")
     parser.add_argument("--port", type=int, help="port", default=9200)
     args = parser.parse_args()
 

@@ -1,4 +1,7 @@
-from blink_retriever import BLINK_MODELS_PATH, ElasticsearchRetriever
+import json
+from typing import List, Dict
+
+from blink_retriever import BLINK_MODELS_PATH, BlinkRetriever
 from elasticsearch_retriever import ElasticsearchRetriever
 
 
@@ -31,8 +34,9 @@ class BlinkElasticsearchRetriever:
 
 
     def __init__(
+        self,
         # Elasticsearch init args:
-        dataset_name: str,
+        dataset_name: str = "hotpotqa",
         elastic_host: str = "http://localhost/",
         elastic_port: int = 9200,
         # Blink init args:

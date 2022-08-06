@@ -83,7 +83,11 @@ python index_corpus.py strategyqa
 ## Start Main Retriever Server
 
 ```bash
+# Tab 1
 uvicorn retriever_server:app --reload --port 8000
+
+# Tab 2
+ngrok http 8000
 ```
 
 ## Interactive Querying

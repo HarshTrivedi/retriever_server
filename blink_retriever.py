@@ -230,12 +230,12 @@ class BlinkRetriever:
         ):
 
         assert faiss_index in ("flat", "hnsw")
-        biencoder_model = os.path.join(blink_models_path, "biencoder_wiki_large.bin"),
-        biencoder_config = os.path.join(blink_models_path, "biencoder_wiki_large.json"),
-        entity_catalogue = os.path.join(blink_models_path, "entity.jsonl"),
-        entity_encoding = os.path.join(blink_models_path, "all_entities_large.t7"),
-        crossencoder_model = os.path.join(blink_models_path, "crossencoder_wiki_large.bin"),
-        crossencoder_config = os.path.join(blink_models_path, "crossencoder_wiki_large.json"),
+        biencoder_model = os.path.join(blink_models_path, "biencoder_wiki_large.bin")
+        biencoder_config = os.path.join(blink_models_path, "biencoder_wiki_large.json")
+        entity_catalogue = os.path.join(blink_models_path, "entity.jsonl")
+        entity_encoding = os.path.join(blink_models_path, "all_entities_large.t7")
+        crossencoder_model = os.path.join(blink_models_path, "crossencoder_wiki_large.bin")
+        crossencoder_config = os.path.join(blink_models_path, "crossencoder_wiki_large.json")
 
         if faiss_index == "flat":
             index_path = os.path.join(blink_models_path, "faiss_flat_index.pkl")

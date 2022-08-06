@@ -11,11 +11,11 @@ def main():
     parser.add_argument(
         "--retrieval_method", type=str, help="retrieval_method",
         choices={"retrieve_from_elasticsearch", "retrieve_from_blink", "retrieve_from_blink_and_elasticsearch"},
-        require=True
+        required=True
     )
-    parser.add_argument("--host", type=str, help="host", require=True)
-    parser.add_argument("--port", type=int, help="port", require=True)
-    parser.add_argument("--max_hits_count", type=int, help="max_hits_count", require=True)
+    parser.add_argument("--host", type=str, help="host", required=True)
+    parser.add_argument("--port", type=int, help="port", required=True)
+    parser.add_argument("--max_hits_count", type=int, help="max_hits_count", required=True)
     args = parser.parse_args()
 
     while True:
@@ -23,7 +23,7 @@ def main():
 
         params = {
             # choices: "retrieve_from_elasticsearch", "retrieve_from_blink", "retrieve_from_blink_and_elasticsearch"
-            "retrieval_method": args.retrieval_method
+            "retrieval_method": args.retrieval_method,
             ####
             "query_text": query_text,
             "max_hits_count": 3,

@@ -161,9 +161,9 @@ if __name__ == "__main__":
     print("Creating Index ...")
     es.indices.create(index=elasticsearch_index, ignore=400, body=paragraphs_index_settings)
 
-    if args.dataset_name == "hotpotqa"
+    if args.dataset_name == "hotpotqa":
         make_documents = make_hotpotqa_documents
-    elif args.dataset_name == "strategyqa"
+    elif args.dataset_name == "strategyqa":
         make_documents = make_strategyqa_documents
     else:
         raise Exception(f"Unknown dataset_name {dataset_name}")

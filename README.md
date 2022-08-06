@@ -57,7 +57,25 @@ cd elasticsearch-7.10.2/
 ### Watermark Exceeded Error:
 
 ```bash
-curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_cluster/settings -d '{ "transient": { "cluster.routing.allocation.disk.threshold_enabled": false } }'
+./fix_es_watermark.sh
+```
 
-curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_all/_settings -d '{"index.blocks.read_only_allow_delete": null}'
+### Check ES Indices
+
+```bash
+curl http://localhost:9200/_cat/indices\?pretty
+```
+
+## Start Main Retriever Server
+
+```bash
+uvicorn retriever_server:app --reload --port 8000
+```
+
+
+## Index Corpuses
+
+```bash
+python index_corpus.py hotpotqa
+python index_corpus.py strategyqa
 ```

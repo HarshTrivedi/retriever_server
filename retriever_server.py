@@ -14,26 +14,16 @@ app = FastAPI()
 async def index():
     return {"message": f"Hello! This is a retriever server."}
 
-@app.post("/retrieve_from_elasticsearch/")
-async def retrieve_from_elasticsearch(
+@app.post("/retrieve/")
+async def retrieve(
         arguments: Request # see the corresponding method in blink_elasticsearch_retriever.py
     ):
         retriever = get_retriever()
         arguments = await arguments.json()
-        return retriever.retrieve_from_elasticsearch(**arguments)
-
-@app.post("/retrieve_from_blink/")
-async def retrieve_from_blink(
-        arguments: Request # see the corresponding method in blink_elasticsearch_retriever.py
-    ):
-        retriever = get_retriever()
-        arguments = await arguments.json()
-        return retriever.retrieve_from_blink(**arguments)
-
-@app.post("/retrieve_from_blink_and_elasticsearch/")
-async def retrieve_from_blink_and_elasticsearch(
-        arguments: Request # see the corresponding method in blink_elasticsearch_retriever.py
-    ):
-        retriever = get_retriever()
-        arguments = await arguments.json()
-        return retriever.retrieve_from_blink_and_elasticsearch(**arguments)
+        retrieval_method = arguments.pop("retrieval_method")
+        assert retrieval_method in (
+            "retrieve_from_elasticsearch",
+            "retrieve_from_blink",
+            "retrieve_from_blink_and_elasticsearch",
+        )
+        return getattr(retriever, retrieval_method)(**arguments)

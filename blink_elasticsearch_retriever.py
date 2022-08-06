@@ -60,7 +60,7 @@ class BlinkElasticsearchRetriever:
     def retrieve_from_elasticsearch(
             self,
             query_text: str,
-            max_hits_count: int,
+            max_hits_count: int = 3,
             is_abstract: bool = None
         ) -> List[Dict]:
         """
@@ -77,7 +77,7 @@ class BlinkElasticsearchRetriever:
     def retrieve_from_blink(
             self,
             query_text: str,
-            max_hits_count: int,
+            max_hits_count: int = 3,
         ) -> List[Dict]:
         """
         Option 2: retrieve_from_blink
@@ -99,8 +99,8 @@ class BlinkElasticsearchRetriever:
     def retrieve_from_blink_and_elasticsearch(
             self,
             query_text: str,
-            one_es_per_blink: bool,
-            max_hits_count: int,
+            one_es_per_blink: bool = True,
+            max_hits_count: int = 3,
             skip_blink_titles: List = None,
         ) -> List[Dict]:
         """

@@ -13,10 +13,13 @@ def main():
         choices={"retrieve_from_elasticsearch", "retrieve_from_blink", "retrieve_from_blink_and_elasticsearch"},
         required=True
     )
-    parser.add_argument("--host", type=str, help="host", required=True)
-    parser.add_argument("--port", type=int, help="port", required=True)
-    parser.add_argument("--max_hits_count", type=int, help="max_hits_count", required=True)
+    parser.add_argument("--host", type=str, help="host", required=False)
+    parser.add_argument("--port", type=int, help="port", required=False)
+    parser.add_argument("--max_hits_count", type=int, help="max_hits_count", default=3, required=False)
     args = parser.parse_args()
+
+    if args.retrieval_method != "retrieve_from_blink" and (not args.host or not args.port):
+        exit("For non blink-only retrievers, you need to pass the host and the port.")
 
     while True:
         query_text = input("Enter Query: ")

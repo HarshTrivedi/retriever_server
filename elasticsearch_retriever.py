@@ -9,7 +9,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
 
-class Retrieval:
+class ElasticsearchRetriever:
 
     def __init__(self, es: Elasticsearch, index_name: str):
         self._es = es
@@ -101,9 +101,16 @@ if __name__ == "__main__":
     elastic_port = 9200
     es = Elasticsearch([{'host': elastic_host, 'port': elastic_port}])
 
-    retrieval = Retrieval(es, args.paragraph_type, args.data_type)
+    retriever = ElasticsearchRetriever(es, args.paragraph_type, args.data_type)
 
-    results = retrieval.retrieve_titles("injuries", "")
+    results = retriever.retrieve_titles("injuries", "")
 
     for result in results:
         print(result)
+
+    # blink_titles
+    # for blink_title in blink_titles:
+    #   get title of wikipedia corresponding to that dataset.
+    #   get one paragraph/s corresponding to that title.
+
+    # keep maintaining a set of paragraph titles.

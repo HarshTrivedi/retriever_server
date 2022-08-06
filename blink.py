@@ -234,6 +234,13 @@ def run_blink_prediction(query_text: str):
     return _run_blink_prediction(**arguments)
 
 def main():
+    print("Call one ....")
+    print(run_blink_prediction(query_text="BERT and ERNIE are Muppets."))
+
+    print("Call two ....")
+    print(run_blink_prediction(query_text="BERT and ERNIE are Muppets."))
+
+    print("Call three ....")
     print(run_blink_prediction(query_text="BERT and ERNIE are Muppets."))
 
 

@@ -100,10 +100,12 @@ if __name__ == "__main__":
     parser.add_argument(
         'dataset_name', type=str, help='dataset_name', choices={"hotpotqa", "strategyqa"}
     )
+    parser.add_argument("--host", type=str, help="host", default="http://localhost/")
+    parser.add_argument("--port", type=int, help="port", default=9200)
     args = parser.parse_args()
 
     retriever = ElasticsearchRetriever(
-        elastic_host, elastic_port, args.dataset_name
+        args.host, args.port, args.dataset_name
     )
 
     results = retriever.retrieve_titles("injuries", "")

@@ -95,7 +95,7 @@ class BlinkElasticsearchRetriever:
             {"title": result["title"], "text": result["text"]}
             for result in blink_titles_results
         ][:max_hits_count]
-        raise results
+        return results
 
 
     def retrieve_from_blink_and_elasticsearch(

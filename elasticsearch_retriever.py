@@ -108,7 +108,12 @@ if __name__ == "__main__":
         dataset_name=args.dataset_name, elastic_host=args.host, elastic_port=args.port, 
     )
 
-    results = retriever.retrieve_titles("injuries", "")
+    print("\n\nRetrieving Titles ...")
+    results = retriever.retrieve_titles("injuries")
+    for result in results:
+        print(result)
 
+    print("\n\nRetrieving Paragraphs ...")
+    results = retriever.retrieve_paragraphs("injuries")
     for result in results:
         print(result)

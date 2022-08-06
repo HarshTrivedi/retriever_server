@@ -1,6 +1,6 @@
 import json
 import _jsonnet
-from fastapi import FastAPI, status, Response
+from fastapi import FastAPI, status, Response, Request
 
 from blink_elasticsearch_retriever import BlinkElasticsearchRetriever
 
@@ -19,7 +19,6 @@ async def index():
 async def retrieve(
         arguments: Request # see the corresponding method in blink_elasticsearch_retriever.py
     ):
-        retriever = get_retriever()
         arguments = await arguments.json()
         retrieval_method = arguments.pop("retrieval_method")
         assert retrieval_method in (

@@ -32,9 +32,9 @@ class BlinkElasticsearchRetriever:
 
     def __init__(
         # Elasticsearch init args:
-        elastic_host: str,
-        elastic_port: int,
         dataset_name: str,
+        elastic_host: str = "http://localhost/",
+        elastic_port: int = 9200,
         # Blink init args:
         blink_models_path: str = BLINK_MODELS_PATH,
         faiss_index: str = "flat", # "flat" or "hnsw",
@@ -45,9 +45,9 @@ class BlinkElasticsearchRetriever:
         self._limit_to_abstracts = dataset_name == "hotpotqa"
 
         self._elasticsearch_retriever = ElasticsearchRetriever(
+            dataset_name=dataset_name,
             elastic_host=elastic_host,
             elastic_port=elastic_port,
-            dataset_name=dataset_name,
         )
         self._blink_retriever = BlinkRetriever(
             blink_models_path=blink_models_path,

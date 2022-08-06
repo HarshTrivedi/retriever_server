@@ -13,9 +13,9 @@ class ElasticsearchRetriever:
 
     def __init__(
             self,
-            elastic_host: str,
-            elastic_port: int,
-            dataset_name: str
+            dataset_name: str,
+            elastic_host: str = "http://localhost/",
+            elastic_port: int = 9200,
         ):
         self._es = Elasticsearch([{'host': elastic_host, 'port': elastic_port}])
         self._index_name = f"{dataset_name}-wikipedia"

@@ -9,5 +9,5 @@
     "fast": false,
     "top_k": 1,
     # Retrievers:
-    "initialize_retrievers": ["elasticsearch"], # ["blink", "elasticsearch"]
+    "initialize_retrievers": ["blink", "elasticsearch"],
 }

@@ -44,21 +44,28 @@ class BlinkElasticsearchRetriever:
         faiss_index: str = "flat", # "flat" or "hnsw",
         fast: bool = False,
         top_k: int = 1,
+        # what to initialize:
+        initialize_retrievers: Tuple[str, str] = ("blink", "elasticsearch"),
     ):
 
         self._limit_to_abstracts = dataset_name == "hotpotqa"
 
-        self._elasticsearch_retriever = ElasticsearchRetriever(
-            dataset_name=dataset_name,
-            elastic_host=elastic_host,
-            elastic_port=elastic_port,
-        )
-        self._blink_retriever = BlinkRetriever(
-            blink_models_path=blink_models_path,
-            faiss_index=faiss_index,
-            fast=fast,
-            top_k=top_k
-        )
+        self._elasticsearch_retriever = None
+        if "elasticsearch" in initialize_retrievers:
+            self._elasticsearch_retriever = ElasticsearchRetriever(
+                dataset_name=dataset_name,
+                elastic_host=elastic_host,
+                elastic_port=elastic_port,
+            )
+
+        self._blink_retriever = None
+        if "blink" in initialize_retrievers:
+            self._blink_retriever = BlinkRetriever(
+                blink_models_path=blink_models_path,
+                faiss_index=faiss_index,
+                fast=fast,
+                top_k=top_k
+            )
 
 
     def retrieve_from_elasticsearch(
@@ -72,6 +79,9 @@ class BlinkElasticsearchRetriever:
             Given some query text,
             1. Directly retrieve from elasticsearch
         """
+        if self._elasticsearch_retriever is None:
+            raise Exception("Elasticsearch retriever not initialized.")
+
         paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
             query_text, is_abstract=is_abstract, max_hits_count=max_hits_count
         )
@@ -89,6 +99,9 @@ class BlinkElasticsearchRetriever:
             1. Get blink titles
             2. Return abstract paragraphs corresponding to them (ignore the corpus).
         """
+        if self._blink_retriever is None:
+            raise Exception("BLINK retriever not initialized.")
+
         blink_titles_results = self._blink_retriever.retrieve_paragraphs(query_text)
 
         results = [
@@ -118,6 +131,12 @@ class BlinkElasticsearchRetriever:
             2. For each blink title, find matching title from the given corpus.
             3. For each of those titles, retrieve one paragraph from the given corpus.
         """
+
+        if self._elasticsearch_retriever is None:
+            raise Exception("Elasticsearch retriever not initialized.")
+
+        if self._blink_retriever is None:
+            raise Exception("BLINK retriever not initialized.")
 
         blink_titles_results = self._blink_retriever.retrieve_paragraphs(query_text)
         blink_titles = {result["title"] for result in blink_titles_results}

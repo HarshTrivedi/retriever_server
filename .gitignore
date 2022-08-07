@@ -132,3 +132,4 @@ BLINK
 .DS_STORE
 raw_data
 wikipedia_corpuses
+.global_config.jsonnet

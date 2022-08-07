@@ -33,7 +33,7 @@ from main_dense import (
     _load_candidates,
 )
 
-BLINK_MODELS_PATH = "BLINK/models"
+BLINK_MODELS_PATH = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))["BLINK_MODELS_PATH"]
 
 @lru_cache(maxsize=None)
 def load_blink_and_ner_models(

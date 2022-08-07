@@ -33,7 +33,10 @@ Version requirement: 7.10
 # Option 1:
 # Source: https://www.elastic.co/guide/en/elasticsearch/reference/current/brew.html
 brew tap elastic/tap
-brew install elastic/tap/elasticsearch-full
+brew install elastic/tap/elasticsearch-full # if it doesn't work: try 'brew untap elastic/tap' first: untap>tap>install.
+# Then,
+brew services start elastic/tap/elasticsearch-full
+brew services stop elastic/tap/elasticsearch-full
 
 # Option 2:
 # Source: https://www.elastic.co/guide/en/elasticsearch/reference/current/targz.html
@@ -47,6 +50,7 @@ cd elasticsearch-7.10.2/
 ### Linux
 
 ```bash
+# https://www.elastic.co/guide/en/elasticsearch/reference/8.1/targz.html
 wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.10.2-linux-x86_64.tar.gz
 wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.10.2-linux-x86_64.tar.gz.sha512
 shasum -a 512 -c elasticsearch-7.10.2-linux-x86_64.tar.gz.sha512
@@ -59,9 +63,11 @@ cd elasticsearch-7.10.2/
 ```bash
 # start
 ./bin/elasticsearch --daemonize
+# or ./bin/elasticsearch -d -p pid
 
 # stop
 pkill -f elasticsearch
+# or pkill -F pid
 ```
 
 
@@ -88,6 +94,15 @@ python index_corpus.py strategyqa
 
 ```bash
 ./bin/elasticsearch --port 9200 # make sure to use this port
+```
+
+## Where's ES data stored and how to change it?
+
+```bash
+# See where it is stored.
+curl http://127.0.0.1:9200/_nodes/stats/fs\?pretty
+# You can change it in the elasticsearch.yml
+# For mac, see https://www.elastic.co/guide/en/elasticsearch/reference/7.17/brew.html#brew-layout
 ```
 
 

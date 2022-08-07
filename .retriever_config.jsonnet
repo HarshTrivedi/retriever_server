@@ -8,4 +8,6 @@
     "faiss_index": "flat", # "flat" or "hnsw",
     "fast": false,
     "top_k": 1,
+    # Retrievers:
+    "initialize_retrievers": ["blink", "elasticsearch"],
 }

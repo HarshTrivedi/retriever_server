@@ -54,6 +54,17 @@ tar -xzf elasticsearch-7.10.2-linux-x86_64.tar.gz
 cd elasticsearch-7.10.2/
 ```
 
+### Start and Stop
+
+```bash
+# start
+./bin/elasticsearch --daemonize
+
+# stop
+pkill -f elasticsearch
+```
+
+
 ### Watermark Exceeded Error:
 
 ```bash

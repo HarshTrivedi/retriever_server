@@ -21,7 +21,7 @@ def hash_object(o: Any) -> str:
 
 
 def make_hotpotqa_documents():
-    raw_glob_filepath = "raw_data/hotpotqa-wikpedia-paragraphs/*/wiki_*.bz2"
+    raw_glob_filepath = "wikipedia_corpuses/hotpotqa-wikpedia-paragraphs/*/wiki_*.bz2"
     _idx = 1
     for filepath in tqdm(glob.glob(raw_glob_filepath)):
         for datum in bz2.BZ2File(filepath).readlines():
@@ -54,7 +54,7 @@ def make_hotpotqa_documents():
 
 
 def make_strategyqa_documents():
-    raw_glob_filepath = "raw_data/strategyqa-wikipedia-paragraphs/strategyqa-wikipedia-paragraphs.jsonl"
+    raw_glob_filepath = "wikipedia_corpuses/strategyqa-wikipedia-paragraphs/strategyqa-wikipedia-paragraphs.jsonl"
     _idx = 1
     with open(raw_glob_filepath, "r") as file:
         for line in tqdm(file):

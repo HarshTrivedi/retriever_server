@@ -36,9 +36,15 @@ def main():
         result = requests.post(url, json=params)
 
         if result.ok:
-            result_str = json.dumps(result.json(), indent=4)
-            result_str = highlight(result_str.encode("utf-8"), lexers.JsonLexer(), formatters.TerminalFormatter())
-            print(result_str)
+
+            result = result.json()
+            retrieval = result["retrieval"]
+            time_in_seconds = result["time_in_seconds"]
+            retrieval_str = json.dumps(retrieval.json(), indent=4)
+            retrieval_str = highlight(retrieval_str.encode("utf-8"), lexers.JsonLexer(), formatters.TerminalFormatter())
+
+            print(f"Time taken in seconds: {time_in_seconds}")
+            print(retrieval_str)
 
         else:
             print("Something went wrong!\n\n")

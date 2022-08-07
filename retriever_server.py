@@ -1,5 +1,6 @@
 import json
 import _jsonnet
+from time import perf_counter
 from fastapi import FastAPI, status, Response, Request
 
 from blink_elasticsearch_retriever import BlinkElasticsearchRetriever
@@ -26,4 +27,8 @@ async def retrieve(
             "retrieve_from_blink",
             "retrieve_from_blink_and_elasticsearch",
         )
-        return getattr(retriever, retrieval_method)(**arguments)
+        start_time = perf_counter()
+        retrieval = getattr(retriever, retrieval_method)(**arguments)
+        end_time = perf_counter()
+        time_in_seconds = round(end_time - start_time, 1)
+        return {"retrieval": retrieval, "time_in_seconds": time_in_seconds}

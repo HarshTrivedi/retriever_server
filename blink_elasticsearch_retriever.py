@@ -1,5 +1,5 @@
 import json
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 from blink_retriever import BLINK_MODELS_PATH, BlinkRetriever
 from elasticsearch_retriever import ElasticsearchRetriever

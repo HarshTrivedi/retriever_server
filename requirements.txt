@@ -1,4 +1,4 @@
-gensim==3.5.0 # this version required for BLINK to work.
+gensim==3.8.3 # this version required for BLINK to work.
 elasticsearch==7.9.1 # required this version
 tqdm
 dill

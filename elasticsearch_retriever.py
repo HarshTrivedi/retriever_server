@@ -11,6 +11,16 @@ from elasticsearch.helpers import bulk
 
 class ElasticsearchRetriever:
 
+    """
+    Some useful resources for constructing ES queries:
+    # https://stackoverflow.com/questions/28768277/elasticsearch-difference-between-must-and-should-bool-query
+    # https://stackoverflow.com/questions/49826587/elasticsearch-query-to-match-two-different-fields-with-exact-values
+
+    # bool/must acts as AND
+    # bool/should acts as OR
+    # bool/filter acts as binary filter w/o score (unlike must and should).
+    """
+
     def __init__(
             self,
             dataset_name: str,
@@ -42,7 +52,10 @@ class ElasticsearchRetriever:
         }
 
         if is_abstract is not None:
-            query["query"]["bool"]["must"].append({"match": {"is_abstract": is_abstract}})
+            query["query"]["bool"]["filter"] = [{"match": {"is_abstract": is_abstract}}]
+
+        if allowed_titles is not None:
+            query["query"]["bool"]["should"] = [{"match": {"title": _title}} for _title in allowed_titles]
 
         result = self._es.search(index=self._index_name, body=query)
 
@@ -76,8 +89,10 @@ class ElasticsearchRetriever:
                 "bool": {
                     "must": [
                         {"match": {"title": query_text}},
-                        {"match": {"is_abstract": True}}, # so that same title doesn't show up many times.
                     ],
+                    "filter": [
+                        {"match": {"is_abstract": True}}, # so that same title doesn't show up many times.
+                    ]
                 }
             }
         }

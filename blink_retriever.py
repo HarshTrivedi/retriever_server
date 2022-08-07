@@ -1,6 +1,7 @@
 from typing import List, Dict, Any
 from logging import Logger
 from functools import lru_cache
+import _jsonnet
 import json
 import copy
 

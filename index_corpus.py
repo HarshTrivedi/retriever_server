@@ -10,6 +10,8 @@ import argparse
 import glob
 import bz2
 import base58
+import _jsonnet
+import os
 
 
 WIKIPEDIA_CORPUSES_PATH = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))["WIKIPEDIA_CORPUSES_PATH"]

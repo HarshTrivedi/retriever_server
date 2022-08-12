@@ -1,12 +1,25 @@
 import os
+import requests
 import argparse
 import subprocess
 import _jsonnet
 import json
 
+
+def is_elasticsearch_running() -> bool:
+    try:
+        res = requests.get("http://localhost:9200/_cluster/health")
+        if res.status_code == 200:
+            if res.json()['number_of_nodes'] > 0:
+                return True
+        return False
+    except Exception as e:
+        return False
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Start/stop elasticsearch server.")
-    parser.add_argument("command", type=str, help="start or stop", choices=("start", "stop"))
+    parser = argparse.ArgumentParser(description="Start/stop or check status of elasticsearch server.")
+    parser.add_argument("command", type=str, help="start, stop or check status", choices=("start", "stop", "status"))
     args = parser.parse_args()
 
     es_pid_path = os.path.expanduser("~/.es_pid")
@@ -32,6 +45,18 @@ def main():
 
         if os.path.exists(es_pid_path):
             os.remove(es_pid_path)
+
+    elif args.command == "status":
+
+        if is_elasticsearch_running():
+            print("Elasticsearch is running.")
+        else:
+            print("Elasticsearch is NOT running.")
+
+        if os.path.exists(es_pid_path):
+            print("ES PID file does exist.")
+        else:
+            print("ES PID file does NOT exists.")
 
 if __name__ == '__main__':
     main()

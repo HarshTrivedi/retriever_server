@@ -12,4 +12,8 @@
     "TRANSFORMERS_CACHE": "~/.cache", # local/context
     # "TRANSFORMERS_CACHE": "/net/nfs.cirrascale/aristo/harsht/.hf_cache", # cirrascale
     # "TRANSFORMERS_CACHE": "/net/nfs2.aristo/aristo/harsht/.hf_cache", # aristo
+
+    "ELASTICSEARCH_PATH": "elasticsearch", # local/context
+    # "ELASTICSEARCH_PATH": "/net/nfs.cirrascale/aristo/harsht/elasticsearch-7.10.2/bin/elasticsearch", # cirrascale
+    # "ELASTICSEARCH_PATH": "/net/nfs2.aristo/harsht/elasticsearch-7.10.2/bin/elasticsearch", # aristo
 }

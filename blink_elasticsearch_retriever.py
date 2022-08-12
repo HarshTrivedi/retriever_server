@@ -115,7 +115,7 @@ class BlinkElasticsearchRetriever:
         blink_titles_results = self._blink_retriever.retrieve_paragraphs(query_text)
 
         results = [
-            {"title": result["title"], "text": result["text"]}
+            {"title": result["title"], "paragraph_text": result["text"]}
             for result in blink_titles_results
         ][:max_hits_count]
         return results

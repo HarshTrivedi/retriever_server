@@ -72,19 +72,29 @@ class BlinkElasticsearchRetriever:
             self,
             query_text: str,
             max_hits_count: int = 3,
-            is_abstract: bool = None
+            is_abstract: bool = None,
+            document_type: str = "paragraph_text"
         ) -> List[Dict]:
         """
         Option 1: retrieve_from_elasticsearch
             Given some query text,
-            1. Directly retrieve from elasticsearch
+            1. Directly retrieve from elasticsearch (could be querying titles or paragraph_texts)
         """
+
+        assert document_type in ("title", "paragraph_text")
+
         if self._elasticsearch_retriever is None:
             raise Exception("Elasticsearch retriever not initialized.")
 
-        paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
-            query_text, is_abstract=is_abstract, max_hits_count=max_hits_count
-        )
+        if document_type == "paragraph_text":
+            paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
+                query_text, is_abstract=is_abstract, max_hits_count=max_hits_count
+            )
+        elif document_type == "title":
+            paragraphs_results = self._elasticsearch_retriever.retrieve_titles(
+                query_text, max_hits_count=max_hits_count
+            )
+
         return paragraphs_results
 
 

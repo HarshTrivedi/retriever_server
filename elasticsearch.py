@@ -56,7 +56,7 @@ def main():
         if os.path.exists(es_pid_path):
             print("ES PID file does exist.")
         else:
-            print("ES PID file does NOT exists.")
+            print("ES PID file does NOT exist.")
 
 if __name__ == '__main__':
     main()

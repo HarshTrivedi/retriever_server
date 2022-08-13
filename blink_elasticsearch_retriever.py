@@ -158,7 +158,7 @@ class BlinkElasticsearchRetriever:
         }
 
         es_titles = [
-            self._elasticsearch_retriever.retrieve_titles(query_text=blink_title, max_hits_count=1)[0]
+            self._elasticsearch_retriever.retrieve_titles(query_text=blink_title, max_hits_count=1)[0]['title']
             for blink_title in blink_titles
         ]
 

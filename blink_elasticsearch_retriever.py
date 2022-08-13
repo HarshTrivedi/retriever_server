@@ -184,8 +184,8 @@ class BlinkElasticsearchRetriever:
                     allowed_titles=[es_title],
                     max_hits_count=1
                 )
-                assert len(result) == 1
-                results.append(result[0])
+                assert len(result) <= 1
+                results.extend(result)
 
         results = sorted(results, key=lambda e: e["score"], reverse=True)[:max_hits_count]
 

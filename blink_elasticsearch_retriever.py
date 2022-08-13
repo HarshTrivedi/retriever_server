@@ -72,7 +72,6 @@ class BlinkElasticsearchRetriever:
             self,
             query_text: str,
             max_hits_count: int = 3,
-            is_abstract: bool = None,
             document_type: str = "paragraph_text"
         ) -> List[Dict]:
         """
@@ -88,7 +87,7 @@ class BlinkElasticsearchRetriever:
 
         if document_type == "paragraph_text":
             paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
-                query_text, is_abstract=is_abstract, max_hits_count=max_hits_count
+                query_text, is_abstract=self._limit_to_abstracts, max_hits_count=max_hits_count
             )
         elif document_type == "title":
             paragraphs_results = self._elasticsearch_retriever.retrieve_titles(

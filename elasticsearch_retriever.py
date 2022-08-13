@@ -44,8 +44,8 @@ class ElasticsearchRetriever:
             "_source": ["id", "title", "paragraph_text", "url", "is_abstract"], # what records are needed in result
             "query": {
                 "bool": {
-                    "must": [
-                        {"match": {"paragraph_text": query_text}},
+                    "should": [
+                        {"match": {"paragraph_text": query_text}}, # must is too strict.
                     ],
                 }
             }
@@ -55,7 +55,7 @@ class ElasticsearchRetriever:
             query["query"]["bool"]["filter"] = [{"match": {"is_abstract": is_abstract}}]
 
         if allowed_titles is not None:
-            query["query"]["bool"]["should"] = [{"match": {"title": _title}} for _title in allowed_titles]
+            query["query"]["bool"]["should"].extend([{"match": {"title": _title}} for _title in allowed_titles])
 
         result = self._es.search(index=self._index_name, body=query)
 

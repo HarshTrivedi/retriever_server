@@ -186,6 +186,6 @@ class BlinkElasticsearchRetriever:
                 assert len(result) <= 1
                 results.extend(result)
 
-        results = sorted(results, key=lambda e: e["score"], reverse=True)[:max_hits_count]
+        results = results[:max_hits_count]
 
         return results

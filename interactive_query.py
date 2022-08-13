@@ -40,7 +40,7 @@ def main():
             result = result.json()
             retrieval = result["retrieval"]
             time_in_seconds = result["time_in_seconds"]
-            retrieval_str = json.dumps(retrieval.json(), indent=4)
+            retrieval_str = json.dumps(retrieval, indent=4)
             retrieval_str = highlight(retrieval_str.encode("utf-8"), lexers.JsonLexer(), formatters.TerminalFormatter())
 
             print(f"Time taken in seconds: {time_in_seconds}")

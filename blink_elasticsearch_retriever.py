@@ -123,7 +123,6 @@ class BlinkElasticsearchRetriever:
     def retrieve_from_blink_and_elasticsearch(
             self,
             query_text: str,
-            one_es_per_blink: bool = True,
             max_hits_count: int = 3,
             skip_blink_titles: List = None,
         ) -> List[Dict]:
@@ -139,6 +138,7 @@ class BlinkElasticsearchRetriever:
             1. Get blink titles
             2. For each blink title, find matching title from the given corpus.
             3. For each of those titles, retrieve one paragraph from the given corpus.
+        EDIT: Removed option 3 and 4. Instead it just maps blink titles to corpus titles by retrieval.
         """
 
         if self._elasticsearch_retriever is None:
@@ -156,36 +156,12 @@ class BlinkElasticsearchRetriever:
             if blink_title not in skip_blink_titles
         }
 
-        es_titles = [
-            self._elasticsearch_retriever.retrieve_titles(query_text=blink_title, max_hits_count=1)[0]['title']
+        blink_titles_paras = [
+            self._elasticsearch_retriever.retrieve_titles(query_text=blink_title, max_hits_count=1)[0]
             for blink_title in blink_titles
         ]
 
-        if not one_es_per_blink:
-        # Option 3
-            is_abstract = self._limit_to_abstracts
-            results = self._elasticsearch_retriever.retrieve_paragraphs(
-                query_text=query_text,
-                is_abstract=is_abstract,
-                allowed_titles=es_titles,
-                max_hits_count=max_hits_count
-            )
-
-        else:
-        # Option 4
-
-            results = []
-            for es_title in es_titles:
-                is_abstract = self._limit_to_abstracts
-                result = self._elasticsearch_retriever.retrieve_paragraphs(
-                    query_text=query_text,
-                    is_abstract=is_abstract,
-                    allowed_titles=[es_title],
-                    max_hits_count=1
-                )
-                assert len(result) <= 1
-                results.extend(result)
-
+        results = [{"title": e["title"], "paragraph_text": e["paragraph_text"]} for e in blink_titles_paras]
         results = results[:max_hits_count]
 
         return results

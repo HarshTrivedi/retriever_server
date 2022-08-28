@@ -133,3 +133,4 @@ BLINK
 raw_data
 wikipedia_corpuses
 .global_config.jsonnet
+set_env.sh

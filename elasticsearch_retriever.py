@@ -32,7 +32,7 @@ class ElasticsearchRetriever:
 
     def retrieve_paragraphs(
         self,
-        query_text: str,
+        query_text: str = None,
         is_abstract: bool = None,
         allowed_titles: List[str] = None,
         paragraph_index: int = None,
@@ -46,23 +46,27 @@ class ElasticsearchRetriever:
             "_source": ["id", "title", "paragraph_text", "url", "is_abstract", "paragraph_index"],
             "query": {
                 "bool": {
-                    "should": [
-                        {"match": {"paragraph_text": query_text}}, # must is too strict.
-                    ],
+                    "should": [],
                 }
             }
         }
+
+        if query_text is not None:
+            # must is too strict for this:
+            query["query"]["bool"]["should"].append({"match": {"paragraph_text": query_text}})
 
         if is_abstract is not None:
             query["query"]["bool"]["filter"] = [{"match": {"is_abstract": is_abstract}}]
 
         if allowed_titles is not None:
-            query["query"]["bool"]["should"].extend([{"match": {"title": _title}} for _title in allowed_titles])
+            query["query"]["bool"]["should"].extend([
+                {"match": {"title": _title}} for _title in allowed_titles
+            ])
 
         if paragraph_index is not None:
-            query["query"]["bool"]["should"].append([
-                {"match": {"paragraph_index": paragraph_index}}
-            ])
+            query["query"]["bool"]["should"].append({"match": {"paragraph_index": paragraph_index}})
+
+        assert query["query"]["bool"]["should"]
 
         result = self._es.search(index=self._index_name, body=query)
 

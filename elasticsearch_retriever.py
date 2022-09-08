@@ -35,6 +35,7 @@ class ElasticsearchRetriever:
         query_text: str,
         is_abstract: bool = None,
         allowed_titles: List[str] = None,
+        paragraph_index: int = None,
         max_buffer_count: int = 100,
         max_hits_count: int = 10
     ) -> List[Dict]:
@@ -57,6 +58,11 @@ class ElasticsearchRetriever:
 
         if allowed_titles is not None:
             query["query"]["bool"]["should"].extend([{"match": {"title": _title}} for _title in allowed_titles])
+
+        if paragraph_index is not None:
+            query["query"]["bool"]["should"].append([
+                {"match": {"paragraph_index": paragraph_index}}
+            ])
 
         result = self._es.search(index=self._index_name, body=query)
 

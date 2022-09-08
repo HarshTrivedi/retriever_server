@@ -41,7 +41,8 @@ class ElasticsearchRetriever:
 
         query = {
             "size": max_buffer_count,
-            "_source": ["id", "title", "paragraph_text", "url", "is_abstract"], # what records are needed in result
+            # what records are needed in result
+            "_source": ["id", "title", "paragraph_text", "url", "is_abstract", "paragraph_index"],
             "query": {
                 "bool": {
                     "should": [
@@ -86,7 +87,8 @@ class ElasticsearchRetriever:
 
         query = {
             "size": max_buffer_count,
-            "_source": ["title", "url", "paragraph_text"], # what records are needed in the result.
+            # what records are needed in the result.
+            "_source": ["id", "title", "paragraph_text", "url", "is_abstract", "paragraph_index"],
             "query": {
                 "bool": {
                     "must": [

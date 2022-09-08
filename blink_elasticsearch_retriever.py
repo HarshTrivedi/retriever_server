@@ -96,8 +96,9 @@ class BlinkElasticsearchRetriever:
             raise Exception("Elasticsearch retriever not initialized.")
 
         if document_type == "paragraph_text":
+            is_abstract = True if self._limit_to_abstracts else None # Note "None" and not False
             paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
-                query_text, is_abstract=self._limit_to_abstracts, max_hits_count=max_hits_count,
+                query_text, is_abstract=is_abstract, max_hits_count=max_hits_count,
                 allowed_titles=allowed_titles, paragraph_index=paragraph_index
             )
         elif document_type == "title":

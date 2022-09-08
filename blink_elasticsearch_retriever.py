@@ -72,7 +72,9 @@ class BlinkElasticsearchRetriever:
             self,
             query_text: str,
             max_hits_count: int = 3,
-            document_type: str = "paragraph_text"
+            document_type: str = "paragraph_text",
+            allowed_titles: List[str] = None,
+            paragraph_index: int = None,
         ) -> List[Dict]:
         """
         Option 1: retrieve_from_elasticsearch
@@ -82,12 +84,21 @@ class BlinkElasticsearchRetriever:
 
         assert document_type in ("title", "paragraph_text")
 
+        if allowed_titles is not None:
+            assert document_type == "paragraph_text", \
+            "allowed_titles not valid input for the document_type of paragraph_text."
+
+        if paragraph_index is not None:
+            assert document_type == "paragraph_text", \
+            "paragraph_index not valid input for the document_type of paragraph_text."
+
         if self._elasticsearch_retriever is None:
             raise Exception("Elasticsearch retriever not initialized.")
 
         if document_type == "paragraph_text":
             paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
-                query_text, is_abstract=self._limit_to_abstracts, max_hits_count=max_hits_count
+                query_text, is_abstract=self._limit_to_abstracts, max_hits_count=max_hits_count,
+                allowed_titles=allowed_titles, paragraph_index=paragraph_index
             )
         elif document_type == "title":
             paragraphs_results = self._elasticsearch_retriever.retrieve_titles(

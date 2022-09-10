@@ -108,12 +108,13 @@ def make_iirc_documents():
 
         for title, page_html in tqdm(full_data.items()):
             page_soup = BeautifulSoup(page_html, "html.parser")
-            page_texts = [
+            paragraph_texts = [
                 text for text in page_soup.text.split("\n")
                 if text.strip() and len(text.strip().split()) > 10
             ]
-            for paragraph_index, page_text in enumerate(page_texts):
+            for paragraph_index, paragraph_text in enumerate(paragraph_texts):
                 url = ""
+                id_ = hash_object(title+paragraph_text)
                 is_abstract = paragraph_index == 0
                 es_paragraph = {
                     "id": id_,

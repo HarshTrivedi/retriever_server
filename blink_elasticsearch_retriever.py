@@ -172,7 +172,7 @@ class BlinkElasticsearchRetriever:
         selected_titles = set()
         for blink_title in blink_titles:
             retrievals = self._elasticsearch_retriever.retrieve_titles(
-                query_text=blink_title, max_hits_count=self.max_hits_count
+                query_text=blink_title, max_hits_count=max_hits_count
             )
 
             for retrieval in retrievals:

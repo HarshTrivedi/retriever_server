@@ -139,8 +139,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "dataset_name", help='name of the dataset', type=str,
         choices=(
-            "hotpotqa", "strategyqa",
-            # "iirc"  "kilt", # TODO yet.
+            "hotpotqa", "strategyqa", "iirc"
         )
     )
     parser.add_argument("--force", help='force delete before creating new index.',

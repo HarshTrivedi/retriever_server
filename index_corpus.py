@@ -11,6 +11,7 @@ import glob
 import bz2
 import base58
 import _jsonnet
+from bs4 import BeautifulSoup
 import os
 
 
@@ -96,6 +97,42 @@ def make_strategyqa_documents():
             _idx += 1
 
 
+
+def make_iirc_documents():
+    raw_filepath = os.path.join(
+        WIKIPEDIA_CORPUSES_PATH, "iirc-wikipedia-paragraphs/context_articles.json"
+    )
+    _idx = 1
+    with open(raw_filepath, "r") as file:
+        full_data = json.load(file)
+
+        for title, page_html in tqdm(full_data.items()):
+            page_soup = BeautifulSoup(page_html, "html.parser")
+            page_texts = [
+                text for text in page_soup.text.split("\n")
+                if text.strip() and len(text.strip().split()) > 10
+            ]
+            for paragraph_index, page_text in enumerate(page_texts):
+                url = ""
+                is_abstract = paragraph_index == 0
+                es_paragraph = {
+                    "id": id_,
+                    "title": title,
+                    "paragraph_index": paragraph_index,
+                    "paragraph_text": paragraph_text,
+                    "url": url,
+                    "is_abstract": is_abstract,
+                }
+                document = {
+                    "_op_type": 'create',
+                    '_index': elasticsearch_index,
+                    '_id': _idx,
+                    '_source': es_paragraph,
+                }
+                yield (document)
+                _idx += 1
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Index paragraphs in Elasticsearch')
@@ -175,6 +212,8 @@ if __name__ == "__main__":
         make_documents = make_hotpotqa_documents
     elif args.dataset_name == "strategyqa":
         make_documents = make_strategyqa_documents
+    elif args.dataset_name == "iirc":
+        make_documents = make_iirc_documents
     else:
         raise Exception(f"Unknown dataset_name {dataset_name}")
 

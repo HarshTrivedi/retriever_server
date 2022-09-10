@@ -8,3 +8,5 @@ jsonnet
 pygments
 uvicorn
 requests
+torch=1.7.1
+flair=0.8

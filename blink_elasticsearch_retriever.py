@@ -168,12 +168,20 @@ class BlinkElasticsearchRetriever:
             if blink_title not in skip_blink_titles
         }
 
-        blink_titles_paras = [
-            self._elasticsearch_retriever.retrieve_titles(query_text=blink_title, max_hits_count=1)[0]
-            for blink_title in blink_titles
-        ]
+        results = []
+        selected_titles = set()
+        for blink_title in blink_titles:
+            retrievals = self._elasticsearch_retriever.retrieve_titles(
+                query_text=blink_title, max_hits_count=self.max_hits_count
+            )
 
-        results = [{"title": e["title"], "paragraph_text": e["paragraph_text"]} for e in blink_titles_paras]
-        results = results[:max_hits_count]
+            for retrieval in retrievals:
+
+                if retrieval["title"] not in selected_titles:
+                    selected_titles.add(retrieval["title"])
+                    results.append({
+                        "title": retrieval["title"],
+                        "paragraph_text": retrieval["paragraph_text"]
+                    })
 
         return results

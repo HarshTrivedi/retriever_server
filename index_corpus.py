@@ -181,13 +181,66 @@ def make_2wikimultihopqa_documents():
                     _idx += 1
 
 
+def make_musique_documents():
+    raw_filepaths = [
+        os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_ans_v1.0_dev.jsonl"),
+        os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_ans_v1.0_test.jsonl"),
+        os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_ans_v1.0_train.jsonl"),
+        os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_full_v1.0_dev.jsonl"),
+        os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_full_v1.0_test.jsonl"),
+        os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_full_v1.0_train.jsonl"),
+    ]
+    _idx = 1
+
+    used_full_ids = set()
+    for raw_filepath in raw_filepaths:
+
+        with open(raw_filepath, "r") as file:
+            for line in tqdm(file.readlines()):
+                if not line.strip():
+                    continue
+                instance = json.loads(line)
+
+                for paragraph in instance["paragraphs"]:
+
+                    title = paragraph["title"]
+                    paragraph_text = paragraph["paragraph_text"]
+                    paragraph_index = 0
+                    url = ""
+                    is_abstract = paragraph_index == 0
+
+                    full_id = hash_object(" ".join([title, paragraph_text]))
+                    if full_id in used_full_ids:
+                        continue
+
+                    used_full_ids.add(full_id)
+                    id_ = full_id[:32]
+
+                    es_paragraph = {
+                        "id": id_,
+                        "title": title,
+                        "paragraph_index": paragraph_index,
+                        "paragraph_text": paragraph_text,
+                        "url": url,
+                        "is_abstract": is_abstract,
+                    }
+                    document = {
+                        "_op_type": 'create',
+                        '_index': elasticsearch_index,
+                        '_id': _idx,
+                        '_source': es_paragraph,
+                    }
+                    yield (document)
+                    _idx += 1
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Index paragraphs in Elasticsearch')
     parser.add_argument(
         "dataset_name", help='name of the dataset', type=str,
         choices=(
-            "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa"
+            "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique"
         )
     )
     parser.add_argument("--force", help='force delete before creating new index.',
@@ -263,6 +316,8 @@ if __name__ == "__main__":
         make_documents = make_iirc_documents
     elif args.dataset_name == "2wikimultihopqa":
         make_documents = make_2wikimultihopqa_documents
+    elif args.dataset_name == "musique":
+        make_documents = make_musique_documents
     else:
         raise Exception(f"Unknown dataset_name {args.dataset_name}")
 

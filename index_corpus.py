@@ -97,7 +97,6 @@ def make_strategyqa_documents():
             _idx += 1
 
 
-
 def make_iirc_documents():
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "iirc-wikipedia-paragraphs/context_articles.json"
@@ -134,13 +133,61 @@ def make_iirc_documents():
                 _idx += 1
 
 
+def make_2wikimultihopqa_documents():
+    raw_filepaths = [
+        os.path.join(WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/train.json"),
+        os.path.join(WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/dev.json"),
+        os.path.join(WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/test.json"),
+    ]
+    _idx = 1
+
+    used_full_ids = set()
+    for raw_filepath in raw_filepaths:
+
+        with open(raw_filepath, "r") as file:
+            full_data = json.load(file)
+            for instance in tqdm(full_data):
+
+                for paragraph in instance["context"]:
+
+                    title = paragraph[0]
+                    paragraph_text = " ".join(paragraph[1])
+                    paragraph_index = 0
+                    url = ""
+                    is_abstract = paragraph_index == 0
+
+                    full_id = hash_object(" ".join([title, paragraph_text]))
+                    if full_id in used_full_ids:
+                        continue
+
+                    used_full_ids.add(full_id)
+                    id_ = full_id[:32]
+
+                    es_paragraph = {
+                        "id": id_,
+                        "title": title,
+                        "paragraph_index": paragraph_index,
+                        "paragraph_text": paragraph_text,
+                        "url": url,
+                        "is_abstract": is_abstract,
+                    }
+                    document = {
+                        "_op_type": 'create',
+                        '_index': elasticsearch_index,
+                        '_id': _idx,
+                        '_source': es_paragraph,
+                    }
+                    yield (document)
+                    _idx += 1
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Index paragraphs in Elasticsearch')
     parser.add_argument(
         "dataset_name", help='name of the dataset', type=str,
         choices=(
-            "hotpotqa", "strategyqa", "iirc"
+            "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa"
         )
     )
     parser.add_argument("--force", help='force delete before creating new index.',
@@ -214,8 +261,10 @@ if __name__ == "__main__":
         make_documents = make_strategyqa_documents
     elif args.dataset_name == "iirc":
         make_documents = make_iirc_documents
+    elif args.dataset_name == "2wikimultihopqa":
+        make_documents = make_2wikimultihopqa_documents
     else:
-        raise Exception(f"Unknown dataset_name {dataset_name}")
+        raise Exception(f"Unknown dataset_name {args.dataset_name}")
 
     # Bulk-insert documents into index
     print("Inserting Paragraphs ...")

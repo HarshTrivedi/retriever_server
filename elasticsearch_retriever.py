@@ -59,14 +59,14 @@ class ElasticsearchRetriever:
             query["query"]["bool"]["filter"] = [{"match": {"is_abstract": is_abstract}}]
 
         if allowed_titles is not None:
-            query["query"]["bool"]["should"].extend([
+            query["query"]["bool"]["must"] = [
                 {"match": {"title": _title}} for _title in allowed_titles
-            ])
+            ]
 
         if paragraph_index is not None:
             query["query"]["bool"]["should"].append({"match": {"paragraph_index": paragraph_index}})
 
-        assert query["query"]["bool"]["should"]
+        assert query["query"]["bool"]["should"] or query["query"]["bool"]["must"]
 
         result = self._es.search(index=self._index_name, body=query)
 

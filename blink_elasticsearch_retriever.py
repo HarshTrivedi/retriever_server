@@ -86,7 +86,7 @@ class BlinkElasticsearchRetriever:
 
         if allowed_titles is not None:
             assert document_type == "paragraph_text", \
-            "allowed_titles not valid input for the document_type of paragraph_text."
+            "if allowed_titles are passed, document_type must be paragraph_text."
 
         if paragraph_index is not None:
             assert document_type == "paragraph_text", \

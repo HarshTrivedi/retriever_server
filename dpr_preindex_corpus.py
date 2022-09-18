@@ -1,7 +1,5 @@
 import argparse, elasticsearch, json
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
-from typing import Any
+from typing import Any, List, Dict
 import hashlib
 import io
 import dill

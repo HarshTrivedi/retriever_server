@@ -209,7 +209,7 @@ def write_jsonl(instances: List[Dict], filepath: str) -> None:
     print(f"Written {count} lines.")
 
 
-if __name__ == "__main__":
+def main():
 
     parser = argparse.ArgumentParser(description="Generate input for DPR index generation.")
     parser.add_argument(
@@ -235,7 +235,7 @@ if __name__ == "__main__":
     else:
         raise Exception(f"Unknown dataset_name {args.dataset_name}")
 
-    output_directory = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"{args.dataset_name}-wikpedia-dpr-input")
+    output_directory = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"{args.dataset_name}-wikpedia-dpr-corpus")
 
     if os.path.exists(output_directory):
         if not args.force:
@@ -250,3 +250,7 @@ if __name__ == "__main__":
 
     documents = make_documents()
     write_jsonl(documents, output_filepath)
+
+
+if __name__ == "__main__":
+    main()

@@ -37,9 +37,8 @@ def main():
     print(command)
 
     command = [e for e in command.split()]
-    subprocess.run(command)
+    subprocess.run(command) 
 
-    
 
 if __name__ == "__main__":
     main()

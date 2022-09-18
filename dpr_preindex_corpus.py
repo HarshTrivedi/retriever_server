@@ -211,7 +211,7 @@ def write_jsonl(instances: List[Dict], filepath: str) -> None:
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Index paragraphs in Elasticsearch')
+    parser = argparse.ArgumentParser(description="Generate input for DPR index generation.")
     parser.add_argument(
         "dataset_name", help='name of the dataset', type=str,
         choices=(

@@ -3,8 +3,7 @@ local global_config = import '../.global_config.jsonnet';
 local wikipedia_corpuses_path = global_config["WIKIPEDIA_CORPUSES_PATH"];
 
 local input_directory = wikipedia_corpuses_path + "/" + dataset + "-wikpedia-dpr-corpus";
-local local_output_directory = wikipedia_corpuses_path + "/" + dataset + "-wikpedia-dpr-flat-index";
-local beaker_output_directory = BEAKER_WORKING_DIR + "/" + local_output_directory;
+local output_directory = wikipedia_corpuses_path + "/" + dataset + "-wikpedia-dpr-flat-index";
 local docker_filepath = "docker_files/Dockerfile_dpr";
 
 local num_shards = 4;
@@ -12,11 +11,11 @@ local num_shards = 4;
 {
     "command": "python build_dpr_index_generate_parts.py hotpotqa --shard-index $INDEX --num-shards "+num_shards+" --batch-size 32",
     "data_filepaths": [input_directory],
-    "local_output_directory": local_output_directory,
-    "beaker_output_directory": beaker_output_directory,
+    "local_output_directory": output_directory,
+    "beaker_output_directory": output_directory,
     "docker_filepath": docker_filepath,
     "envs": {
-        "WIKIPEDIA_CORPUSES_PATH": wikipedia_corpuses_path
+        "WIKIPEDIA_CORPUSES_PATH": wikipedia_corpuses_path,
         "TRANSFORMERS_CACHE": "~/.cache",
     },
     "gpu_count": 1,

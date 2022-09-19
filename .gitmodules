@@ -1,0 +1,3 @@
+[submodule "beakerizer"]
+	path = beakerizer
+	url = https://github.com/HarshTrivedi/beakerizer

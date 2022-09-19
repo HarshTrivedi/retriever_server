@@ -2,6 +2,8 @@ import subprocess
 import argparse
 import shutil
 import os
+import json
+import _jsonnet
 
 
 WIKIPEDIA_CORPUSES_PATH = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))["WIKIPEDIA_CORPUSES_PATH"]

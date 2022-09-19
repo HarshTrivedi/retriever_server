@@ -26,6 +26,7 @@ async def retrieve(
             "retrieve_from_elasticsearch",
             "retrieve_from_blink",
             "retrieve_from_blink_and_elasticsearch",
+            "retrieve_from_dpr",
         )
         start_time = perf_counter()
         retrieval = getattr(retriever, retrieval_method)(**arguments)

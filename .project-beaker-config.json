@@ -1,0 +1,6 @@
+{
+    "project_name": "retriever_server",
+    "working_dir": "/run",
+    "image_critical_paths": [],
+    "beaker_workspace": "harsh-trivedi/retriever_server"
+}

@@ -42,14 +42,14 @@ def main():
     command = f'''
 python -m pyserini.encode
     input   --corpus {corpus_path}
-            --fields title paragraph_text paragraph_index
-            --delimiter "\\n"
+            --fields title text index
+            --delimiter \\n
             --shard-id {args.shard_index}
             --shard-num {args.num_shards}
     output  --embeddings {flat_index_path}
             --to-faiss
     encoder --encoder facebook/dpr-ctx_encoder-multiset-base
-            --fields paragraph_text
+            --fields text
             --max-length 300
             --device cuda:0
             --batch {args.batch_size}

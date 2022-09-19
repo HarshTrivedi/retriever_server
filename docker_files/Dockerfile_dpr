@@ -2,7 +2,6 @@ FROM ghcr.io/allenai/conda:latest
 
 RUN pip install torch==1.8.1+cu111 torchvision==0.9.1+cu111 torchaudio==0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
 
-
 WORKDIR /run/
 
 COPY build_dpr_index_generate_parts.py build_dpr_index_generate_parts.py
@@ -11,9 +10,8 @@ COPY build_dpr_index_merge_parts.py build_dpr_index_merge_parts.py
 COPY build_dpr_index_preprocess_corpus.py build_dpr_index_preprocess_corpus.py
 COPY .global_config.jsonnet .global_config.jsonnet
 
+RUN conda install -c conda-forge openjdk=11
 RUN pip install pyserini
-# RUN conda install -c conda-forge openjdk=11 # skipping it for as as I don't need anserini
-# RUN pip install torch==1.8.1 torchvision==0.9.1 torchaudio===0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
 RUN pip install faiss-cpu==1.7.0
 RUN pip install transformers==4.6.0
 RUN pip install jsonnet

@@ -37,7 +37,7 @@ def main():
     os.system("ls")
 
     print("***********wikipedia_corpuses:")
-    os.system("wikipedia_corpuses")
+    os.system("ls wikipedia_corpuses")
     exit()
 
     if args.force:

@@ -34,8 +34,8 @@ def main():
     if args.force:
         shutil.rmtree(hnsw_index_path, ignore_errors=True)
 
-    if os.path.exists(hnsw_index_path):
-        exit(f"The hnsw_index_path (output) {hnsw_index_path} already exists.")
+    if os.path.exists(hnsw_index_path) and os.listdir(hnsw_index_path):
+        exit(f"The non-empty hnsw_index_path (output) {hnsw_index_path} already exists.")
 
     command = f"python -m pyserini.index.faiss --input {flat_index_path} --output {hnsw_index_path} --hnsw"
     print("Running command:")

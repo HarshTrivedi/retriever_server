@@ -1,4 +1,6 @@
-FROM pytorch/pytorch:1.8.1-cuda11.1-cudnn8-devel
+FROM ghcr.io/allenai/conda:latest
+
+RUN /opt/conda/bin/conda install pytorch==1.8.1 torchvision==0.9.1 torchaudio==0.8.1 cudatoolkit=11.3 -c pytorch -c conda-forge
 
 WORKDIR /run/
 

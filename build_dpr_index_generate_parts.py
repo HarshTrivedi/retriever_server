@@ -33,6 +33,13 @@ def main():
     if not os.path.exists(corpus_path):
         exit(f"The corpus_path (input) {corpus_path} not available.")
 
+    print("***********ls:")
+    os.system("ls")
+
+    print("***********wikipedia_corpuses:")
+    os.system("wikipedia_corpuses")
+    exit()
+
     if args.force:
         shutil.rmtree(flat_index_path, ignore_errors=True)
 

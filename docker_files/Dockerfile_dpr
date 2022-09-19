@@ -12,6 +12,7 @@ RUN pip install pyserini
 # RUN pip install torch==1.8.1 torchvision==0.9.1 torchaudio===0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
 RUN pip install faiss-cpu==1.7.0
 RUN pip install transformers==4.6.0
+RUN pip install jsonnet
 
 CMD []
 ENTRYPOINT []

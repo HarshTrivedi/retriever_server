@@ -3,9 +3,10 @@ from typing import List, Dict, Tuple
 
 from blink_retriever import BLINK_MODELS_PATH, BlinkRetriever
 from elasticsearch_retriever import ElasticsearchRetriever
+from dpr_retriever import DprRetriever
 
 
-class BlinkElasticsearchRetriever:
+class UnifiedRetriever:
 
     """
     Kinds of retrievals I need.
@@ -37,15 +38,18 @@ class BlinkElasticsearchRetriever:
         self,
         # Elasticsearch init args:
         dataset_name: str = "hotpotqa",
-        elastic_host: str = "http://localhost/",
-        elastic_port: int = 9200,
+        elasticsearch_host: str = "http://localhost/",
+        elasticsearch_port: int = 9200,
         # Blink init args:
         blink_models_path: str = BLINK_MODELS_PATH,
-        faiss_index: str = "flat", # "flat" or "hnsw",
-        fast: bool = False,
-        top_k: int = 1,
+        blink_faiss_index_type: str = "flat", # "flat" or "hnsw",
+        blink_fast: bool = False,
+        blink_top_k: int = 1,
+        # DPR init args:
+        dpr_faiss_index_type: str = "flat", # "flat" or "hnsw",
+        dpr_query_model_path: str = "facebook/dpr-question_encoder-multiset-base",
         # what to initialize:
-        initialize_retrievers: Tuple[str, str] = ("blink", "elasticsearch"),
+        initialize_retrievers: Tuple[str, str] = ("blink", "elasticsearch", "dpr"),
     ):
 
         self._limit_to_abstracts = dataset_name == "hotpotqa"
@@ -54,17 +58,25 @@ class BlinkElasticsearchRetriever:
         if "elasticsearch" in initialize_retrievers:
             self._elasticsearch_retriever = ElasticsearchRetriever(
                 dataset_name=dataset_name,
-                elastic_host=elastic_host,
-                elastic_port=elastic_port,
+                elasticsearch_host=elasticsearch_host,
+                elasticsearch_port=elasticsearch_port,
             )
 
         self._blink_retriever = None
         if "blink" in initialize_retrievers:
             self._blink_retriever = BlinkRetriever(
                 blink_models_path=blink_models_path,
-                faiss_index=faiss_index,
-                fast=fast,
-                top_k=top_k
+                faiss_index=blink_faiss_index_type,
+                fast=blink_fast,
+                top_k=blink_top_k
+            )
+
+        self._dpr_retriever = None
+        if "dpr" in initialize_retrievers:
+            self._dpr_retriever = DprRetriever(
+                dataset_name=dataset_name,
+                index_type=dpr_faiss_index_type,
+                device=dpr_device,
             )
 
 
@@ -184,4 +196,19 @@ class BlinkElasticsearchRetriever:
                         "paragraph_text": retrieval["paragraph_text"]
                     })
 
+        return results
+
+
+    def retrieve_from_dpr(
+            self,
+            query_text: str,
+            max_hits_count: int = 3,
+        ) -> List[Dict]:
+        """
+        Option 5: retrieve_from_dpr
+        """
+        if self._dpr_retriever is None:
+            raise Exception("DPR retriever not initialized.")
+
+        results = self._dpr_retriever.retrieve_paragraphs(query_text=query_text, max_hits_count=max_hits_count)
         return results

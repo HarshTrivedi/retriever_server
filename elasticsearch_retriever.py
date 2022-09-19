@@ -24,10 +24,10 @@ class ElasticsearchRetriever:
     def __init__(
             self,
             dataset_name: str,
-            elastic_host: str = "localhost",
-            elastic_port: int = 9200,
+            elasticsearch_host: str = "localhost",
+            elasticsearch_port: int = 9200,
         ):
-        self._es = Elasticsearch([elastic_host], scheme="http", port=elastic_port)
+        self._es = Elasticsearch([elasticsearch_host], scheme="http", port=elasticsearch_port)
         self._index_name = f"{dataset_name}-wikipedia"
 
     def retrieve_paragraphs(

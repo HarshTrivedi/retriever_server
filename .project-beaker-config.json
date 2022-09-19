@@ -1,4 +1,5 @@
 {
+    "user_name": "harsh-trivedi",
     "project_name": "retriever_server",
     "working_dir": "/run",
     "image_critical_paths": [],

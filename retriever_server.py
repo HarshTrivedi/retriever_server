@@ -3,12 +3,12 @@ import _jsonnet
 from time import perf_counter
 from fastapi import FastAPI, status, Response, Request
 
-from blink_elasticsearch_retriever import BlinkElasticsearchRetriever
+from unified_retriever import UnifiedRetriever
 
 retriever_init_args = json.loads(
     _jsonnet.evaluate_file(".retriever_config.jsonnet")
 )
-retriever = BlinkElasticsearchRetriever(**retriever_init_args)
+retriever = UnifiedRetriever(**retriever_init_args)
 
 app = FastAPI()
 

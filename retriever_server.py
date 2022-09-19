@@ -18,7 +18,7 @@ async def index():
 
 @app.post("/retrieve/")
 async def retrieve(
-        arguments: Request # see the corresponding method in blink_elasticsearch_retriever.py
+        arguments: Request # see the corresponding method in unified_retriever.py
     ):
         arguments = await arguments.json()
         retrieval_method = arguments.pop("retrieval_method")

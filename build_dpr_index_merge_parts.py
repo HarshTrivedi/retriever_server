@@ -4,6 +4,9 @@ import shutil
 import os
 
 
+WIKIPEDIA_CORPUSES_PATH = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))["WIKIPEDIA_CORPUSES_PATH"]
+
+
 def main():
 
     parser = argparse.ArgumentParser(description="Combine DPR sub-indices.")

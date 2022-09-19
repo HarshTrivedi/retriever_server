@@ -1,0 +1,17 @@
+FROM python:3.8
+
+WORKDIR /run/
+
+COPY build_dpr_index_generate_parts.py build_dpr_index_generate_parts.py
+COPY build_dpr_index_make_fast.py build_dpr_index_make_fast.py
+COPY build_dpr_index_merge_parts.py build_dpr_index_merge_parts.py
+COPY build_dpr_index_preprocess_corpus.py build_dpr_index_preprocess_corpus.py
+
+RUN pip install pyserini
+RUN conda install -c conda-forge openjdk=11
+RUN pip install torch==1.8.1 torchvision==0.9.1 torchaudio===0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip install faiss-cpu==1.7.0
+RUN pip install transformers==4.6.0
+
+CMD []
+ENTRYPOINT []

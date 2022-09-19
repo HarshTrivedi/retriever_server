@@ -52,7 +52,7 @@ python -m pyserini.encode \
     encoder --encoder facebook/dpr-ctx_encoder-multiset-base \
             --fields paragraph_text \
             --max-length 300
-            --device 0
+            --device cuda:0
             --batch {args.batch_size} \
             --fp16
 '''.strip()

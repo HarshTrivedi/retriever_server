@@ -6,6 +6,7 @@ COPY build_dpr_index_generate_parts.py build_dpr_index_generate_parts.py
 COPY build_dpr_index_make_fast.py build_dpr_index_make_fast.py
 COPY build_dpr_index_merge_parts.py build_dpr_index_merge_parts.py
 COPY build_dpr_index_preprocess_corpus.py build_dpr_index_preprocess_corpus.py
+COPY .global_config.jsonnet .global_config.jsonnet
 
 RUN pip install pyserini
 # RUN conda install -c conda-forge openjdk=11 # skipping it for as as I don't need anserini

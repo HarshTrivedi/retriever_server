@@ -1,4 +1,4 @@
-local dataset = "hotpotqa";
+local dataset = "musique";
 local global_config = import '../.global_config.jsonnet';
 local wikipedia_corpuses_path = global_config["WIKIPEDIA_CORPUSES_PATH"];
 

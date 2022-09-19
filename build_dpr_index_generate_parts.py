@@ -49,7 +49,7 @@ python -m pyserini.encode \
             --shard-num {args.num_shards} \
     output  --embeddings {flat_index_path} \
             --to-faiss \
-    encoder --encoder facebook/dpr-context_encoder-multiset-base \
+    encoder --encoder facebook/dpr-ctx_encoder-multiset-base \
             --fields paragraph_text \
             --max-length 300
             --device 0

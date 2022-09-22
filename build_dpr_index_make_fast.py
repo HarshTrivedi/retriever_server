@@ -23,7 +23,7 @@ def main():
                         action="store_true", default=False)
     args = parser.parse_args()
 
-    flat_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"{args.dataset_name}-wikpedia-dpr-flat-index")
+    flat_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"{args.dataset_name}-wikpedia-dpr-flat-index", "part_full")
     hnsw_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"{args.dataset_name}-wikpedia-dpr-hnsw-index")
 
     if not os.path.exists(flat_index_path):

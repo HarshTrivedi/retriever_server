@@ -23,8 +23,6 @@ def main():
                         action="store_true", default=False)
     args = parser.parse_args()
 
-    assert 0 <= args.shard_index < args.num_shards
-
     flat_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"{args.dataset_name}-wikpedia-dpr-flat-index")
     hnsw_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"{args.dataset_name}-wikpedia-dpr-hnsw-index")
 

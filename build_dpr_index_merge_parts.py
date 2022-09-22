@@ -23,7 +23,7 @@ def main():
 
     assert 0 <= args.shard_index < args.num_shards
 
-    flat_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"{args.dataset_name}-wikpedia-dpr-flat-index")
+    flat_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"{args.dataset_name}-wikpedia-dpr-flat-index", "part_")
 
     if not os.path.exists(flat_index_path):
         exit(f"The flat_index_path (input/output) {flat_index_path} not available.")

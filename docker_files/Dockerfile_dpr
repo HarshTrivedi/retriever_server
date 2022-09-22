@@ -4,6 +4,7 @@ RUN pip install torch==1.8.1+cu111 torchvision==0.9.1+cu111 torchaudio==0.8.1 -f
 
 WORKDIR /run/
 
+COPY build_dpr_index_sparse_counterpart.py build_dpr_index_sparse_counterpart.py
 COPY build_dpr_index_generate_parts.py build_dpr_index_generate_parts.py
 COPY build_dpr_index_make_fast.py build_dpr_index_make_fast.py
 COPY build_dpr_index_merge_parts.py build_dpr_index_merge_parts.py

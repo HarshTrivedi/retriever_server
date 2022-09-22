@@ -18,7 +18,7 @@ def main():
             "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique"
         )
     )
-    parser.add_argument("--num-shards", help="number of total shards", type=int, default=1)
+    parser.add_argument("--num-shards", help="number of total shards", type=int, required=True)
     parser.add_argument("--force", help='force delete output directory, if it exits.',
                         action="store_true", default=False)
     args = parser.parse_args()

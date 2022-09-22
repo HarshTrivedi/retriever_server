@@ -46,7 +46,9 @@ class DprRetriever:
 
         retrieval_results = []
         for hit in hits:
+            # breakpoint()
 
+            # hit.docid
             doc = self._searcher.doc(hit.docid)
             doc.raw() # TODO: See what this gives
             contents = doc.contents()

@@ -4,7 +4,7 @@ local wikipedia_corpuses_path = global_config["WIKIPEDIA_CORPUSES_PATH"];
 
 local input_directory = wikipedia_corpuses_path + "/" + dataset + "-wikpedia-dpr-corpus";
 local beaker_output_directory = wikipedia_corpuses_path + "/" + dataset + "-wikpedia-dpr-flat-index";
-local local_output_directory = wikipedia_corpuses_path + "/" + dataset + "-wikpedia-dpr-flat-index" + "/" + "subtask_$INDEX";
+local local_output_directory = wikipedia_corpuses_path + "/" + dataset + "-wikpedia-dpr-flat-index" + "/" + "part_$INDEX";
 local docker_filepath = "docker_files/Dockerfile_dpr";
 
 local num_shards = 4;

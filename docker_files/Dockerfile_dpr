@@ -11,7 +11,7 @@ COPY build_dpr_index_merge_parts.py build_dpr_index_merge_parts.py
 COPY build_dpr_index_preprocess_corpus.py build_dpr_index_preprocess_corpus.py
 COPY .global_config.jsonnet .global_config.jsonnet
 
-RUN conda install -c conda-forge openjdk=11
+RUN conda install -c conda-forge openjdk=11 -y
 RUN pip install pyserini
 RUN pip install faiss-cpu==1.7.0
 RUN pip install transformers==4.6.0

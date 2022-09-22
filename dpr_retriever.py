@@ -5,6 +5,7 @@ import argparse
 import os
 
 from pyserini.search import FaissSearcher, DprQueryEncoder
+from pyserini.search.lucene import LuceneSearcher
 
 
 WIKIPEDIA_CORPUSES_PATH = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))["WIKIPEDIA_CORPUSES_PATH"]
@@ -30,10 +31,16 @@ class DprRetriever:
         print("Loading FaissSearcher...")
 
         if index_type == "flat":
-            index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"hotpotqa-wikpedia-dpr-{index_type}-index/part_full")
+            dpr_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"hotpotqa-wikpedia-dpr-{index_type}-index/part_full")
         else: # hnsw
-            index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"hotpotqa-wikpedia-dpr-{index_type}-index")
-        self._searcher = FaissSearcher(index_path, query_encoder)
+            dpr_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"hotpotqa-wikpedia-dpr-{index_type}-index")
+        self._dense_searcher = FaissSearcher(dpr_index_path, query_encoder)
+
+        print("Loading SparseSearcher...")
+        # Dense index doesn't store the original text documents, so we need to
+        # generate+load the corresponding sparse index too.
+        sparse_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"hotpotqa-wikpedia-dpr-sparse-index")
+        self._sparse_searcher = LuceneSearcher(sparse_index_path)
 
 
     def retrieve_paragraphs(
@@ -42,29 +49,23 @@ class DprRetriever:
         max_hits_count: int = 10
     ) -> List[Dict]:
 
-        hits = self._searcher.search(query=query_text, k=max_hits_count)
+        hits = self._dense_searcher.search(query=query_text, k=max_hits_count)
 
         retrieval_results = []
         for hit in hits:
-            # breakpoint()
-
-            # hit.docid
-            doc = self._searcher.doc(hit.docid)
-            doc.raw() # TODO: See what this gives
-            contents = doc.contents()
-
+            doc = self._sparse_searcher.doc(hit.docid)
+            document = json.loads(doc.raw())
+            contents = document["contents"]
             title, paragraph_text, paragraph_index = contents.split("\n")
             paragraph_index = int(paragraph_index.strip())
-
             retrieval_result = {
                 "title": title, "paragraph_text": paragraph_text,
-                "paragraph_index": paragraph_index, "score": doc.score
+                "paragraph_index": paragraph_index, "score": hit.score
             }
             retrieval_results.append(retrieval_result)
 
         retrieval_results = sorted(retrieval_results, key=lambda e: e["score"], reverse=True)
         retrieval_results = retrieval_results[:max_hits_count]
-
         return retrieval_results
 
 

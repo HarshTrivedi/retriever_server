@@ -48,6 +48,7 @@ class UnifiedRetriever:
         # DPR init args:
         dpr_faiss_index_type: str = "flat", # "flat" or "hnsw",
         dpr_query_model_path: str = "facebook/dpr-question_encoder-multiset-base",
+        dpr_type: str = "cpu",
         # what to initialize:
         initialize_retrievers: Tuple[str, str] = ("blink", "elasticsearch", "dpr"),
     ):

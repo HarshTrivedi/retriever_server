@@ -77,6 +77,7 @@ class UnifiedRetriever:
             self._dpr_retriever = DprRetriever(
                 dataset_name=dataset_name,
                 index_type=dpr_faiss_index_type,
+                hf_query_model_name_or_path=dpr_query_model_path,
                 device=dpr_device,
             )
 

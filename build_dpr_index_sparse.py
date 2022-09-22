@@ -18,16 +18,13 @@ WIKIPEDIA_CORPUSES_PATH = json.loads(_jsonnet.evaluate_file(".global_config.json
 
 def main():
 
-    parser = argparse.ArgumentParser(description="Generate DPR index.")
+    parser = argparse.ArgumentParser(description="Generate the sparse counterpart of the dpr corpus.")
     parser.add_argument(
         "dataset_name", help='name of the dataset', type=str,
         choices=(
             "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique"
         )
     )
-    parser.add_argument("--shard-index", help="shard index", type=int, default=0)
-    parser.add_argument("--num-shards", help="number of total shards", type=int, default=1)
-    parser.add_argument("--batch-size", help="batch size", type=int, default=32)
     parser.add_argument("--force", help='force delete before creating new index.',
                         action="store_true", default=False)
     args = parser.parse_args()

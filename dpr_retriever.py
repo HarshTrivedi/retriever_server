@@ -1,5 +1,11 @@
+import json
+import _jsonnet
+
 from pyserini.search import FaissSearcher
 from pyserini.encode import DprQueryEncoder
+
+
+WIKIPEDIA_CORPUSES_PATH = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))["WIKIPEDIA_CORPUSES_PATH"]
 
 
 class DprRetriever:
@@ -20,7 +26,7 @@ class DprRetriever:
         )
 
         print("Loading FaissSearcher...")
-        index_path = f"wikipedia_corpuses/hotpotqa-wikpedia-dpr-{index_type}-index"
+        index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"hotpotqa-wikpedia-dpr-{index_type}-index")
         self._searcher = FaissSearcher(index, query_encoder)
 
 

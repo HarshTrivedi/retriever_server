@@ -29,8 +29,6 @@ def main():
                         action="store_true", default=False)
     args = parser.parse_args()
 
-    assert 0 <= args.shard_index < args.num_shards
-
     corpus_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"{args.dataset_name}-wikpedia-dpr-corpus")
     index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"{args.dataset_name}-wikpedia-dpr-sparse-index")
 
@@ -49,7 +47,7 @@ python -m pyserini.index.lucene
     --input {corpus_path}
     --index {index_path}
     --generator DefaultLuceneDocumentGenerator
-    --threads 1 \
+    --threads 10 \
     --storePositions --storeDocvectors --storeRaw
 '''.strip()
     print("Running command:")

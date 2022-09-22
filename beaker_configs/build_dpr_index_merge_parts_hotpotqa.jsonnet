@@ -2,7 +2,7 @@ local dataset = "hotpotqa";
 local global_config = import '../.global_config.jsonnet';
 local wikipedia_corpuses_path = global_config["WIKIPEDIA_CORPUSES_PATH"];
 
-local output_directory = wikipedia_corpuses_path + "/" + dataset + "-wikpedia-dpr-flat-index/full";
+local output_directory = wikipedia_corpuses_path + "/" + dataset + "-wikpedia-dpr-flat-index/part_full";
 local docker_filepath = "docker_files/Dockerfile_dpr";
 local num_shards = 4;
 

@@ -60,7 +60,7 @@ class DprRetriever:
             paragraph_index = int(paragraph_index.strip())
             retrieval_result = {
                 "title": title, "paragraph_text": paragraph_text,
-                "paragraph_index": paragraph_index, "score": hit.score
+                "paragraph_index": paragraph_index, "score": float(hit.score)
             }
             retrieval_results.append(retrieval_result)
 

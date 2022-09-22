@@ -1,8 +1,10 @@
 import json
 import _jsonnet
+from typing import List, Dict
+import argparse
+import os
 
-from pyserini.search import FaissSearcher
-from pyserini.encode import DprQueryEncoder
+from pyserini.search import FaissSearcher, DprQueryEncoder
 
 
 WIKIPEDIA_CORPUSES_PATH = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))["WIKIPEDIA_CORPUSES_PATH"]
@@ -26,8 +28,12 @@ class DprRetriever:
         )
 
         print("Loading FaissSearcher...")
-        index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"hotpotqa-wikpedia-dpr-{index_type}-index")
-        self._searcher = FaissSearcher(index, query_encoder)
+
+        if index_type == "flat":
+            index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"hotpotqa-wikpedia-dpr-{index_type}-index/part_full")
+        else: # hnsw
+            index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"hotpotqa-wikpedia-dpr-{index_type}-index")
+        self._searcher = FaissSearcher(index_path, query_encoder)
 
 
     def retrieve_paragraphs(
@@ -40,7 +46,6 @@ class DprRetriever:
 
         retrieval_results = []
         for hit in hits:
-            hit.docid
 
             doc = self._searcher.doc(hit.docid)
             doc.raw() # TODO: See what this gives
@@ -70,6 +75,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    print("Loading DPR retriever ...")
     retriever = DprRetriever(
         dataset_name=args.dataset_name,
         index_type="flat",

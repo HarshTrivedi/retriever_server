@@ -83,8 +83,8 @@ class ElasticsearchRetriever:
         retrieval = retrieval[:max_hits_count]
         retrieval = [e["_source"] for e in retrieval]
 
-        lower_allowed_titles = [e.lower().strip() for e in allowed_titles]
         if allowed_titles is not None:
+            lower_allowed_titles = [e.lower().strip() for e in allowed_titles]
             retrieval = [
                 item for item in retrieval
                 if item["title"].lower().strip() in lower_allowed_titles

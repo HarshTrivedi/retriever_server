@@ -32,7 +32,8 @@ async def retrieve(
         retrieval = getattr(retriever, retrieval_method)(**arguments)
 
         for retrieval_ in retrieval:
-            retrieval_["corpus_name"] = retriever_init_args["dataset_name"]
+            if "corpus_name" not in retrieval_:
+                retrieval_["corpus_name"] = retriever_init_args["dataset_name"]
 
         end_time = perf_counter()
         time_in_seconds = round(end_time - start_time, 1)

@@ -100,6 +100,9 @@ class ElasticsearchRetriever:
                 if item["title"].lower().strip() in lower_allowed_titles
             ]
 
+        for retrieval_ in retrieval:
+            retrieval_["corpus_name"] = corpus_name
+
         return retrieval
 
     def retrieve_titles(
@@ -147,6 +150,9 @@ class ElasticsearchRetriever:
             retrieval = list(text2retrieval.values())[:max_hits_count]
 
         retrieval = [e["_source"] for e in retrieval]
+
+        for retrieval_ in retrieval:
+            retrieval_["corpus_name"] = corpus_name
 
         return retrieval
 

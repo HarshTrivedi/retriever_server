@@ -23,12 +23,12 @@ class ElasticsearchRetriever:
 
     def __init__(
             self,
-            dataset_name: str,
+            corpus_name: str,
             elasticsearch_host: str = "localhost",
             elasticsearch_port: int = 9200,
         ):
         self._es = Elasticsearch([elasticsearch_host], scheme="http", port=elasticsearch_port)
-        self._index_name = f"{dataset_name}-wikipedia"
+        self._corpus_name = corpus_name
 
     def retrieve_paragraphs(
         self,
@@ -37,8 +37,18 @@ class ElasticsearchRetriever:
         allowed_titles: List[str] = None,
         paragraph_index: int = None,
         max_buffer_count: int = 100,
-        max_hits_count: int = 10
+        max_hits_count: int = 10,
+        corpus_name: str = None,
     ) -> List[Dict]:
+
+        self._corpus_name == "auto":
+            assert corpus_name != None, \
+            "The corpus_name is initialized as auto. So you need to pass it at runtime."
+        else:
+            assert corpus_name == None, \
+            "The corpus_name is not initialized as auto. So you can't pass it at runtime."
+
+        index_name = f"{corpus_name or self._corpus_name}-wikipedia"
 
         query = {
             "size": max_buffer_count,
@@ -68,7 +78,7 @@ class ElasticsearchRetriever:
 
         assert query["query"]["bool"]["should"] or query["query"]["bool"]["must"]
 
-        result = self._es.search(index=self._index_name, body=query)
+        result = self._es.search(index=index_name, body=query)
 
         retrieval = []
         if result.get('hits') is not None and result['hits'].get('hits') is not None:
@@ -97,7 +107,17 @@ class ElasticsearchRetriever:
         query_text: str,
         max_buffer_count: int = 100,
         max_hits_count: int = 10
+        corpus_name: str = None,
     ) -> List[Dict]:
+
+        self._corpus_name == "auto":
+            assert corpus_name != None, \
+            "The corpus_name is initialized as auto. So you need to pass it at runtime."
+        else:
+            assert corpus_name == None, \
+            "The corpus_name is not initialized as auto. So you can't pass it at runtime."
+
+        index_name = f"{corpus_name or self._corpus_name}-wikipedia"
 
         query = {
             "size": max_buffer_count,
@@ -115,7 +135,7 @@ class ElasticsearchRetriever:
             }
         }
 
-        result = self._es.search(index=self._index_name, body=query)
+        result = self._es.search(index=index_name, body=query)
 
         retrieval = []
         if result.get('hits') is not None and result['hits'].get('hits') is not None:
@@ -136,14 +156,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='retrieve paragraphs or titles')
     parser.add_argument(
         "dataset_name", type=str, help="dataset_name",
-        choices={"hotpotqa", "strategyqa", "2wikimultihopqa", "iirc"}
+        choices={"auto", "hotpotqa", "strategyqa", "2wikimultihopqa", "iirc"}
     )
     parser.add_argument("--host", type=str, help="host", default="localhost")
     parser.add_argument("--port", type=int, help="port", default=9200)
     args = parser.parse_args()
 
+    corpus_name = "musique" if args.dataset_name == "musique_ans" else args.dataset_name
+
     retriever = ElasticsearchRetriever(
-        dataset_name=args.dataset_name, elastic_host=args.host, elastic_port=args.port, 
+        corpus_name=corpus_name, elastic_host=args.host, elastic_port=args.port, 
     )
 
     print("\n\nRetrieving Titles ...")

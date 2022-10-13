@@ -53,12 +53,13 @@ class UnifiedRetriever:
         initialize_retrievers: Tuple[str, str] = ("blink", "elasticsearch", "dpr"),
     ):
 
-        self._limit_to_abstracts = dataset_name == "hotpotqa"
+        corpus_name = "musique" if dataset_name == "musique_ans" else dataset_name
+        self._limit_to_abstracts = corpus_name == "hotpotqa"
 
         self._elasticsearch_retriever = None
         if "elasticsearch" in initialize_retrievers:
             self._elasticsearch_retriever = ElasticsearchRetriever(
-                dataset_name=dataset_name,
+                corpus_name=corpus_name,
                 elasticsearch_host=elasticsearch_host,
                 elasticsearch_port=elasticsearch_port,
             )
@@ -75,7 +76,7 @@ class UnifiedRetriever:
         self._dpr_retriever = None
         if "dpr" in initialize_retrievers:
             self._dpr_retriever = DprRetriever(
-                dataset_name=dataset_name,
+                corpus_name=corpus_name,
                 index_type=dpr_faiss_index_type,
                 hf_query_model_name_or_path=dpr_query_model_path,
                 device=dpr_device,
@@ -89,6 +90,7 @@ class UnifiedRetriever:
             document_type: str = "paragraph_text",
             allowed_titles: List[str] = None,
             paragraph_index: int = None,
+            corpus_name: str = None,
         ) -> List[Dict]:
         """
         Option 1: retrieve_from_elasticsearch
@@ -113,11 +115,12 @@ class UnifiedRetriever:
             is_abstract = True if self._limit_to_abstracts else None # Note "None" and not False
             paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
                 query_text, is_abstract=is_abstract, max_hits_count=max_hits_count,
-                allowed_titles=allowed_titles, paragraph_index=paragraph_index
+                allowed_titles=allowed_titles, paragraph_index=paragraph_index,
+                corpus_name=corpus_name
             )
         elif document_type == "title":
             paragraphs_results = self._elasticsearch_retriever.retrieve_titles(
-                query_text, max_hits_count=max_hits_count
+                query_text, max_hits_count=max_hits_count, corpus_name=corpus_name
             )
 
         return paragraphs_results
@@ -151,6 +154,7 @@ class UnifiedRetriever:
             query_text: str,
             max_hits_count: int = 3,
             skip_blink_titles: List = None,
+            corpus_name: str = None,
         ) -> List[Dict]:
         """
         Option 3: retrieve_from_blink_and_elasticsearch (one_es_per_blink=False)
@@ -186,7 +190,8 @@ class UnifiedRetriever:
         selected_titles = set()
         for blink_title in blink_titles:
             retrievals = self._elasticsearch_retriever.retrieve_titles(
-                query_text=blink_title, max_hits_count=max_hits_count
+                query_text=blink_title, max_hits_count=max_hits_count,
+                corpus_name=corpus_name
             )
 
             for retrieval in retrievals:

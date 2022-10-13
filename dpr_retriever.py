@@ -14,12 +14,13 @@ WIKIPEDIA_CORPUSES_PATH = json.loads(_jsonnet.evaluate_file(".global_config.json
 class DprRetriever:
     def __init__(
             self,
-            dataset_name: str,
+            corpus_name: str,
             index_type: str,
             hf_query_model_name_or_path: str = "facebook/dpr-question_encoder-multiset-base",
             device: str = "cpu",
         ):
         assert index_type in ("flat", "hsnw")
+        assert corpus_name != "auto", f"corpus_name auto is not valid for dpr_retriever."
 
         print("Loading DprQueryEncoder...")
         query_encoder = DprQueryEncoder(
@@ -31,15 +32,23 @@ class DprRetriever:
         print("Loading FaissSearcher...")
 
         if index_type == "flat":
-            dpr_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"hotpotqa-wikpedia-dpr-{index_type}-index/part_full")
+            dpr_index_path = os.path.join(
+                WIKIPEDIA_CORPUSES_PATH,
+                f"{corpus_name}-wikpedia-dpr-{index_type}-index/part_full"
+            )
         else: # hnsw
-            dpr_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"hotpotqa-wikpedia-dpr-{index_type}-index")
+            dpr_index_path = os.path.join(
+                WIKIPEDIA_CORPUSES_PATH,
+                f"{corpus_name}-wikpedia-dpr-{index_type}-index"
+            )
         self._dense_searcher = FaissSearcher(dpr_index_path, query_encoder)
 
         print("Loading SparseSearcher...")
         # Dense index doesn't store the original text documents, so we need to
         # generate+load the corresponding sparse index too.
-        sparse_index_path = os.path.join(WIKIPEDIA_CORPUSES_PATH, f"hotpotqa-wikpedia-dpr-sparse-index")
+        sparse_index_path = os.path.join(
+            WIKIPEDIA_CORPUSES_PATH, f"{corpus_name}-wikpedia-dpr-sparse-index"
+        )
         self._sparse_searcher = LuceneSearcher(sparse_index_path)
 
 
@@ -74,7 +83,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="retrieve paragraphs via DPR.")
     parser.add_argument(
         "dataset_name", type=str, help="dataset_name",
-        choices={"hotpotqa", "strategyqa", "2wikimultihopqa", "iirc"}
+        choices={"hotpotqa", "2wikimultihopqa", "musique_ans", "iirc", "strategyqa"}
     )
     args = parser.parse_args()
 

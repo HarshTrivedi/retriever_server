@@ -41,7 +41,7 @@ class ElasticsearchRetriever:
         corpus_name: str = None,
     ) -> List[Dict]:
 
-        self._corpus_name == "auto":
+        if self._corpus_name == "auto":
             assert corpus_name != None, \
             "The corpus_name is initialized as auto. So you need to pass it at runtime."
         else:
@@ -110,7 +110,7 @@ class ElasticsearchRetriever:
         corpus_name: str = None,
     ) -> List[Dict]:
 
-        self._corpus_name == "auto":
+        if self._corpus_name == "auto":
             assert corpus_name != None, \
             "The corpus_name is initialized as auto. So you need to pass it at runtime."
         else:

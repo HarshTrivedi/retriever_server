@@ -106,7 +106,7 @@ class ElasticsearchRetriever:
         self,
         query_text: str,
         max_buffer_count: int = 100,
-        max_hits_count: int = 10
+        max_hits_count: int = 10,
         corpus_name: str = None,
     ) -> List[Dict]:
 

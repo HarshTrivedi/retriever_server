@@ -98,7 +98,7 @@ class UnifiedRetriever:
             1. Directly retrieve from elasticsearch (could be querying titles or paragraph_texts)
         """
 
-        assert document_type in ("title", "paragraph_text")
+        assert document_type in ("title", "paragraph_text", "title_paragraph_text")
 
         if allowed_titles is not None:
             assert document_type == "paragraph_text", \
@@ -117,6 +117,14 @@ class UnifiedRetriever:
                 query_text, is_abstract=is_abstract, max_hits_count=max_hits_count,
                 allowed_titles=allowed_titles, paragraph_index=paragraph_index,
                 corpus_name=corpus_name
+            )
+        elif document_type == "title_paragraph_text":
+            is_abstract = True if self._limit_to_abstracts else None # Note "None" and not False
+            assert not allowed_titles
+            paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
+                query_text, is_abstract=is_abstract, max_hits_count=max_hits_count,
+                allowed_titles=False, paragraph_index=paragraph_index,
+                corpus_name=corpus_name, query_title_field_too=True
             )
         elif document_type == "title":
             paragraphs_results = self._elasticsearch_retriever.retrieve_titles(

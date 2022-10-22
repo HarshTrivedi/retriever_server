@@ -35,6 +35,7 @@ class ElasticsearchRetriever:
         query_text: str = None,
         is_abstract: bool = None,
         allowed_titles: List[str] = None,
+        query_title_field_too: bool = False,
         paragraph_index: int = None,
         max_buffer_count: int = 100,
         max_hits_count: int = 10,
@@ -64,6 +65,9 @@ class ElasticsearchRetriever:
         if query_text is not None:
             # must is too strict for this:
             query["query"]["bool"]["should"].append({"match": {"paragraph_text": query_text}})
+
+        if query_title_field_too:
+            query["query"]["bool"]["should"].append({"match": {"title": query_text}})
 
         if is_abstract is not None:
             query["query"]["bool"]["filter"] = [{"match": {"is_abstract": is_abstract}}]

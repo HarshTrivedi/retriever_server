@@ -120,10 +120,10 @@ class UnifiedRetriever:
             )
         elif document_type == "title_paragraph_text":
             is_abstract = True if self._limit_to_abstracts else None # Note "None" and not False
-            assert not allowed_titles
+            assert allowed_titles is None
             paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
                 query_text, is_abstract=is_abstract, max_hits_count=max_hits_count,
-                allowed_titles=False, paragraph_index=paragraph_index,
+                allowed_titles=None, paragraph_index=paragraph_index,
                 corpus_name=corpus_name, query_title_field_too=True
             )
         elif document_type == "title":

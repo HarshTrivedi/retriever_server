@@ -78,7 +78,7 @@ class ElasticsearchRetriever:
                     {"match": {"title": _title}} for _title in allowed_titles
                 ]
             else:
-                query["query"]["bool"]["should"] = [
+                query["query"]["bool"]["should"] += [
                     {"bool": {"must": {"match": {"title": _title}}}} for _title in allowed_titles
                 ]
 

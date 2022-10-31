@@ -78,8 +78,8 @@ class ElasticsearchRetriever:
                     {"match": {"title": _title}} for _title in allowed_titles
                 ]
             else:
-                query["query"]["bool"]["must"] = [ # AND of ORs
-                    {"bool": {"should": {"match": {"title": _title}}}} for _title in allowed_titles
+                query["query"]["bool"]["should"] = [
+                    {"bool": {"must": {"match": {"title": _title}}}} for _title in allowed_titles
                 ]
 
         if paragraph_index is not None:

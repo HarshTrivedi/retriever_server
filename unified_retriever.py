@@ -87,6 +87,7 @@ class UnifiedRetriever:
             self,
             query_text: str,
             max_hits_count: int = 3,
+            max_buffer_count: int = 100,
             document_type: str = "paragraph_text",
             allowed_titles: List[str] = None,
             paragraph_index: int = None,
@@ -116,7 +117,7 @@ class UnifiedRetriever:
             paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
                 query_text, is_abstract=is_abstract, max_hits_count=max_hits_count,
                 allowed_titles=allowed_titles, paragraph_index=paragraph_index,
-                corpus_name=corpus_name
+                corpus_name=corpus_name, max_buffer_count=max_buffer_count
             )
         elif document_type == "title_paragraph_text":
             is_abstract = True if self._limit_to_abstracts else None # Note "None" and not False
@@ -124,7 +125,8 @@ class UnifiedRetriever:
             paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
                 query_text, is_abstract=is_abstract, max_hits_count=max_hits_count,
                 allowed_titles=allowed_titles, paragraph_index=paragraph_index,
-                corpus_name=corpus_name, query_title_field_too=True
+                corpus_name=corpus_name, query_title_field_too=True,
+                max_buffer_count=max_buffer_count
             )
         elif document_type == "title":
             paragraphs_results = self._elasticsearch_retriever.retrieve_titles(

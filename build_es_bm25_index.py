@@ -17,6 +17,7 @@ import base58
 import _jsonnet
 from bs4 import BeautifulSoup
 import os
+import random
 
 
 WIKIPEDIA_CORPUSES_PATH = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))["WIKIPEDIA_CORPUSES_PATH"]
@@ -106,6 +107,9 @@ def make_iirc_documents():
         WIKIPEDIA_CORPUSES_PATH, "iirc-wikipedia-paragraphs/context_articles.json"
     )
     _idx = 1
+
+    random.seed(13370) # Don't change.
+
     with open(raw_filepath, "r") as file:
         full_data = json.load(file)
 
@@ -115,7 +119,17 @@ def make_iirc_documents():
                 text for text in page_soup.text.split("\n")
                 if text.strip() and len(text.strip().split()) > 10
             ]
-            for paragraph_index, paragraph_text in enumerate(paragraph_texts):
+
+            # IIRC has a positional bias. 70% of the times, the first
+            # is the supporting one, and almost all are in 1st 20.
+            # So we scramble them to make it more challenging retrieval
+            # problem.
+            paragraph_indices_and_texts = [
+                (paragraph_index, paragraph_text)
+                for paragraph_index, paragraph_text in enumerate(paragraph_texts)
+            ]
+            random.shuffle(paragraph_indices_and_texts)
+            for paragraph_index, paragraph_text in paragraph_indices_and_texts:
                 url = ""
                 id_ = hash_object(title+paragraph_text)
                 is_abstract = paragraph_index == 0

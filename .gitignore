@@ -135,3 +135,4 @@ wikipedia_corpuses
 .global_config.jsonnet
 set_env.sh
 .beaker_experiment_specs
+.history

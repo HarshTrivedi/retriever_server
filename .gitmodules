@@ -1,3 +1,6 @@
 [submodule "beakerizer"]
 	path = beakerizer
 	url = https://github.com/HarshTrivedi/beakerizer
+[submodule "contriever"]
+	path = contriever
+	url = https://github.com/facebookresearch/contriever

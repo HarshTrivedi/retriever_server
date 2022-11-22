@@ -9,6 +9,7 @@ from typing import Any
 import hashlib
 import io
 import dill
+import gzip
 from tqdm import tqdm
 import argparse
 import glob
@@ -252,13 +253,82 @@ def make_musique_documents():
                     _idx += 1
 
 
+def make_natcq_documents():
+    raw_filepath = os.path.join(
+        WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
+    )
+    _idx = 1
+
+    random.seed(13370) # Don't change.
+
+    with gzip.open(raw_filepath, mode="rt") as file:
+        page_data = json.load(file)
+        page_title = page_data["title"]
+        page_id = page_data["page_id"]
+        page_url = page_data["url"]
+
+        for section_wise_data in page_data["sectionwise_data"]:
+
+            section_index = section_wise_data["section_index"]
+            section_breadcrumb = section_wise_data["section_breadcrumb"]
+
+            for section_paragraph in section_wise_data["section_paragraphs"]:
+                document_index = section_paragraph["paragraph_index"]
+                document_text = section_paragraph["paragraph_object"]["text"]
+                document_parsed_data = section_paragraph["parsed_data"]
+                document_type = "paragraph"
+
+            for section_list in section_wise_data["section_lists"]:
+                document_index = section_list["list_index"]
+                document_text = section_list["list_object"]["text"]
+                document_parsed_data = section_list["parsed_data"]
+                document_type = "list"
+
+            for section_infobox in section_wise_data["section_infoboxes"]:
+                document_index = section_infobox["infobox_index"]
+                document_text = section_infobox["infobox_object"]["text"]
+                document_parsed_data = section_infobox["parsed_data"]
+                document_type = "infobox"
+
+            for section_table in section_wise_data["section_tables"]:
+                document_index = section_table["table_index"]
+                document_text = section_table["table_object"]["text"]
+                document_parsed_data = section_table["parsed_data"]
+                document_type = "table"
+
+            document_id = hash_object([page_id, section_index, document_index])
+            metadata = {
+                "page_id": page_id,
+                "document_type": document_type,
+                "document_path": section_breadcrumb,
+                "document_parsed_data": document_parsed_data,
+            }
+            es_document = {
+                "id": document_id,
+                "title": page_title,
+                "paragraph_index": document_index,
+                "paragraph_text": document_text,
+                "url": page_url,
+                "is_abstract": False,
+                "metadata": json.dumps(metadata)
+            }
+            document = {
+                "_op_type": 'create',
+                '_index': elasticsearch_index,
+                '_id': _idx,
+                '_source': es_document,
+            }
+            yield (document)
+            _idx += 1
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Index paragraphs in Elasticsearch')
     parser.add_argument(
         "dataset_name", help='name of the dataset', type=str,
         choices=(
-            "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique"
+            "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique", "natcq"
         )
     )
     parser.add_argument("--force", help='force delete before creating new index.',
@@ -308,6 +378,11 @@ if __name__ == "__main__":
                 }
         }
     }
+
+    if args.dataset == "natcq":
+        paragraphs_index_settings["mappings"]["properties"] = {
+            "metadata": {"type": "object", "index" : False}
+        }
 
     index_exists = es.indices.exists(elasticsearch_index)
     print("Index already exists" if index_exists else "Index doesn't exist.")

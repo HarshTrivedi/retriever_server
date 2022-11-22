@@ -4,6 +4,7 @@ from typing import List, Dict, Tuple
 from blink_retriever import BLINK_MODELS_PATH, BlinkRetriever
 from elasticsearch_retriever import ElasticsearchRetriever
 from dpr_retriever import DprRetriever
+from contriever_retriever import ContrieverRetriever
 
 
 class UnifiedRetriever:
@@ -50,7 +51,7 @@ class UnifiedRetriever:
         dpr_query_model_path: str = "facebook/dpr-question_encoder-multiset-base",
         dpr_device: str = "cpu",
         # what to initialize:
-        initialize_retrievers: Tuple[str, str] = ("blink", "elasticsearch", "dpr"),
+        initialize_retrievers: Tuple[str, str] = ("blink", "elasticsearch", "dpr", "contriever"),
     ):
 
         corpus_name = "musique" if dataset_name == "musique_ans" else dataset_name
@@ -81,6 +82,10 @@ class UnifiedRetriever:
                 hf_query_model_name_or_path=dpr_query_model_path,
                 device=dpr_device,
             )
+
+        self._contriever_retriever = None
+        if "contriever" in initialize_retrievers:
+            self._contriever_retriever = ContrieverRetriever(corpus_name=corpus_name)
 
 
     def retrieve_from_elasticsearch(
@@ -228,4 +233,19 @@ class UnifiedRetriever:
             raise Exception("DPR retriever not initialized.")
 
         results = self._dpr_retriever.retrieve_paragraphs(query_text=query_text, max_hits_count=max_hits_count)
+        return results
+
+    def retrieve_from_contriever(
+            self,
+            query_text: str,
+            max_hits_count: int = 3,
+        ) -> List[Dict]:
+        """
+        Option 5: retrieve_from_contriever
+        """
+        if self._contriever_retriever is None:
+            raise Exception("Contriever retriever not initialized.")
+        results = self._contriever_retriever.retrieve_paragraphs(
+            query_text=query_text, max_hits_count=max_hits_count
+        )
         return results

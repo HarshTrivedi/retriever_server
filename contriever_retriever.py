@@ -95,8 +95,8 @@ class ContrieverRetriever:
         query_embeddings = embed_queries(self.config, [query_text], self.model, self.tokenizer)
         paragraph_ids, _ = self.index.search_knn(query_embeddings, max_hits_count)[0]
         paragraphs = [self.paragraph_id_map[paragraph_id] for paragraph_id in paragraph_ids]
-        assert corpus_name == self.corpus_name, \
-            f"Mismatching corpus_names ({corpus_name} != {self.corpus_name})"
+        assert corpus_name == self._corpus_name, \
+            f"Mismatching corpus_names ({corpus_name} != {self._corpus_name})"
 
         retrieval = [
             {
@@ -105,7 +105,7 @@ class ContrieverRetriever:
                 "paragraph_text": paragraph["text"],
                 "is_abstract": False,
                 "url": None,
-                "corpus_name": self.corpus_name,
+                "corpus_name": self._corpus_name,
             }
             for paragraph_id, paragraph in zip(paragraph_ids, paragraphs)
         ]

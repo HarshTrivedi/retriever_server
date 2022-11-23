@@ -78,7 +78,7 @@ class ContrieverRetriever:
 
         # load paragraphs
         print("Loading contriever paragraphs...")
-        paragraphs = src.data.load_paragraphs(config.paragraphs_path)
+        paragraphs = src.data.load_passages(config.paragraphs_path)
         self.paragraph_id_map = {x["id"]: x for x in paragraphs}
         del paragraphs
         print("...Done.")

@@ -45,11 +45,14 @@ class ContrieverRetriever:
             os.path.join(contriever_data_path, "passages.tsv"),
             os.path.join(contriever_data_path, "embeddings")
         )
-        model, tokenizer, _ = contriever_src.contriever.load_retriever(config.model_name_or_path)
+        model, tokenizer, _ = src.contriever.load_retriever(config.model_name_or_path)
         model.eval()
         model = model.cuda()
 
-        self.index = contriever_src.index.Indexer(
+        self.model = model
+        self.tokenizer = tokenizer
+
+        self.index = src.index.Indexer(
             config.projection_size, config.n_subquantizers, config.n_bits
         )
 

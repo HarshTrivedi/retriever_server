@@ -6,6 +6,7 @@ import glob
 import os
 import sys
 import json
+import time
 
 import _jsonnet
 
@@ -15,17 +16,18 @@ sys.path.insert(0, "contriever") # Make sure to clone the repository and install
 
 import src.contriever
 import src.index
+from passage_retrieval import embed_queries, index_encoded_data
 
 
 @dataclass
 class ContrieverConfig:
-    passages_path
-    passages_embeddings
-    projection_size = 768
-    n_subquantizers = 0
-    n_bits = 8
-    indexing_batch_size = 1000000
-    model_name_or_path = "facebook/contriever"
+    passages_path: str
+    passages_embeddings: str
+    projection_size: int = 768
+    n_subquantizers: int = 0
+    n_bits: int = 8
+    indexing_batch_size: int = 1000000
+    model_name_or_path: str = "facebook/contriever"
     lowercase: bool = False
     normalize_text: bool = False
     per_gpu_batch_size: int = 0
@@ -62,7 +64,7 @@ class ContrieverRetriever:
         else:
             print(f"Indexing passages from files {input_paths}")
             start_time_indexing = time.time()
-            index_encoded_data(index, input_paths, config.indexing_batch_size)
+            index_encoded_data(self.index, input_paths, config.indexing_batch_size)
             print(f"Indexing time: {time.time()-start_time_indexing:.1f} s.")
             self.index.serialize(embeddings_dir)
 
@@ -82,18 +84,21 @@ class ContrieverRetriever:
     ) -> List[Dict]:
 
         query_embeddings = embed_queries(self.config, [query_text], self.model, self.tokenizer)
-        passage_ids = index.search_knn(query_embeddings, self.config.n_docs)[0]
-        passages = [passage_id_map[passage_id] for passage_id in passage_ids]
+        passage_ids = self.index.search_knn(query_embeddings, self.config.n_docs)[0]
+        passages = [self.passage_id_map[passage_id] for passage_id in passage_ids]
+        assert corpus_name == self.corpus_name, \
+            f"Mismatching corpus_names ({corpus_name} != {self.corpus_name})"
+
         retrieval = [
             {
-                "id": passage_ids[index],
-                "title": passages[index]["title"],
-                "paragraph_text": passages[index]["text"],
+                "id": passage_id,
+                "title": passage["title"],
+                "paragraph_text": passage["text"],
                 "is_abstract": False,
                 "url": None,
                 "corpus_name": self.corpus_name,
             }
-            for index, passage in enumerate(passages)
+            for passage_id, passage in zip(passage_ids, passages)
         ]
 
         return retrieval
@@ -108,6 +113,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    corpus_name = "musique" if args.dataset_name == "musique_ans" else args.dataset_name
     retriever = ContrieverRetriever(corpus_name=corpus_name)
 
     print("\n\nRetrieving Paragraphs ...")

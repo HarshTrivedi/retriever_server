@@ -1,11 +1,6 @@
 import json
 from typing import List, Dict, Tuple
 
-from blink_retriever import BLINK_MODELS_PATH, BlinkRetriever
-from elasticsearch_retriever import ElasticsearchRetriever
-from dpr_retriever import DprRetriever
-from contriever_retriever import ContrieverRetriever
-
 
 class UnifiedRetriever:
 
@@ -42,7 +37,7 @@ class UnifiedRetriever:
         elasticsearch_host: str = "http://localhost/",
         elasticsearch_port: int = 9200,
         # Blink init args:
-        blink_models_path: str = BLINK_MODELS_PATH,
+        blink_models_path: str = None,
         blink_faiss_index_type: str = "flat", # "flat" or "hnsw",
         blink_fast: bool = False,
         blink_top_k: int = 1,
@@ -59,6 +54,7 @@ class UnifiedRetriever:
 
         self._elasticsearch_retriever = None
         if "elasticsearch" in initialize_retrievers:
+            from elasticsearch_retriever import ElasticsearchRetriever
             self._elasticsearch_retriever = ElasticsearchRetriever(
                 corpus_name=corpus_name,
                 elasticsearch_host=elasticsearch_host,
@@ -67,6 +63,9 @@ class UnifiedRetriever:
 
         self._blink_retriever = None
         if "blink" in initialize_retrievers:
+            from blink_retriever import BLINK_MODELS_PATH, BlinkRetriever
+            if blink_models_path is None:
+                blink_models_path = BLINK_MODELS_PATH
             self._blink_retriever = BlinkRetriever(
                 blink_models_path=blink_models_path,
                 faiss_index=blink_faiss_index_type,
@@ -76,6 +75,7 @@ class UnifiedRetriever:
 
         self._dpr_retriever = None
         if "dpr" in initialize_retrievers:
+            from dpr_retriever import DprRetriever
             self._dpr_retriever = DprRetriever(
                 corpus_name=corpus_name,
                 index_type=dpr_faiss_index_type,
@@ -85,6 +85,7 @@ class UnifiedRetriever:
 
         self._contriever_retriever = None
         if "contriever" in initialize_retrievers:
+            from contriever_retriever import ContrieverRetriever
             self._contriever_retriever = ContrieverRetriever(corpus_name=corpus_name)
 
 

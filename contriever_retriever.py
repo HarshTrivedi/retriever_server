@@ -48,7 +48,7 @@ class ContrieverRetriever:
         model.eval()
         model = model.cuda()
 
-        if not os.path.exists(config.paragraphs_embeddings):
+        if not os.path.exists(config.paragraphs_embeddings.replace("*", "")):
             raise Exception(f"Embeddings path ({config.paragraphs_embeddings}) not found.")
 
         if not os.path.exists(config.paragraphs_path):

@@ -240,6 +240,7 @@ class UnifiedRetriever:
             self,
             query_text: str,
             max_hits_count: int = 3,
+            corpus_name: str = None,
         ) -> List[Dict]:
         """
         Option 5: retrieve_from_contriever
@@ -247,6 +248,6 @@ class UnifiedRetriever:
         if self._contriever_retriever is None:
             raise Exception("Contriever retriever not initialized.")
         results = self._contriever_retriever.retrieve_paragraphs(
-            query_text=query_text, max_hits_count=max_hits_count
+            query_text=query_text, corpus_name=corpus_name, max_hits_count=max_hits_count
         )
         return results

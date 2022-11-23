@@ -47,23 +47,24 @@ class ContrieverRetriever:
         model, tokenizer, _ = src.contriever.load_retriever(config.model_name_or_path)
         model.eval()
         model = model.cuda()
+        self.config = config
 
-        if not os.path.exists(config.paragraphs_embeddings.replace("*", "")):
-            raise Exception(f"Embeddings path ({config.paragraphs_embeddings}) not found.")
+        if not os.path.exists(self.config.paragraphs_embeddings.replace("*", "")):
+            raise Exception(f"Embeddings path ({self.config.paragraphs_embeddings}) not found.")
 
-        if not os.path.exists(config.paragraphs_path):
-            raise Exception(f"Data path ({config.paragraphs_path}) not found.")
+        if not os.path.exists(self.config.paragraphs_path):
+            raise Exception(f"Data path ({self.config.paragraphs_path}) not found.")
 
         self.model = model
         self.tokenizer = tokenizer
 
         self.index = src.index.Indexer(
-            config.projection_size, config.n_subquantizers, config.n_bits
+            self.config.projection_size, self.config.n_subquantizers, self.config.n_bits
         )
 
         # index all paragraphs
         print("(Maybe) indexing all paragraphs.")
-        input_paths = glob.glob(config.paragraphs_embeddings)
+        input_paths = glob.glob(self.config.paragraphs_embeddings)
         input_paths = sorted(input_paths)
         embeddings_dir = os.path.dirname(input_paths[0])
         index_path = os.path.join(embeddings_dir, "index.faiss")
@@ -72,13 +73,13 @@ class ContrieverRetriever:
         else:
             print(f"Indexing paragraphs from files {input_paths}")
             start_time_indexing = time.time()
-            index_encoded_data(self.index, input_paths, config.indexing_batch_size)
+            index_encoded_data(self.index, input_paths, self.config.indexing_batch_size)
             print(f"Indexing time: {time.time()-start_time_indexing:.1f} s.")
             self.index.serialize(embeddings_dir)
 
         # load paragraphs
         print("Loading contriever paragraphs...")
-        paragraphs = src.data.load_passages(config.paragraphs_path)
+        paragraphs = src.data.load_passages(self.config.paragraphs_path)
         self.paragraph_id_map = {x["id"]: x for x in paragraphs}
         del paragraphs
         print("...Done.")

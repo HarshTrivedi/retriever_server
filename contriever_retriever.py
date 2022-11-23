@@ -16,7 +16,7 @@ sys.path.insert(0, "contriever") # Make sure to clone the repository and install
 
 import src.contriever
 import src.index
-from paragraph_retrieval import embed_queries, index_encoded_data
+from passage_retrieval import embed_queries, index_encoded_data
 
 
 @dataclass

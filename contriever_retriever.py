@@ -42,7 +42,7 @@ class ContrieverRetriever:
         contriever_data_path = os.path.join(CONTRIEVER_DATA_PATH, corpus_name)
         config = ContrieverConfig(
             os.path.join(contriever_data_path, "paragraphs.tsv"),
-            os.path.join(contriever_data_path, "embeddings")
+            os.path.join(contriever_data_path, "embeddings/*")
         )
         model, tokenizer, _ = src.contriever.load_retriever(config.model_name_or_path)
         model.eval()

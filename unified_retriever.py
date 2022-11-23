@@ -240,7 +240,7 @@ class UnifiedRetriever:
             self,
             query_text: str,
             max_hits_count: int = 3,
-            corpus_name: str = None,
+            corpus_name: str = "original",
         ) -> List[Dict]:
         """
         Option 5: retrieve_from_contriever

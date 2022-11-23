@@ -93,7 +93,7 @@ class ContrieverRetriever:
     ) -> List[Dict]:
 
         query_embeddings = embed_queries(self.config, [query_text], self.model, self.tokenizer)
-        paragraph_ids = self.index.search_knn(query_embeddings, max_hits_count)[0]
+        paragraph_ids, _ = self.index.search_knn(query_embeddings, max_hits_count)[0]
         paragraphs = [self.paragraph_id_map[paragraph_id] for paragraph_id in paragraph_ids]
         assert corpus_name == self.corpus_name, \
             f"Mismatching corpus_names ({corpus_name} != {self.corpus_name})"

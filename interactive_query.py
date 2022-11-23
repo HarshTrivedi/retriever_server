@@ -12,7 +12,8 @@ def main():
         "--retrieval_method", type=str, help="retrieval_method",
         choices={
             "retrieve_from_elasticsearch", "retrieve_from_blink",
-            "retrieve_from_blink_and_elasticsearch", "retrieve_from_dpr"
+            "retrieve_from_blink_and_elasticsearch", "retrieve_from_dpr",
+            "retrieve_from_contriever"
         },
         required=True
     )

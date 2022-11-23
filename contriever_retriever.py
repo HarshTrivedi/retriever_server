@@ -49,10 +49,10 @@ class ContrieverRetriever:
         model.eval()
         model = model.cuda()
 
-        if os.path.exists(config.passages_embeddings):
+        if not os.path.exists(config.passages_embeddings):
             raise Exception(f"Embeddings path ({config.passages_embeddings}) not found.")
 
-        if os.path.exists(config.passages_path):
+        if not os.path.exists(config.passages_path):
             raise Exception(f"Data path ({config.passages_path}) not found.")
 
         self.model = model

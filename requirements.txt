@@ -11,3 +11,4 @@ requests
 torch=1.7.1
 flair=0.8
 beautifulsoup4
+blingfire

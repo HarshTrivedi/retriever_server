@@ -48,7 +48,7 @@ def main():
     parser = argparse.ArgumentParser(description="Create contriever injestible wiki format corpus.")
     parser.add_argument(
         "dataset_name", help='name of the dataset', type=str,
-        choices=("hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique")
+        choices=("hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique_ans")
     )
     parser.add_argument('--do_chunks', action="store_true", default=False, help="do_chunks")
     args = parser.parse_args()

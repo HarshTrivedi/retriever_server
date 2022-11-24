@@ -118,7 +118,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='retrieve paragraphs')
     parser.add_argument(
         "dataset_name", type=str, help="dataset_name",
-        choices={"original", "hotpotqa", "strategyqa", "2wikimultihopqa", "iirc"}
+        choices={"original", "musique_ans", "hotpotqa", "strategyqa", "2wikimultihopqa", "iirc"}
     )
     args = parser.parse_args()
 

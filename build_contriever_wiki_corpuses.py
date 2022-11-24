@@ -16,7 +16,11 @@ from build_es_bm25_index import (
 CONTRIEVER_DATA_PATH = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))["CONTRIEVER_DATA_PATH"]
 
 
-def chunk_with_sliding_window(text: str, chunk_size: int, sliding_window_size: str) -> List[str]:
+def chunk_with_sliding_window(
+    text: str,
+    chunk_size: int = 100,
+    sliding_window_size: str = 50
+) -> List[str]:
     tokens = text.split(" ")
     chunked_texts = []
     start_index = 0

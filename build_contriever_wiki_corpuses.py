@@ -50,6 +50,7 @@ def main():
         "dataset_name", help='name of the dataset', type=str,
         choices=("hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique")
     )
+    parser.add_argument('--do_chunks', action="store_true", default=False, help="do_chunks")
     args = parser.parse_args()
 
     if args.dataset_name == "hotpotqa":

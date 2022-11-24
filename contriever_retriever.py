@@ -108,6 +108,7 @@ class ContrieverRetriever:
                 "corpus_name": self._corpus_name,
             }
             for paragraph_id, paragraph in zip(paragraph_ids, paragraphs)
+            if len(paragraph["text"].split()) >= 5
         ]
 
         return retrieval

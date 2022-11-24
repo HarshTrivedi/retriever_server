@@ -71,6 +71,7 @@ def main():
         corpus_name = "chunked_" + corpus_name
     contriever_data_directory = os.path.join(CONTRIEVER_DATA_PATH, corpus_name)
     contriever_paragraphs_file_path = os.path.join(contriever_data_directory, "paragraphs.tsv")
+    os.makedirs(contriever_data_directory, exist_ok=True)
 
     with open(contriever_paragraphs_file_path, "w") as file:
         line = f"id\ttext\ttitle\n"

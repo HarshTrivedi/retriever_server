@@ -385,7 +385,7 @@ if __name__ == "__main__":
             "metadata": {"type": "object", "index" : False}
         }
 
-    index_exists = es.indices.exists(elasticsearch_index: str)
+    index_exists = es.indices.exists(elasticsearch_index)
     print("Index already exists" if index_exists else "Index doesn't exist.")
 
     # delete index if exists

@@ -77,7 +77,7 @@ def main():
         line = f"id\ttext\ttitle\n"
         file.write(line)
         index = 0
-        for document in make_documents():
+        for document in make_documents(None):
             documents = get_transformed_documents(document, do_chunks=args.do_chunks)
             for document in documents:
                 title = re.sub(r' +', " ", document["title"].replace("\n", " ").replace("\t", " "))

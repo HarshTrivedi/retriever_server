@@ -61,7 +61,7 @@ def main():
         make_documents = make_iirc_documents
     elif args.dataset_name == "2wikimultihopqa":
         make_documents = make_2wikimultihopqa_documents
-    elif args.dataset_name == "musique":
+    elif args.dataset_name == "musique_ans":
         make_documents = make_musique_documents
     else:
         raise Exception(f"Unknown dataset_name {args.dataset_name}")

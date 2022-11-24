@@ -101,14 +101,14 @@ class ContrieverRetriever:
         retrieval = [
             {
                 "id": paragraph_id,
-                "title": paragraph["title"],
-                "paragraph_text": paragraph["text"],
+                "title": paragraph["title"].strip(),
+                "paragraph_text": paragraph["text"].strip(),
                 "is_abstract": False,
                 "url": None,
                 "corpus_name": self._corpus_name,
             }
             for paragraph_id, paragraph in zip(paragraph_ids, paragraphs)
-            if len(paragraph["text"].split()) >= 5
+            if len(paragraph["text"].strip().split()) >= 5
         ]
 
         return retrieval

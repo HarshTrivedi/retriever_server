@@ -77,6 +77,7 @@ def main():
     contriever_paragraphs_file_path = os.path.join(contriever_data_directory, "paragraphs.tsv")
     os.makedirs(contriever_data_directory, exist_ok=True)
 
+    print(f"Writing paragraphs in {contriever_paragraphs_file_path}")
     with open(contriever_paragraphs_file_path, "w") as file:
         line = f"id\ttext\ttitle\n"
         file.write(line)

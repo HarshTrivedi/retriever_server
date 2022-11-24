@@ -118,13 +118,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='retrieve paragraphs')
     parser.add_argument(
         "dataset_name", type=str, help="dataset_name",
-        choices={"original", "musique_ans", "hotpotqa", "strategyqa", "2wikimultihopqa", "iirc"}
+        choices={
+            "original", "musique_ans", "hotpotqa", "2wikimultihopqa", "iirc",
+            "chunked_musique_ans", "chunked_hotpotqa", "chunked_2wikimultihopqa", "chunked_iirc",
+        }
     )
     args = parser.parse_args()
 
-    corpus_name = "musique" if args.dataset_name == "musique_ans" else args.dataset_name
-    retriever = ContrieverRetriever(corpus_name=corpus_name)
-
+    retriever = ContrieverRetriever(corpus_name=args.dataset_name)
     print("\n\nRetrieving Paragraphs ...")
     results = retriever.retrieve_paragraphs("Who is the 44th president of USA.")
     for result in results:

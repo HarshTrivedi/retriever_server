@@ -329,7 +329,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "dataset_name", help='name of the dataset', type=str,
         choices=(
-            "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique", "natcq"
+            "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique_ans", "natcq"
         )
     )
     parser.add_argument("--force", help='force delete before creating new index.',
@@ -410,7 +410,7 @@ if __name__ == "__main__":
         make_documents = make_iirc_documents
     elif args.dataset_name == "2wikimultihopqa":
         make_documents = make_2wikimultihopqa_documents
-    elif args.dataset_name == "musique":
+    elif args.dataset_name == "musique_ans":
         make_documents = make_musique_documents
     else:
         raise Exception(f"Unknown dataset_name {args.dataset_name}")

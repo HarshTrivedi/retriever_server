@@ -34,7 +34,7 @@ def hash_object(o: Any) -> str:
         return base58.b58encode(m.digest()).decode()
 
 
-def make_hotpotqa_documents():
+def make_hotpotqa_documents(elasticsearch_index: str):
     raw_glob_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "hotpotqa-wikpedia-paragraphs/*/wiki_*.bz2"
     )
@@ -69,7 +69,7 @@ def make_hotpotqa_documents():
             _idx += 1
 
 
-def make_strategyqa_documents():
+def make_strategyqa_documents(elasticsearch_index: str):
     raw_glob_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "strategyqa-wikipedia-paragraphs/strategyqa-wikipedia-paragraphs.jsonl"
     )
@@ -104,7 +104,7 @@ def make_strategyqa_documents():
             _idx += 1
 
 
-def make_iirc_documents():
+def make_iirc_documents(elasticsearch_index: str):
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "iirc-wikipedia-paragraphs/context_articles.json"
     )
@@ -153,7 +153,7 @@ def make_iirc_documents():
                 _idx += 1
 
 
-def make_2wikimultihopqa_documents():
+def make_2wikimultihopqa_documents(elasticsearch_index: str):
     raw_filepaths = [
         os.path.join(WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/train.json"),
         os.path.join(WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/dev.json"),
@@ -201,7 +201,7 @@ def make_2wikimultihopqa_documents():
                     _idx += 1
 
 
-def make_musique_documents():
+def make_musique_documents(elasticsearch_index: str):
     raw_filepaths = [
         os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_ans_v1.0_dev.jsonl"),
         os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_ans_v1.0_test.jsonl"),
@@ -254,7 +254,7 @@ def make_musique_documents():
                     _idx += 1
 
 
-def make_natcq_documents():
+def make_natcq_documents(elasticsearch_index: str):
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
     )
@@ -385,7 +385,7 @@ if __name__ == "__main__":
             "metadata": {"type": "object", "index" : False}
         }
 
-    index_exists = es.indices.exists(elasticsearch_index)
+    index_exists = es.indices.exists(elasticsearch_index: str)
     print("Index already exists" if index_exists else "Index doesn't exist.")
 
     # delete index if exists
@@ -417,7 +417,7 @@ if __name__ == "__main__":
 
     # Bulk-insert documents into index
     print("Inserting Paragraphs ...")
-    result = bulk(es, make_documents())
+    result = bulk(es, make_documents(elasticsearch_index))
     es.indices.refresh(elasticsearch_index) # actually updates the count.
     document_count = result[0]
     print(f"Index {elasticsearch_index} is ready. Added {document_count} documents.")

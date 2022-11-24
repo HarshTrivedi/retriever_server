@@ -2,6 +2,7 @@
 Build ES (Elasticsearch) BM25 Index.
 """
 
+from typing import List
 import argparse, elasticsearch, json
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk

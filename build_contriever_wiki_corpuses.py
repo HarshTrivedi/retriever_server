@@ -65,7 +65,7 @@ def get_transformed_documents(
     paragraphs = [
         {"title": title_text, "text": paragraph_text}
         for paragraph_text in paragraph_texts
-        len(paragraph_text.strip().split()) >= 5
+        if len(paragraph_text.strip().split()) >= 5
     ]
     return paragraphs
 

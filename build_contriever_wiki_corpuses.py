@@ -111,7 +111,7 @@ def main():
         file.write(line)
         index = 0
         for document in make_documents(None):
-            documents = get_transformed_documents(document, do_chunks=args.do_chunks)
+            documents = get_transformed_documents(document, chunk_by_type=args.chunk_by_type)
             for document in documents:
                 title = re.sub(r' +', " ", document["title"].replace("\n", " ").replace("\t", " "))
                 text = re.sub(r' +', " ", document["text"].replace("\n", " ").replace("\t", " "))

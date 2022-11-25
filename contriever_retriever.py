@@ -127,12 +127,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.dataset_name != "original":
+        assert args.chunk_by_type != None
         corpus_name = "musique" if args.dataset_name == "musique_ans" else args.dataset_name
         if args.chunk_by_type == "words":
             corpus_name = "word_chunked_" + corpus_name
         if args.chunk_by_type == "sentences":
             corpus_name = "sentence_chunked_" + corpus_name
     else:
+        assert args.chunk_by_type == None
         corpus_name = "original"
 
     retriever = ContrieverRetriever(corpus_name=corpus_name)

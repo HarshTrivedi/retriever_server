@@ -7,10 +7,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="generate contriever embeddings")
     parser.add_argument(
         "dataset_name", type=str, help="dataset_name",
-        choices={
-            "original", "musique_ans", "hotpotqa", "2wikimultihopqa", "iirc",
-            "chunked_musique_ans", "chunked_hotpotqa", "chunked_2wikimultihopqa", "chunked_iirc",
-        }
+        choices={"original", "musique_ans", "hotpotqa", "2wikimultihopqa", "iirc"}
+    )
+    parser.add_argument(
+        '--chunk_by_type', type=str, default=None, help="chunk_by_type", choices={None, "words", "sentences"}
     )
     args = parser.parse_args()
-    ContrieverRetriever(corpus_name=args.dataset_name)
+
+    if args.dataset_name != "original":
+        corpus_name = "musique" if args.dataset_name == "musique_ans" else args.dataset_name
+        if args.chunk_by_type == "words":
+            corpus_name = "word_chunked_" + corpus_name
+        if args.chunk_by_type == "sentences":
+            corpus_name = "sentence_chunked_" + corpus_name
+    else:
+        corpus_name = "original"
+
+    ContrieverRetriever(corpus_name=corpus_name)

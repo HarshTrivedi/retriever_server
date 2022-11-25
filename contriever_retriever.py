@@ -1,6 +1,5 @@
-from typing import List, Dict, Union
+from typing import List, Dict
 from dataclasses import dataclass
-import requests
 import argparse
 import glob
 import os

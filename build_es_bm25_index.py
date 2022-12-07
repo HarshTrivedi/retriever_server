@@ -279,25 +279,25 @@ def make_natcq_documents(elasticsearch_index: str):
                 for section_paragraph in section_wise_data["section_paragraphs"]:
                     document_index = section_paragraph["paragraph_index"]
                     document_text = section_paragraph["paragraph_object"]["text"]
-                    document_parsed_data = section_paragraph["parsed_data"]
+                    document_parsed_data = section_paragraph["paragraph_object"]["parsed_data"]
                     document_type = "paragraph"
 
                 for section_list in section_wise_data["section_lists"]:
                     document_index = section_list["list_index"]
                     document_text = section_list["list_object"]["text"]
-                    document_parsed_data = section_list["parsed_data"]
+                    document_parsed_data = section_list["list_object"]["parsed_data"]
                     document_type = "list"
 
                 for section_infobox in section_wise_data["section_infoboxes"]:
                     document_index = section_infobox["infobox_index"]
                     document_text = section_infobox["infobox_object"]["text"]
-                    document_parsed_data = section_infobox["parsed_data"]
+                    document_parsed_data = section_infobox["infobox_object"]["parsed_data"]
                     document_type = "infobox"
 
                 for section_table in section_wise_data["section_tables"]:
                     document_index = section_table["table_index"]
                     document_text = section_table["table_object"]["text"]
-                    document_parsed_data = section_table["parsed_data"]
+                    document_parsed_data = section_table["table_object"]["parsed_data"]
                     document_type = "table"
 
                 document_id = hash_object([page_id, section_index, document_index])

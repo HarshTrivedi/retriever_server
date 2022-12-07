@@ -264,7 +264,10 @@ def make_natcq_documents(elasticsearch_index: str):
 
     with gzip.open(raw_filepath, mode="rt") as file:
 
-        for line in tqdm(file):
+        for line_index, line in tqdm(enumerate(file)):
+
+            if line_index % 200000 == 0:
+                print(f"Completed {line_index} lines.")
 
             page_data = json.loads(line)
             page_title = page_data["title"]

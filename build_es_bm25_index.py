@@ -264,9 +264,9 @@ def make_natcq_documents(elasticsearch_index: str):
 
     with gzip.open(raw_filepath, mode="rt") as file:
 
-        for line in file:
+        for line in tqdm(file):
 
-            page_data = json.load(line)
+            page_data = json.loads(line)
             page_title = page_data["title"]
             page_id = page_data["page_id"]
             page_url = page_data["url"]

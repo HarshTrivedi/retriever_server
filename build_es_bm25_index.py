@@ -479,8 +479,7 @@ if __name__ == "__main__":
 
     # Bulk-insert documents into index
     print("Inserting Paragraphs ...")
-    # batch_size of 1000 is default, but for natcq_docs, I'd to decrease it to 100 to get it to work.
-    result = bulk(es, make_documents(elasticsearch_index), size=1000)
+    result = bulk(es, make_documents(elasticsearch_index))
     es.indices.refresh(elasticsearch_index) # actually updates the count.
     document_count = result[0]
     print(f"Index {elasticsearch_index} is ready. Added {document_count} documents.")

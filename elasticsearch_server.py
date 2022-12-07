@@ -32,7 +32,8 @@ def main():
         if os.path.exists(es_pid_path):
             exit("ES PID file aleady exists. Turn off ES first.")
 
-        command = f"{elasticsearch_path} --daemonize --silent --pidfile {es_pid_path}"
+        command = 'ES_JAVA_OPTS="-Xms26g -Xmx26g" ' # larger heapsize needed for natcq
+        command += f"{elasticsearch_path} --daemonize --silent --pidfile {es_pid_path}"
         subprocess.call(command, shell=True)
 
     elif args.command == "stop":

@@ -165,7 +165,6 @@ class ElasticsearchRetriever:
 
         return retrieval
 
-
     def retrieve_by_id(self, query_id: str, corpus_name: str = None) -> List[Dict]:
 
         if self._corpus_name == "auto":

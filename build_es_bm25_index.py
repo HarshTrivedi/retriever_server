@@ -345,12 +345,18 @@ def make_natcq_pages_documents(elasticsearch_index: str):
 
     random.seed(13370) # Don't change.
 
+    line_skip_count = 0
+
     with gzip.open(raw_filepath, mode="rt") as file:
 
         for line_index, line in tqdm(enumerate(file)):
 
+            if len(line) > 1000000:
+                line_skip_count += 1
+                continue
+
             if line_index % 200000 == 0:
-                print(f"Completed {line_index} lines.")
+                print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
             page_data = json.loads(line)
             page_title = page_data["title"]

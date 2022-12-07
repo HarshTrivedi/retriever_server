@@ -254,7 +254,7 @@ def make_musique_documents(elasticsearch_index: str):
                     _idx += 1
 
 
-def make_natcq_documents(elasticsearch_index: str):
+def make_natcq_docs_documents(elasticsearch_index: str):
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
     )
@@ -337,13 +337,49 @@ def make_natcq_documents(elasticsearch_index: str):
                 _idx += 1
 
 
+def make_natcq_pages_documents(elasticsearch_index: str):
+    raw_filepath = os.path.join(
+        WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
+    )
+    _idx = 1
+
+    random.seed(13370) # Don't change.
+
+    with gzip.open(raw_filepath, mode="rt") as file:
+
+        for line_index, line in tqdm(enumerate(file)):
+
+            if line_index % 200000 == 0:
+                print(f"Completed {line_index} lines.")
+
+            page_data = json.loads(line)
+            page_title = page_data["title"]
+            page_id = page_data["page_id"]
+            page_url = page_data["url"]
+
+            es_document = {
+                "id": page_id,
+                "title": page_title,
+                "url": page_url,
+                "data": json.dumps(page_data)
+            }
+            document = {
+                "_op_type": "create",
+                "_index": elasticsearch_index,
+                "_id": _idx,
+                "_source": es_document,
+            }
+            yield (document)
+            _idx += 1
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Index paragraphs in Elasticsearch')
     parser.add_argument(
         "dataset_name", help='name of the dataset', type=str,
         choices=(
-            "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique_ans", "natcq"
+            "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique_ans", "natcq_docs", "natcq_pages"
         )
     )
     parser.add_argument("--force", help='force delete before creating new index.',
@@ -394,9 +430,17 @@ if __name__ == "__main__":
         }
     }
 
-    if args.dataset_name == "natcq":
+    if args.dataset_name == "natcq_docs":
         paragraphs_index_settings["mappings"]["properties"] = {
             "metadata": {"type": "object", "index" : False}
+        }
+
+    if args.dataset_name == "natcq_pages":
+        paragraphs_index_settings["mappings"]["properties"].pop("paragraph_index")
+        paragraphs_index_settings["mappings"]["properties"].pop("paragraph_text")
+        paragraphs_index_settings["mappings"]["properties"].pop("is_abstract")
+        paragraphs_index_settings["mappings"]["properties"] = {
+            "data": {"type": "object", "index" : False}
         }
 
     index_exists = es.indices.exists(elasticsearch_index)
@@ -426,14 +470,17 @@ if __name__ == "__main__":
         make_documents = make_2wikimultihopqa_documents
     elif args.dataset_name == "musique_ans":
         make_documents = make_musique_documents
-    elif args.dataset_name == "natcq":
-        make_documents = make_natcq_documents
+    elif args.dataset_name == "natcq_docs":
+        make_documents = make_natcq_docs_documents
+    elif args.dataset_name == "natcq_pages":
+        make_documents = make_natcq_pages_documents
     else:
         raise Exception(f"Unknown dataset_name {args.dataset_name}")
 
     # Bulk-insert documents into index
     print("Inserting Paragraphs ...")
-    result = bulk(es, make_documents(elasticsearch_index))
+    # batch_size of 1000 is default, but for natcq_docs, I'd to decrease it to 100 to get it to work.
+    result = bulk(es, make_documents(elasticsearch_index), size=1000)
     es.indices.refresh(elasticsearch_index) # actually updates the count.
     document_count = result[0]
     print(f"Index {elasticsearch_index} is ready. Added {document_count} documents.")

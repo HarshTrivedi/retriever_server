@@ -166,6 +166,43 @@ class ElasticsearchRetriever:
         return retrieval
 
 
+    def retrieve_by_id(self, query_id: str, corpus_name: str = None) -> List[Dict]:
+
+        if self._corpus_name == "auto":
+            assert corpus_name != None, \
+            "The corpus_name is initialized as auto. So you need to pass it at runtime."
+        else:
+            assert corpus_name == None, \
+            "The corpus_name is not initialized as auto. So you can't pass it at runtime."
+
+        index_name = f"{corpus_name or self._corpus_name}-wikipedia"
+
+        query = {
+            "size": 1,
+            # what records are needed in the result.
+            "_source": ["id", "title", "paragraph_text", "url", "is_abstract", "paragraph_index", "data"],
+            "query": {
+                "bool": {
+                    "must": [
+                        {"match": {"id": query_id}},
+                    ],
+                }
+            }
+        }
+
+        result = self._es.search(index=index_name, body=query)
+
+        retrieval = []
+        if result.get('hits') is not None and result['hits'].get('hits') is not None:
+            retrieval = result['hits']['hits']
+        retrieval = [e["_source"] for e in retrieval]
+
+        for retrieval_ in retrieval:
+            retrieval_["corpus_name"] = corpus_name
+
+        return retrieval
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='retrieve paragraphs or titles')

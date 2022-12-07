@@ -271,6 +271,7 @@ def make_natcq_documents(elasticsearch_index: str):
             page_id = page_data["page_id"]
             page_url = page_data["url"]
 
+            is_abstract_added = False
             for section_wise_data in page_data["sectionwise_data"]:
 
                 section_index = section_wise_data["section_index"]
@@ -301,6 +302,12 @@ def make_natcq_documents(elasticsearch_index: str):
                     document_type = "table"
 
                 document_id = hash_object([page_id, section_index, document_index])
+
+                is_abstract = False
+                if not is_abstract_added:
+                    is_abstract = True
+                    is_abstract_added = True
+
                 metadata = {
                     "page_id": page_id,
                     "document_type": document_type,
@@ -310,10 +317,11 @@ def make_natcq_documents(elasticsearch_index: str):
                 es_document = {
                     "id": document_id,
                     "title": page_title,
+                    "section_index": section_index,
                     "paragraph_index": document_index,
                     "paragraph_text": document_text,
                     "url": page_url,
-                    "is_abstract": False,
+                    "is_abstract": is_abstract,
                     "metadata": json.dumps(metadata)
                 }
                 document = {

@@ -380,7 +380,7 @@ if __name__ == "__main__":
         }
     }
 
-    if args.dataset == "natcq":
+    if args.dataset_name == "natcq":
         paragraphs_index_settings["mappings"]["properties"] = {
             "metadata": {"type": "object", "index" : False}
         }
@@ -412,6 +412,8 @@ if __name__ == "__main__":
         make_documents = make_2wikimultihopqa_documents
     elif args.dataset_name == "musique_ans":
         make_documents = make_musique_documents
+    elif args.dataset_name == "natcq":
+        make_documents = make_natcq_documents
     else:
         raise Exception(f"Unknown dataset_name {args.dataset_name}")
 

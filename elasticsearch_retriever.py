@@ -147,6 +147,9 @@ class ElasticsearchRetriever:
             }
         }
 
+        if index_name == f"natcq_pages-wikipedia":
+            query["query"]["bool"].pop("filter")
+
         result = self._es.search(index=index_name, body=query)
 
         retrieval = []

@@ -221,7 +221,7 @@ if __name__ == "__main__":
     corpus_name = "musique" if args.dataset_name == "musique_ans" else args.dataset_name
 
     retriever = ElasticsearchRetriever(
-        corpus_name=corpus_name, elastic_host=args.host, elastic_port=args.port, 
+        corpus_name=corpus_name, elasticsearch_host=args.host, elasticsearch_port=args.port, 
     )
 
     print("\n\nRetrieving Titles ...")

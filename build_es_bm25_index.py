@@ -310,7 +310,7 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                     document_parsed_data = section_table["table_object"]["parsed_data"]
                     document_type = "table"
 
-                document_id = hash_object([page_id, section_index, document_index])
+                document_id = "__".join([page_id, str(section_index), str(document_index)])
 
                 is_abstract = False
                 if not is_abstract_added:

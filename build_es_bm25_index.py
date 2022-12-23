@@ -264,6 +264,8 @@ def make_natcq_docs_documents(elasticsearch_index: str):
 
     line_skip_count = 0
 
+    indexed_document_ids = set()
+
     with gzip.open(raw_filepath, mode="rt") as file:
 
         for line_index, line in tqdm(enumerate(file)):
@@ -286,61 +288,90 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                 section_index = section_wise_data["section_index"]
                 section_breadcrumb = section_wise_data["section_breadcrumb"]
 
+                document_infos = []
                 for section_paragraph in section_wise_data["section_paragraphs"]:
+                    document_id = "__".join([page_id, str(section_index), str(document_index)])
                     document_index = section_paragraph["paragraph_index"]
                     document_text = section_paragraph["paragraph_object"]["text"]
                     document_parsed_data = section_paragraph["paragraph_object"]["parsed_data"]
                     document_type = "paragraph"
+                    document_infos.append([
+                        document_id, document_index, document_text,
+                        document_parsed_data, document_type
+                    ])
 
                 for section_list in section_wise_data["section_lists"]:
+                    document_id = "__".join([page_id, str(section_index), str(document_index)])
                     document_index = section_list["list_index"]
                     document_text = section_list["list_object"]["text"]
                     document_parsed_data = section_list["list_object"]["parsed_data"]
                     document_type = "list"
+                    document_infos.append([
+                        document_id, document_index, document_text,
+                        document_parsed_data, document_type
+                    ])
 
                 for section_infobox in section_wise_data["section_infoboxes"]:
+                    document_id = "__".join([page_id, str(section_index), str(document_index)])
                     document_index = section_infobox["infobox_index"]
                     document_text = section_infobox["infobox_object"]["text"]
                     document_parsed_data = section_infobox["infobox_object"]["parsed_data"]
                     document_type = "infobox"
+                    document_infos.append([
+                        document_id, document_index, document_text,
+                        document_parsed_data, document_type
+                    ])
 
                 for section_table in section_wise_data["section_tables"]:
+                    document_id = "__".join([page_id, str(section_index), str(document_index)])
                     document_index = section_table["table_index"]
                     document_text = section_table["table_object"]["text"]
                     document_parsed_data = section_table["table_object"]["parsed_data"]
                     document_type = "table"
+                    document_infos.append([
+                        document_id, document_index, document_text,
+                        document_parsed_data, document_type
+                    ])
 
-                document_id = "__".join([page_id, str(section_index), str(document_index)])
+                for document_info in document_infos:
 
-                is_abstract = False
-                if not is_abstract_added:
-                    is_abstract = True
-                    is_abstract_added = True
+                    document_id, document_index, document_text, \
+                        document_parsed_data, document_type = document_info
 
-                metadata = {
-                    "page_id": page_id,
-                    "document_type": document_type,
-                    "document_path": section_breadcrumb,
-                    "document_parsed_data": document_parsed_data,
-                }
-                es_document = {
-                    "id": document_id,
-                    "title": page_title,
-                    "section_index": section_index,
-                    "paragraph_index": document_index,
-                    "paragraph_text": document_text,
-                    "url": page_url,
-                    "is_abstract": is_abstract,
-                    "metadata": json.dumps(metadata)
-                }
-                document = {
-                    "_op_type": 'create',
-                    '_index': elasticsearch_index,
-                    '_id': _idx,
-                    '_source': es_document,
-                }
-                yield (document)
-                _idx += 1
+                    if document_id in indexed_document_ids:
+                        print("WARNING: Looks like a repeated document_id is being indexed.")
+
+                    is_abstract = False
+                    if not is_abstract_added:
+                        is_abstract = True
+                        is_abstract_added = True
+
+                    metadata = {
+                        "page_id": page_id,
+                        "document_type": document_type,
+                        "document_path": section_breadcrumb,
+                        "document_parsed_data": document_parsed_data,
+                    }
+                    es_document = {
+                        "id": document_id,
+                        "title": page_title,
+                        "section_index": section_index,
+                        "paragraph_index": document_index,
+                        "paragraph_text": document_text,
+                        "url": page_url,
+                        "is_abstract": is_abstract,
+                        "metadata": json.dumps(metadata)
+                    }
+                    document = {
+                        "_op_type": 'create',
+                        '_index': elasticsearch_index,
+                        '_id': _idx,
+                        '_source': es_document,
+                    }
+                    yield (document)
+                    _idx += 1
+
+                    indexed_document_ids.add(document_id)
 
 
 def make_natcq_pages_documents(elasticsearch_index: str):

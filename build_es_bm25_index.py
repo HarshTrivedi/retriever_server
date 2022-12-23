@@ -295,7 +295,7 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                     document_text = section_paragraph["paragraph_object"]["text"]
                     document_parsed_data = section_paragraph["paragraph_object"]["parsed_data"]
                     document_type = "paragraph"
-                    document_id = "__".join([page_id, str(section_index), str(document_index)])
+                    document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
                     document_infos.append([
                         document_id, document_index, document_text,
                         document_parsed_data, document_type
@@ -307,7 +307,7 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                     document_text = section_list["list_object"]["text"]
                     document_parsed_data = section_list["list_object"]["parsed_data"]
                     document_type = "list"
-                    document_id = "__".join([page_id, str(section_index), str(document_index)])
+                    document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
                     document_infos.append([
                         document_id, document_index, document_text,
                         document_parsed_data, document_type
@@ -319,7 +319,7 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                     document_text = section_infobox["infobox_object"]["text"]
                     document_parsed_data = section_infobox["infobox_object"]["parsed_data"]
                     document_type = "infobox"
-                    document_id = "__".join([page_id, str(section_index), str(document_index)])
+                    document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
                     document_infos.append([
                         document_id, document_index, document_text,
                         document_parsed_data, document_type
@@ -331,7 +331,7 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                     document_text = section_table["table_object"]["text"]
                     document_parsed_data = section_table["table_object"]["parsed_data"]
                     document_type = "table"
-                    document_id = "__".join([page_id, str(section_index), str(document_index)])
+                    document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
                     document_infos.append([
                         document_id, document_index, document_text,
                         document_parsed_data, document_type

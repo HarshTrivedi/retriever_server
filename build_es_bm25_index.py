@@ -289,8 +289,9 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                 section_breadcrumb = section_wise_data["section_breadcrumb"]
 
                 document_infos = []
-                for section_paragraph in section_wise_data["section_paragraphs"]:
+                for index, section_paragraph in enumerate(section_wise_data["section_paragraphs"]):
                     document_index = section_paragraph["paragraph_index"]
+                    assert index == document_index
                     document_text = section_paragraph["paragraph_object"]["text"]
                     document_parsed_data = section_paragraph["paragraph_object"]["parsed_data"]
                     document_type = "paragraph"
@@ -300,8 +301,9 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                         document_parsed_data, document_type
                     ])
 
-                for section_list in section_wise_data["section_lists"]:
+                for index, section_list in enumerate(section_wise_data["section_lists"]):
                     document_index = section_list["list_index"]
+                    assert index == document_index
                     document_text = section_list["list_object"]["text"]
                     document_parsed_data = section_list["list_object"]["parsed_data"]
                     document_type = "list"
@@ -311,8 +313,9 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                         document_parsed_data, document_type
                     ])
 
-                for section_infobox in section_wise_data["section_infoboxes"]:
+                for index, section_infobox in enumerate(section_wise_data["section_infoboxes"]):
                     document_index = section_infobox["infobox_index"]
+                    assert index == document_index
                     document_text = section_infobox["infobox_object"]["text"]
                     document_parsed_data = section_infobox["infobox_object"]["parsed_data"]
                     document_type = "infobox"
@@ -322,8 +325,9 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                         document_parsed_data, document_type
                     ])
 
-                for section_table in section_wise_data["section_tables"]:
+                for index, section_table in enumerate(section_wise_data["section_tables"]):
                     document_index = section_table["table_index"]
+                    assert index == document_index
                     document_text = section_table["table_object"]["text"]
                     document_parsed_data = section_table["table_object"]["parsed_data"]
                     document_type = "table"

@@ -360,6 +360,7 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                         "id": document_id,
                         "title": page_title,
                         "section_index": section_index,
+                        "section_path": section_breadcrumb,
                         "paragraph_index": document_index,
                         "paragraph_text": document_text,
                         "url": page_url,
@@ -480,6 +481,9 @@ if __name__ == "__main__":
     if args.dataset_name == "natcq_docs":
         paragraphs_index_settings["mappings"]["properties"] = {
             "metadata": {"type": "object", "index" : False}
+        }
+        paragraphs_index_settings["mappings"]["properties"]["section_path"] = {
+            "type": "text", "analyzer": "english",
         }
 
     if args.dataset_name == "natcq_pages":

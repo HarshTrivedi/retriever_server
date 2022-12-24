@@ -36,6 +36,7 @@ class ElasticsearchRetriever:
         is_abstract: bool = None,
         allowed_titles: List[str] = None,
         query_title_field_too: bool = False,
+        query_section_path_field_too: bool = False,
         paragraph_index: int = None,
         max_buffer_count: int = 100,
         max_hits_count: int = 10,
@@ -68,6 +69,9 @@ class ElasticsearchRetriever:
 
         if query_title_field_too:
             query["query"]["bool"]["should"].append({"match": {"title": query_text}})
+
+        if query_section_path_field_too:
+            query["query"]["bool"]["should"].append({"match": {"section_path": query_text}})
 
         if is_abstract is not None:
             query["query"]["bool"]["filter"] = [{"match": {"is_abstract": is_abstract}}]

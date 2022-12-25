@@ -27,7 +27,7 @@ class ElasticsearchRetriever:
             elasticsearch_host: str = "localhost",
             elasticsearch_port: int = 9200,
         ):
-        self._es = Elasticsearch([elasticsearch_host], scheme="http", port=elasticsearch_port)
+        self._es = Elasticsearch([elasticsearch_host], scheme="http", port=elasticsearch_port, timeout=30)
         self._corpus_name = corpus_name
 
     def retrieve_paragraphs(

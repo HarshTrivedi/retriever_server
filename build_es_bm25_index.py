@@ -441,7 +441,7 @@ if __name__ == "__main__":
     elasticsearch_index = f"{args.dataset_name}-wikipedia"
     es = Elasticsearch(
         [{'host': elastic_host, 'port': elastic_port}],
-        max_retries=10, timeout=30, retry_on_timeout=True
+        max_retries=10, timeout=500, retry_on_timeout=True
     )
 
     # INDEX settings:
@@ -534,7 +534,11 @@ if __name__ == "__main__":
 
     # Bulk-insert documents into index
     print("Inserting Paragraphs ...")
-    result = bulk(es, make_documents(elasticsearch_index))
+    result = bulk(
+        es, make_documents(elasticsearch_index),
+        raise_on_error=False, raise_on_exception=False,
+        max_retries=10, request_timeout=500, chunk_size=500
+    )
     es.indices.refresh(elasticsearch_index) # actually updates the count.
     document_count = result[0]
     print(f"Index {elasticsearch_index} is ready. Added {document_count} documents.")

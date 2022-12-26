@@ -70,6 +70,11 @@ class ElasticsearchRetriever:
             query["query"]["bool"]["should"].append({"match": {"paragraph_text": query_text}})
 
         if query_title_field_too:
+
+            # This assert is a new change after arxiving ircot done primarily to account for natcq queries.
+            assert not allowed_titles, \
+                "Can't query title field when the allowed titles are passed."
+
             query["query"]["bool"]["should"].append({"match": {"title": query_text}})
 
         if query_section_path_field_too:
@@ -122,6 +127,8 @@ class ElasticsearchRetriever:
 
         retrieval = sorted(retrieval, key=lambda e: e["_score"], reverse=True)
         retrieval = retrieval[:max_hits_count]
+        for retrieval_ in retrieval:
+            retrieval_["_source"]["score"] = retrieval_["_score"]
         retrieval = [e["_source"] for e in retrieval]
 
         if allowed_titles is not None:
@@ -243,7 +250,7 @@ if __name__ == "__main__":
     corpus_name = "musique" if args.dataset_name == "musique_ans" else args.dataset_name
 
     retriever = ElasticsearchRetriever(
-        corpus_name=corpus_name, elasticsearch_host=args.host, elasticsearch_port=args.port, 
+        corpus_name=corpus_name, elasticsearch_host=args.host, elasticsearch_port=args.port,
     )
 
     print("\n\nRetrieving Titles ...")

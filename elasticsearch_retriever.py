@@ -60,6 +60,7 @@ class ElasticsearchRetriever:
             "query": {
                 "bool": {
                     "should": [],
+                    "must": [],
                 }
             }
         }
@@ -79,7 +80,7 @@ class ElasticsearchRetriever:
 
         if allowed_titles is not None:
             if len(allowed_titles) == 1:
-                query["query"]["bool"]["must"] = [
+                query["query"]["bool"]["must"] += [
                     {"match": {"title": _title}} for _title in allowed_titles
                 ]
             else:
@@ -89,7 +90,7 @@ class ElasticsearchRetriever:
 
         if allowed_paragraph_types is not None:
             if len(allowed_paragraph_types) == 1:
-                query["query"]["bool"]["must"] = [
+                query["query"]["bool"]["must"] += [
                     {"match": {"paragraph_type": _paragraph_type}} for _paragraph_type in allowed_paragraph_types
                 ]
             else:
@@ -101,6 +102,12 @@ class ElasticsearchRetriever:
             query["query"]["bool"]["should"].append({"match": {"paragraph_index": paragraph_index}})
 
         assert query["query"]["bool"]["should"] or query["query"]["bool"]["must"]
+
+        if not query["query"]["bool"]["must"]:
+            query["query"]["bool"].pop("must")
+
+        if not query["query"]["bool"]["should"]:
+            query["query"]["bool"].pop("should")
 
         result = self._es.search(index=index_name, body=query)
 

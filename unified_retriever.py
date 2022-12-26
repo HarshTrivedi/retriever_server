@@ -106,8 +106,11 @@ class UnifiedRetriever:
             1. Directly retrieve from elasticsearch (could be querying titles or paragraph_texts)
         """
 
+        # NOTE: Don't use title_section_path_paragraph_text for natcq. For some reason three should clauses
+        # are causing some weird behavior:
+        # https://stackoverflow.com/questions/74923099/elasticsearch-additional-should-clause-enforcing-empty-results
         assert document_type in (
-            "title", "paragraph_text", "title_paragraph_text", "title_section_path_paragraph_text", "id"
+            "title", "paragraph_text", "title_paragraph_text", "section_path_paragraph_text", "id"
         )
 
         # if allowed_titles is not None:
@@ -137,13 +140,13 @@ class UnifiedRetriever:
                 paragraph_index=paragraph_index, corpus_name=corpus_name, query_title_field_too=True,
                 max_buffer_count=max_buffer_count
             )
-        elif document_type == "title_section_path_paragraph_text":
+        elif document_type == "section_path_paragraph_text":
             is_abstract = True if self._limit_to_abstracts else None # Note "None" and not False
             # assert allowed_titles is None
             paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
                 query_text, is_abstract=is_abstract, max_hits_count=max_hits_count,
                 allowed_titles=allowed_titles, allowed_paragraph_types=allowed_paragraph_types,
-                paragraph_index=paragraph_index, corpus_name=corpus_name, query_title_field_too=True,
+                paragraph_index=paragraph_index, corpus_name=corpus_name, query_title_field_too=False,
                 query_section_path_field_too=True, max_buffer_count=max_buffer_count
             )
         elif document_type == "title":

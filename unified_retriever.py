@@ -96,6 +96,7 @@ class UnifiedRetriever:
             max_buffer_count: int = 100,
             document_type: str = "paragraph_text",
             allowed_titles: List[str] = None,
+            allowed_paragraph_types: List[str] = None,
             paragraph_index: int = None,
             corpus_name: str = None,
         ) -> List[Dict]:
@@ -124,16 +125,16 @@ class UnifiedRetriever:
             is_abstract = True if self._limit_to_abstracts else None # Note "None" and not False
             paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
                 query_text, is_abstract=is_abstract, max_hits_count=max_hits_count,
-                allowed_titles=allowed_titles, paragraph_index=paragraph_index,
-                corpus_name=corpus_name, max_buffer_count=max_buffer_count
+                allowed_titles=allowed_titles, allowed_paragraph_types=allowed_paragraph_types,
+                paragraph_index=paragraph_index, corpus_name=corpus_name, max_buffer_count=max_buffer_count
             )
         elif document_type == "title_paragraph_text":
             is_abstract = True if self._limit_to_abstracts else None # Note "None" and not False
             # assert allowed_titles is None
             paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
                 query_text, is_abstract=is_abstract, max_hits_count=max_hits_count,
-                allowed_titles=allowed_titles, paragraph_index=paragraph_index,
-                corpus_name=corpus_name, query_title_field_too=True,
+                allowed_titles=allowed_titles, allowed_paragraph_types=allowed_paragraph_types,
+                paragraph_index=paragraph_index, corpus_name=corpus_name, query_title_field_too=True,
                 max_buffer_count=max_buffer_count
             )
         elif document_type == "title_section_path_paragraph_text":
@@ -141,9 +142,9 @@ class UnifiedRetriever:
             # assert allowed_titles is None
             paragraphs_results = self._elasticsearch_retriever.retrieve_paragraphs(
                 query_text, is_abstract=is_abstract, max_hits_count=max_hits_count,
-                allowed_titles=allowed_titles, paragraph_index=paragraph_index,
-                corpus_name=corpus_name, query_title_field_too=True, query_section_path_field_too=True,
-                max_buffer_count=max_buffer_count
+                allowed_titles=allowed_titles, allowed_paragraph_types=allowed_paragraph_types,
+                paragraph_index=paragraph_index, corpus_name=corpus_name, query_title_field_too=True,
+                query_section_path_field_too=True, max_buffer_count=max_buffer_count
             )
         elif document_type == "title":
             paragraphs_results = self._elasticsearch_retriever.retrieve_titles(

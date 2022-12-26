@@ -35,6 +35,7 @@ class ElasticsearchRetriever:
         query_text: str = None,
         is_abstract: bool = None,
         allowed_titles: List[str] = None,
+        allowed_paragraph_types: List[str] = None,
         query_title_field_too: bool = False,
         query_section_path_field_too: bool = False,
         paragraph_index: int = None,
@@ -84,6 +85,16 @@ class ElasticsearchRetriever:
             else:
                 query["query"]["bool"]["should"] += [
                     {"bool": {"must": {"match": {"title": _title}}}} for _title in allowed_titles
+                ]
+
+        if allowed_paragraph_types is not None:
+            if len(allowed_paragraph_types) == 1:
+                query["query"]["bool"]["must"] = [
+                    {"match": {"paragraph_type": _paragraph_type}} for _paragraph_type in allowed_paragraph_types
+                ]
+            else:
+                query["query"]["bool"]["should"] += [
+                    {"bool": {"must": {"match": {"title": _paragraph_type}}}} for _paragraph_type in allowed_paragraph_types
                 ]
 
         if paragraph_index is not None:

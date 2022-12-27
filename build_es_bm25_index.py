@@ -380,6 +380,132 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                     indexed_document_ids.add(document_id)
 
 
+def make_natcq_chunked_docs_documents(elasticsearch_index: str):
+    raw_filepath = os.path.join(
+        WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
+    )
+    _idx = 1
+
+    random.seed(13370) # Don't change.
+
+    line_skip_count = 0
+
+    indexed_document_ids = set()
+
+    with gzip.open(raw_filepath, mode="rt") as file:
+
+        for line_index, line in tqdm(enumerate(file)):
+
+            if len(line) > 1000000:
+                line_skip_count += 1
+                continue
+
+            if line_index % 200000 == 0:
+                print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
+
+            page_data = json.loads(line)
+            page_title = page_data["title"]
+            page_id = page_data["page_id"]
+            page_url = page_data["url"]
+
+            is_abstract_added = False
+            for section_wise_data in page_data["sectionwise_data"]:
+
+                section_index = section_wise_data["section_index"]
+                section_breadcrumb = section_wise_data["section_breadcrumb"]
+
+                document_infos = []
+                for index, section_paragraph in enumerate(section_wise_data["section_paragraphs"]):
+                    document_index = section_paragraph["paragraph_index"]
+                    assert index == document_index
+                    document_text = section_paragraph["paragraph_object"]["text"]
+                    document_parsed_data = section_paragraph["paragraph_object"]["parsed_data"]
+                    document_type = "paragraph"
+                    document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
+                    document_infos.append([
+                        document_id, document_index, document_text,
+                        document_parsed_data, document_type
+                    ])
+
+                for index, section_list in enumerate(section_wise_data["section_lists"]):
+                    document_index = section_list["list_index"]
+                    assert index == document_index
+                    document_text = section_list["list_object"]["text"]
+                    document_parsed_data = section_list["list_object"]["parsed_data"]
+                    document_type = "list"
+                    document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
+                    document_infos.append([
+                        document_id, document_index, document_text,
+                        document_parsed_data, document_type
+                    ])
+
+                for index, section_infobox in enumerate(section_wise_data["section_infoboxes"]):
+                    document_index = section_infobox["infobox_index"]
+                    assert index == document_index
+                    document_text = section_infobox["infobox_object"]["text"]
+                    document_parsed_data = section_infobox["infobox_object"]["parsed_data"]
+                    document_type = "infobox"
+                    document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
+                    document_infos.append([
+                        document_id, document_index, document_text,
+                        document_parsed_data, document_type
+                    ])
+
+                for index, section_table in enumerate(section_wise_data["section_tables"]):
+                    document_index = section_table["table_index"]
+                    assert index == document_index
+                    document_text = section_table["table_object"]["text"]
+                    document_parsed_data = section_table["table_object"]["parsed_data"]
+                    document_type = "table"
+                    document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
+                    document_infos.append([
+                        document_id, document_index, document_text,
+                        document_parsed_data, document_type
+                    ])
+
+                for document_info in document_infos:
+
+                    document_id, document_index, document_text, \
+                        document_parsed_data, document_type = document_info
+
+                    if document_id in indexed_document_ids:
+                        print("WARNING: Looks like a repeated document_id is being indexed.")
+
+                    is_abstract = False
+                    if not is_abstract_added:
+                        is_abstract = True
+                        is_abstract_added = True
+
+                    metadata = {
+                        "page_id": page_id,
+                        "document_type": document_type,
+                        "document_path": section_breadcrumb,
+                        "document_parsed_data": document_parsed_data,
+                    }
+                    es_document = {
+                        "id": document_id,
+                        "title": page_title,
+                        "section_index": section_index,
+                        "section_path": section_breadcrumb,
+                        "paragraph_type": document_type,
+                        "paragraph_index": document_index,
+                        "paragraph_text": document_text,
+                        "url": page_url,
+                        "is_abstract": is_abstract,
+                        "metadata": json.dumps(metadata)
+                    }
+                    document = {
+                        "_op_type": 'create',
+                        '_index': elasticsearch_index,
+                        '_id': _idx,
+                        '_source': es_document,
+                    }
+                    yield (document)
+                    _idx += 1
+
+                    indexed_document_ids.add(document_id)
+
+
 def make_natcq_pages_documents(elasticsearch_index: str):
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
@@ -428,7 +554,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "dataset_name", help='name of the dataset', type=str,
         choices=(
-            "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique_ans", "natcq_docs", "natcq_pages"
+            "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique_ans",
+            "natcq_docs", "natcq_chunked_docs", "natcq_pages"
         )
     )
     parser.add_argument("--force", help='force delete before creating new index.',
@@ -479,7 +606,7 @@ if __name__ == "__main__":
         }
     }
 
-    if args.dataset_name == "natcq_docs":
+    if args.dataset_name in ("natcq_docs", "natcq_chunked_docs"):
         paragraphs_index_settings["mappings"]["properties"] = {
             "metadata": {"type": "object", "index" : False}
         }

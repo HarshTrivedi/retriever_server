@@ -18,6 +18,7 @@ import bz2
 import base58
 import _jsonnet
 from bs4 import BeautifulSoup
+import pandas as pd
 import os
 import random
 
@@ -390,7 +391,42 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str):
 
     line_skip_count = 0
 
-    indexed_document_ids = set()
+    indexed_sub_document_ids = set()
+
+    def chunk_list_of_items_with_max_tokens(
+        list_of_items: List[str],
+        max_chunk_tokens: int = 400,
+        first_n_is_header: int = None,
+        separator: str = "\n",
+    ) -> List[str]:
+
+        header_text = ""
+        if first_n_is_header is not None:
+            assert first_n_is_header > 0
+            header_text = separator.join(list_of_items[:first_n_is_header])
+            list_of_items = list_of_items[first_n_is_header:]
+
+        chunked_items = []
+        active_chunked_item = ""
+        for item in list_of_items:
+            if (
+                len(active_chunked_item.split()) + len(item.split()) > max_chunk_tokens
+                and active_chunked_item.strip()
+            ):
+                chunked_items.append(active_chunked_item)
+                active_chunked_item = (separator + item)
+            else:
+                active_chunked_item += (separator + item)
+        chunked_items.append(active_chunked_item)
+
+        if chunked_items and not first_n_is_header:
+            for index in range(len(chunked_items)):
+                chunked_items[index] = chunked_items[index].replace(separator, "", 1)
+
+        chunked_items = [
+            header_text + chunked_item for chunked_item in chunked_items
+        ]
+        return chunked_items
 
     with gzip.open(raw_filepath, mode="rt") as file:
 
@@ -414,62 +450,62 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str):
                 section_index = section_wise_data["section_index"]
                 section_breadcrumb = section_wise_data["section_breadcrumb"]
 
-                document_infos = []
+                sub_document_infos = []
                 for index, section_paragraph in enumerate(section_wise_data["section_paragraphs"]):
                     document_index = section_paragraph["paragraph_index"]
                     assert index == document_index
                     document_text = section_paragraph["paragraph_object"]["text"]
-                    document_parsed_data = section_paragraph["paragraph_object"]["parsed_data"]
                     document_type = "paragraph"
                     document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
-                    document_infos.append([
-                        document_id, document_index, document_text,
-                        document_parsed_data, document_type
-                    ])
+                    sub_document_texts = [document_text]
+                    for sub_document_index, sub_document_text in enumerate(sub_document_texts):
+                        sub_document_infos.append([
+                            document_id, document_index, sub_document_index, sub_document_text, document_type
+                        ])
 
                 for index, section_list in enumerate(section_wise_data["section_lists"]):
                     document_index = section_list["list_index"]
                     assert index == document_index
                     document_text = section_list["list_object"]["text"]
-                    document_parsed_data = section_list["list_object"]["parsed_data"]
                     document_type = "list"
                     document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
-                    document_infos.append([
-                        document_id, document_index, document_text,
-                        document_parsed_data, document_type
-                    ])
+                    sub_document_texts = chunk_list_of_items_with_max_tokens(section_list["list_object"]["parsed_data"])
+                    for sub_document_index, sub_document_text in enumerate(sub_document_texts):
+                        sub_document_infos.append([
+                            document_id, document_index, sub_document_index, sub_document_text, document_type
+                        ])
 
                 for index, section_infobox in enumerate(section_wise_data["section_infoboxes"]):
                     document_index = section_infobox["infobox_index"]
                     assert index == document_index
                     document_text = section_infobox["infobox_object"]["text"]
-                    document_parsed_data = section_infobox["infobox_object"]["parsed_data"]
                     document_type = "infobox"
                     document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
-                    document_infos.append([
-                        document_id, document_index, document_text,
-                        document_parsed_data, document_type
-                    ])
+                    sub_document_texts = [document_text]
+                    for sub_document_index, sub_document_text in enumerate(sub_document_texts):
+                        sub_document_infos.append([
+                            document_id, document_index, sub_document_index, sub_document_text, document_type
+                        ])
 
                 for index, section_table in enumerate(section_wise_data["section_tables"]):
                     document_index = section_table["table_index"]
                     assert index == document_index
                     document_text = section_table["table_object"]["text"]
-                    document_parsed_data = section_table["table_object"]["parsed_data"]
                     document_type = "table"
                     document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
-                    document_infos.append([
-                        document_id, document_index, document_text,
-                        document_parsed_data, document_type
-                    ])
+                    sub_document_texts = chunk_list_of_items_with_max_tokens(document_text.strip().split("\n"), first_n_is_header=2)
+                    for sub_document_index, sub_document_text in enumerate(sub_document_texts):
+                        sub_document_infos.append([
+                            document_id, document_index, sub_document_index, sub_document_text, document_type
+                        ])
 
-                for document_info in document_infos:
+                for sub_document_info in sub_document_infos:
 
-                    document_id, document_index, document_text, \
-                        document_parsed_data, document_type = document_info
+                    document_id, document_index, sub_document_index, sub_document_text, document_type = sub_document_info
+                    sub_document_id = "__".join([document_id, str(sub_document_index)])
 
-                    if document_id in indexed_document_ids:
-                        print("WARNING: Looks like a repeated document_id is being indexed.")
+                    if sub_document_id in indexed_sub_document_ids:
+                        print("WARNING: Looks like a repeated sub_document_id is being indexed.")
 
                     is_abstract = False
                     if not is_abstract_added:
@@ -479,17 +515,19 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str):
                     metadata = {
                         "page_id": page_id,
                         "document_type": document_type,
+                        "source_document_id": document_id,
+                        "sub_document_index": sub_document_index,
                         "document_path": section_breadcrumb,
-                        "document_parsed_data": document_parsed_data,
                     }
                     es_document = {
-                        "id": document_id,
+                        "id": sub_document_id,
                         "title": page_title,
                         "section_index": section_index,
                         "section_path": section_breadcrumb,
                         "paragraph_type": document_type,
                         "paragraph_index": document_index,
-                        "paragraph_text": document_text,
+                        "paragraph_sub_index": sub_document_index,
+                        "paragraph_text": sub_document_text,
                         "url": page_url,
                         "is_abstract": is_abstract,
                         "metadata": json.dumps(metadata)
@@ -503,7 +541,7 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str):
                     yield (document)
                     _idx += 1
 
-                    indexed_document_ids.add(document_id)
+                    indexed_sub_document_ids.add(sub_document_id)
 
 
 def make_natcq_pages_documents(elasticsearch_index: str):
@@ -617,6 +655,11 @@ if __name__ == "__main__":
             "type": "text", "analyzer": "english",
         }
 
+    if args.dataset_name in ("natcq_chunked_docs"):
+        paragraphs_index_settings["mappings"]["properties"]["paragraph_sub_index"] = {
+            "type": "text", "analyzer": "english",
+        }
+
     if args.dataset_name == "natcq_pages":
         paragraphs_index_settings["mappings"]["properties"].pop("paragraph_index")
         paragraphs_index_settings["mappings"]["properties"].pop("paragraph_text")
@@ -654,6 +697,8 @@ if __name__ == "__main__":
         make_documents = make_musique_documents
     elif args.dataset_name == "natcq_docs":
         make_documents = make_natcq_docs_documents
+    elif args.dataset_name == "natcq_chunked_docs":
+        make_documents = make_natcq_chunked_docs_documents
     elif args.dataset_name == "natcq_pages":
         make_documents = make_natcq_pages_documents
     else:

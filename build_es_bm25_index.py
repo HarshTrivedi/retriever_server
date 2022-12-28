@@ -469,6 +469,8 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str):
 
                 for sub_document_info in sub_document_infos:
 
+                    # TODO: Once wiki cleaning is redone, remove the code to do the chunking here. It's done in the cleaning phase.
+                    # TODO: Also note that the sub_document_id is also now created in the cleaning phase.
                     document_id, document_index, sub_document_index, sub_document_text, document_type = sub_document_info
                     sub_document_id = "__".join([document_id, str(sub_document_index)])
 

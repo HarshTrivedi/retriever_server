@@ -290,53 +290,21 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                 section_breadcrumb = section_wise_data["section_breadcrumb"]
 
                 document_infos = []
-                for index, section_paragraph in enumerate(section_wise_data["section_paragraphs"]):
-                    document_index = section_paragraph["paragraph_index"]
-                    assert index == document_index
-                    document_text = section_paragraph["paragraph_object"]["text"]
-                    document_parsed_data = section_paragraph["paragraph_object"]["parsed_data"]
-                    document_type = "paragraph"
-                    document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
-                    document_infos.append([
-                        document_id, document_index, document_text,
-                        document_parsed_data, document_type
-                    ])
-
-                for index, section_list in enumerate(section_wise_data["section_lists"]):
-                    document_index = section_list["list_index"]
-                    assert index == document_index
-                    document_text = section_list["list_object"]["text"]
-                    document_parsed_data = section_list["list_object"]["parsed_data"]
-                    document_type = "list"
-                    document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
-                    document_infos.append([
-                        document_id, document_index, document_text,
-                        document_parsed_data, document_type
-                    ])
-
-                for index, section_infobox in enumerate(section_wise_data["section_infoboxes"]):
-                    document_index = section_infobox["infobox_index"]
-                    assert index == document_index
-                    document_text = section_infobox["infobox_object"]["text"]
-                    document_parsed_data = section_infobox["infobox_object"]["parsed_data"]
-                    document_type = "infobox"
-                    document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
-                    document_infos.append([
-                        document_id, document_index, document_text,
-                        document_parsed_data, document_type
-                    ])
-
-                for index, section_table in enumerate(section_wise_data["section_tables"]):
-                    document_index = section_table["table_index"]
-                    assert index == document_index
-                    document_text = section_table["table_object"]["text"]
-                    document_parsed_data = section_table["table_object"]["parsed_data"]
-                    document_type = "table"
-                    document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
-                    document_infos.append([
-                        document_id, document_index, document_text,
-                        document_parsed_data, document_type
-                    ])
+                plural = {
+                    "paragraph": "paragraphs", "list": "lists", "infobox": "infoboxes", "table": "tables"
+                }
+                for document_type in ["paragraph", "list", "infobox", "table"]:
+                    for index, section_document in enumerate(section_wise_data[f"section_{plural[document_type]}"]):
+                        document_index = section_document[f"{document_type}_index"]
+                        assert index == document_index
+                        document_text = section_document[f"{document_type}_object"]["text"]
+                        document_parsed_data = section_document[f"{document_type}_object"]["parsed_data"]
+                        # TODO: Once wiki cleaning is redone, use document_id = section_document["document_id"]
+                        document_id = "__".join([page_id, str(section_index), document_type, str(document_index)])
+                        document_infos.append([
+                            document_id, document_index, document_text,
+                            document_parsed_data, document_type
+                        ])
 
                 for document_info in document_infos:
 

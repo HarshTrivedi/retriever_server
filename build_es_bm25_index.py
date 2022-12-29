@@ -347,7 +347,7 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                     indexed_document_ids.add(document_id)
 
 
-def make_natcq_chunked_docs_documents_simplified(elasticsearch_index: str):
+def make_natcq_chunked_docs_documents(elasticsearch_index: str):
 
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
@@ -472,7 +472,7 @@ def make_natcq_pages_documents(elasticsearch_index: str):
                 "id": page_id,
                 "title": page_title,
                 "url": page_url,
-                "data": json.dumps(page_data)
+                "data": json.dumps(page)
             }
             document = {
                 "_op_type": "create",

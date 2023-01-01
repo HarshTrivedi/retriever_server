@@ -22,7 +22,9 @@ import os
 import random
 
 
-WIKIPEDIA_CORPUSES_PATH = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))["WIKIPEDIA_CORPUSES_PATH"]
+WIKIPEDIA_CORPUSES_PATH = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))[
+    "WIKIPEDIA_CORPUSES_PATH"
+]
 
 
 def hash_object(o: Any) -> str:
@@ -61,10 +63,10 @@ def make_hotpotqa_documents(elasticsearch_index: str, metadata: Dict = None):
                 "is_abstract": is_abstract,
             }
             document = {
-                "_op_type": 'create',
-                '_index': elasticsearch_index,
-                '_id': metadata["_idx"],
-                '_source': es_paragraph,
+                "_op_type": "create",
+                "_index": elasticsearch_index,
+                "_id": metadata["_idx"],
+                "_source": es_paragraph,
             }
             yield (document)
             metadata["_idx"] += 1
@@ -72,7 +74,8 @@ def make_hotpotqa_documents(elasticsearch_index: str, metadata: Dict = None):
 
 def make_strategyqa_documents(elasticsearch_index: str, metadata: Dict = None):
     raw_glob_filepath = os.path.join(
-        WIKIPEDIA_CORPUSES_PATH, "strategyqa-wikipedia-paragraphs/strategyqa-wikipedia-paragraphs.jsonl"
+        WIKIPEDIA_CORPUSES_PATH,
+        "strategyqa-wikipedia-paragraphs/strategyqa-wikipedia-paragraphs.jsonl",
     )
     metadata = metadata or {"_idx": 1}
     assert "_idx" in metadata
@@ -97,10 +100,10 @@ def make_strategyqa_documents(elasticsearch_index: str, metadata: Dict = None):
                 "is_abstract": is_abstract,
             }
             document = {
-                "_op_type": 'create',
-                '_index': elasticsearch_index,
-                '_id': metadata["_idx"],
-                '_source': es_paragraph,
+                "_op_type": "create",
+                "_index": elasticsearch_index,
+                "_id": metadata["_idx"],
+                "_source": es_paragraph,
             }
             yield (document)
             metadata["_idx"] += 1
@@ -113,7 +116,7 @@ def make_iirc_documents(elasticsearch_index: str, metadata: Dict = None):
     metadata = metadata or {"_idx": 1}
     assert "_idx" in metadata
 
-    random.seed(13370) # Don't change.
+    random.seed(13370)  # Don't change.
 
     with open(raw_filepath, "r") as file:
         full_data = json.load(file)
@@ -121,7 +124,8 @@ def make_iirc_documents(elasticsearch_index: str, metadata: Dict = None):
         for title, page_html in tqdm(full_data.items()):
             page_soup = BeautifulSoup(page_html, "html.parser")
             paragraph_texts = [
-                text for text in page_soup.text.split("\n")
+                text
+                for text in page_soup.text.split("\n")
                 if text.strip() and len(text.strip().split()) > 10
             ]
 
@@ -136,7 +140,7 @@ def make_iirc_documents(elasticsearch_index: str, metadata: Dict = None):
             random.shuffle(paragraph_indices_and_texts)
             for paragraph_index, paragraph_text in paragraph_indices_and_texts:
                 url = ""
-                id_ = hash_object(title+paragraph_text)
+                id_ = hash_object(title + paragraph_text)
                 is_abstract = paragraph_index == 0
                 es_paragraph = {
                     "id": id_,
@@ -147,10 +151,10 @@ def make_iirc_documents(elasticsearch_index: str, metadata: Dict = None):
                     "is_abstract": is_abstract,
                 }
                 document = {
-                    "_op_type": 'create',
-                    '_index': elasticsearch_index,
-                    '_id': metadata["_idx"],
-                    '_source': es_paragraph,
+                    "_op_type": "create",
+                    "_index": elasticsearch_index,
+                    "_id": metadata["_idx"],
+                    "_source": es_paragraph,
                 }
                 yield (document)
                 metadata["_idx"] += 1
@@ -158,9 +162,15 @@ def make_iirc_documents(elasticsearch_index: str, metadata: Dict = None):
 
 def make_2wikimultihopqa_documents(elasticsearch_index: str, metadata: Dict = None):
     raw_filepaths = [
-        os.path.join(WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/train.json"),
-        os.path.join(WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/dev.json"),
-        os.path.join(WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/test.json"),
+        os.path.join(
+            WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/train.json"
+        ),
+        os.path.join(
+            WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/dev.json"
+        ),
+        os.path.join(
+            WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/test.json"
+        ),
     ]
     metadata = metadata or {"_idx": 1}
     assert "_idx" in metadata
@@ -196,10 +206,10 @@ def make_2wikimultihopqa_documents(elasticsearch_index: str, metadata: Dict = No
                         "is_abstract": is_abstract,
                     }
                     document = {
-                        "_op_type": 'create',
-                        '_index': elasticsearch_index,
-                        '_id': metadata["_idx"],
-                        '_source': es_paragraph,
+                        "_op_type": "create",
+                        "_index": elasticsearch_index,
+                        "_id": metadata["_idx"],
+                        "_source": es_paragraph,
                     }
                     yield (document)
                     metadata["_idx"] += 1
@@ -207,12 +217,30 @@ def make_2wikimultihopqa_documents(elasticsearch_index: str, metadata: Dict = No
 
 def make_musique_documents(elasticsearch_index: str, metadata: Dict = None):
     raw_filepaths = [
-        os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_ans_v1.0_dev.jsonl"),
-        os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_ans_v1.0_test.jsonl"),
-        os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_ans_v1.0_train.jsonl"),
-        os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_full_v1.0_dev.jsonl"),
-        os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_full_v1.0_test.jsonl"),
-        os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_full_v1.0_train.jsonl"),
+        os.path.join(
+            WIKIPEDIA_CORPUSES_PATH,
+            "musique-wikipedia-paragraphs/musique_ans_v1.0_dev.jsonl",
+        ),
+        os.path.join(
+            WIKIPEDIA_CORPUSES_PATH,
+            "musique-wikipedia-paragraphs/musique_ans_v1.0_test.jsonl",
+        ),
+        os.path.join(
+            WIKIPEDIA_CORPUSES_PATH,
+            "musique-wikipedia-paragraphs/musique_ans_v1.0_train.jsonl",
+        ),
+        os.path.join(
+            WIKIPEDIA_CORPUSES_PATH,
+            "musique-wikipedia-paragraphs/musique_full_v1.0_dev.jsonl",
+        ),
+        os.path.join(
+            WIKIPEDIA_CORPUSES_PATH,
+            "musique-wikipedia-paragraphs/musique_full_v1.0_test.jsonl",
+        ),
+        os.path.join(
+            WIKIPEDIA_CORPUSES_PATH,
+            "musique-wikipedia-paragraphs/musique_full_v1.0_train.jsonl",
+        ),
     ]
     metadata = metadata or {"_idx": 1}
     assert "_idx" in metadata
@@ -250,10 +278,10 @@ def make_musique_documents(elasticsearch_index: str, metadata: Dict = None):
                         "is_abstract": is_abstract,
                     }
                     document = {
-                        "_op_type": 'create',
-                        '_index': elasticsearch_index,
-                        '_id': metadata["_idx"],
-                        '_source': es_paragraph,
+                        "_op_type": "create",
+                        "_index": elasticsearch_index,
+                        "_id": metadata["_idx"],
+                        "_source": es_paragraph,
                     }
                     yield (document)
                     metadata["_idx"] += 1
@@ -262,6 +290,7 @@ def make_musique_documents(elasticsearch_index: str, metadata: Dict = None):
 def make_hotpotqa_2wikimultihopqa_musique_documents(elasticsearch_index: str):
     pass
 
+
 def make_natcq_docs_documents(elasticsearch_index: str):
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
@@ -269,7 +298,7 @@ def make_natcq_docs_documents(elasticsearch_index: str):
     metadata = metadata or {"_idx": 1}
     assert "idx" in metadata
 
-    random.seed(13370) # Don't change.
+    random.seed(13370)  # Don't change.
 
     line_skip_count = 0
 
@@ -299,7 +328,10 @@ def make_natcq_docs_documents(elasticsearch_index: str):
 
                 document_infos = []
                 plural = {
-                    "paragraph": "paragraphs", "list": "lists", "infobox": "infoboxes", "table": "tables"
+                    "paragraph": "paragraphs",
+                    "list": "lists",
+                    "infobox": "infoboxes",
+                    "table": "tables",
                 }
                 for document_type in ["paragraph", "list", "infobox", "table"]:
                     for document in section[plural[document_type]]:
@@ -307,18 +339,30 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                         document_text = document["text"]
                         document_data = document["data"]
                         document_id = document["id"]
-                        document_infos.append([
-                            document_id, document_index, document_text,
-                            document_data, document_type
-                        ])
+                        document_infos.append(
+                            [
+                                document_id,
+                                document_index,
+                                document_text,
+                                document_data,
+                                document_type,
+                            ]
+                        )
 
                 for document_info in document_infos:
 
-                    document_id, document_index, document_text, \
-                        document_data, document_type = document_info
+                    (
+                        document_id,
+                        document_index,
+                        document_text,
+                        document_data,
+                        document_type,
+                    ) = document_info
 
                     if document_id in indexed_document_ids:
-                        print("WARNING: Looks like a repeated document_id is being indexed.")
+                        print(
+                            "WARNING: Looks like a repeated document_id is being indexed."
+                        )
 
                     is_abstract = False
                     if not is_abstract_added:
@@ -341,13 +385,13 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                         "paragraph_text": document_text,
                         "url": page_url,
                         "is_abstract": is_abstract,
-                        "metadata": json.dumps(metadata)
+                        "metadata": json.dumps(metadata),
                     }
                     document = {
-                        "_op_type": 'create',
-                        '_index': elasticsearch_index,
-                        '_id': metadata["_idx"],
-                        '_source': es_document,
+                        "_op_type": "create",
+                        "_index": elasticsearch_index,
+                        "_id": metadata["_idx"],
+                        "_source": es_document,
                     }
                     yield (document)
                     metadata["_idx"] += 1
@@ -363,7 +407,7 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str):
     metadata = metadata or {"_idx": 1}
     assert "idx" in metadata
 
-    random.seed(13370) # Don't change.
+    random.seed(13370)  # Don't change.
 
     line_skip_count = 0
 
@@ -393,28 +437,47 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str):
 
                 sub_document_infos = []
                 plural = {
-                    "paragraph": "paragraphs", "list": "lists", "infobox": "infoboxes", "table": "tables"
+                    "paragraph": "paragraphs",
+                    "list": "lists",
+                    "infobox": "infoboxes",
+                    "table": "tables",
                 }
                 for document_type in ["paragraph", "list", "infobox", "table"]:
                     for document in section[plural[document_type]]:
                         document_index = document["index"]
                         document_id = document["id"]
 
-                        for sub_document in document[f"chunked_{plural[document_type]}"]:
+                        for sub_document in document[
+                            f"chunked_{plural[document_type]}"
+                        ]:
                             sub_document_id = sub_document["id"]
                             sub_document_text = sub_document["text"]
-                            sub_document_infos.append([
-                                document_type, document_id, document_index, sub_document_id,
-                                sub_document_index, sub_document_text
-                            ])
+                            sub_document_infos.append(
+                                [
+                                    document_type,
+                                    document_id,
+                                    document_index,
+                                    sub_document_id,
+                                    sub_document_index,
+                                    sub_document_text,
+                                ]
+                            )
 
                 for sub_document_info in sub_document_infos:
 
-                    document_type, document_id, document_index, sub_document_id, \
-                        sub_document_index, sub_document_text = sub_document_info
+                    (
+                        document_type,
+                        document_id,
+                        document_index,
+                        sub_document_id,
+                        sub_document_index,
+                        sub_document_text,
+                    ) = sub_document_info
 
                     if sub_document_id in indexed_sub_document_ids:
-                        print("WARNING: Looks like a repeated document_id is being indexed.")
+                        print(
+                            "WARNING: Looks like a repeated document_id is being indexed."
+                        )
 
                     is_abstract = False
                     if not is_abstract_added:
@@ -437,13 +500,13 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str):
                         "paragraph_text": sub_document_text,
                         "url": page_url,
                         "is_abstract": is_abstract,
-                        "metadata": json.dumps(metadata)
+                        "metadata": json.dumps(metadata),
                     }
                     document = {
-                        "_op_type": 'create',
-                        '_index': elasticsearch_index,
-                        '_id': metadata["_idx"],
-                        '_source': es_document,
+                        "_op_type": "create",
+                        "_index": elasticsearch_index,
+                        "_id": metadata["_idx"],
+                        "_source": es_document,
                     }
                     yield (document)
                     metadata["_idx"] += 1
@@ -458,7 +521,7 @@ def make_natcq_pages_documents(elasticsearch_index: str):
     metadata = metadata or {"_idx": 1}
     assert "idx" in metadata
 
-    random.seed(13370) # Don't change.
+    random.seed(13370)  # Don't change.
 
     line_skip_count = 0
 
@@ -482,7 +545,7 @@ def make_natcq_pages_documents(elasticsearch_index: str):
                 "id": page_id,
                 "title": page_title,
                 "url": page_url,
-                "data": json.dumps(page)
+                "data": json.dumps(page),
             }
             document = {
                 "_op_type": "create",
@@ -496,25 +559,39 @@ def make_natcq_pages_documents(elasticsearch_index: str):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Index paragraphs in Elasticsearch')
+    parser = argparse.ArgumentParser(description="Index paragraphs in Elasticsearch")
     parser.add_argument(
-        "dataset_name", help='name of the dataset', type=str,
+        "dataset_name",
+        help="name of the dataset",
+        type=str,
         choices=(
-            "hotpotqa", "strategyqa", "iirc", "2wikimultihopqa", "musique_ans",
-            "natcq_docs", "natcq_chunked_docs", "natcq_pages"
-        )
+            "hotpotqa",
+            "strategyqa",
+            "iirc",
+            "2wikimultihopqa",
+            "musique_ans",
+            "natcq_docs",
+            "natcq_chunked_docs",
+            "natcq_pages",
+        ),
     )
-    parser.add_argument("--force", help='force delete before creating new index.',
-                        action="store_true", default=False)
+    parser.add_argument(
+        "--force",
+        help="force delete before creating new index.",
+        action="store_true",
+        default=False,
+    )
     args = parser.parse_args()
 
     # conntect elastic-search
-    elastic_host = 'localhost'
+    elastic_host = "localhost"
     elastic_port = 9200
     elasticsearch_index = f"{args.dataset_name}-wikipedia"
     es = Elasticsearch(
-        [{'host': elastic_host, 'port': elastic_port}],
-        max_retries=10, timeout=500, retry_on_timeout=True
+        [{"host": elastic_host, "port": elastic_port}],
+        max_retries=10,
+        timeout=500,
+        retry_on_timeout=True,
     )
 
     # INDEX settings:
@@ -529,43 +606,42 @@ if __name__ == "__main__":
 
     paragraphs_index_settings = {
         "mappings": {
-                "properties": {
-                    "title": {
-                        "type": "text",
-                        "analyzer": "english",
-                    },
-                    "paragraph_index": {
-                        "type": "integer"
-                    },
-                    "paragraph_text": {
-                        "type": "text",
-                        "analyzer": "english",
-                    },
-                    "url": {
-                        "type": "text",
-                        "analyzer": "english",
-                    },
-                    "is_abstract": {
-                        "type": "boolean"
-                    }
-                }
+            "properties": {
+                "title": {
+                    "type": "text",
+                    "analyzer": "english",
+                },
+                "paragraph_index": {"type": "integer"},
+                "paragraph_text": {
+                    "type": "text",
+                    "analyzer": "english",
+                },
+                "url": {
+                    "type": "text",
+                    "analyzer": "english",
+                },
+                "is_abstract": {"type": "boolean"},
+            }
         }
     }
 
     if args.dataset_name in ("natcq_docs", "natcq_chunked_docs"):
         paragraphs_index_settings["mappings"]["properties"] = {
-            "metadata": {"type": "object", "index" : False}
+            "metadata": {"type": "object", "index": False}
         }
         paragraphs_index_settings["mappings"]["properties"]["section_path"] = {
-            "type": "text", "analyzer": "english",
+            "type": "text",
+            "analyzer": "english",
         }
         paragraphs_index_settings["mappings"]["properties"]["paragraph_type"] = {
-            "type": "text", "analyzer": "english",
+            "type": "text",
+            "analyzer": "english",
         }
 
     if args.dataset_name in ("natcq_chunked_docs"):
         paragraphs_index_settings["mappings"]["properties"]["paragraph_sub_index"] = {
-            "type": "text", "analyzer": "english",
+            "type": "text",
+            "analyzer": "english",
         }
 
     if args.dataset_name == "natcq_pages":
@@ -573,7 +649,7 @@ if __name__ == "__main__":
         paragraphs_index_settings["mappings"]["properties"].pop("paragraph_text")
         paragraphs_index_settings["mappings"]["properties"].pop("is_abstract")
         paragraphs_index_settings["mappings"]["properties"] = {
-            "data": {"type": "object", "index" : False}
+            "data": {"type": "object", "index": False}
         }
 
     index_exists = es.indices.exists(elasticsearch_index)
@@ -583,15 +659,19 @@ if __name__ == "__main__":
     if index_exists:
 
         if not args.force:
-            feedback = input(f"Index {elasticsearch_index} already exists. "
-                             f"Are you sure you want to delete it?")
+            feedback = input(
+                f"Index {elasticsearch_index} already exists. "
+                f"Are you sure you want to delete it?"
+            )
             if not (feedback.startswith("y") or feedback == ""):
                 exit("Termited by user.")
         es.indices.delete(index=elasticsearch_index)
 
     # create index
     print("Creating Index ...")
-    es.indices.create(index=elasticsearch_index, ignore=400, body=paragraphs_index_settings)
+    es.indices.create(
+        index=elasticsearch_index, ignore=400, body=paragraphs_index_settings
+    )
 
     if args.dataset_name == "hotpotqa":
         make_documents = make_hotpotqa_documents
@@ -615,10 +695,14 @@ if __name__ == "__main__":
     # Bulk-insert documents into index
     print("Inserting Paragraphs ...")
     result = bulk(
-        es, make_documents(elasticsearch_index),
-        raise_on_error=False, raise_on_exception=False,
-        max_retries=10, request_timeout=500, chunk_size=500
+        es,
+        make_documents(elasticsearch_index),
+        raise_on_error=False,
+        raise_on_exception=False,
+        max_retries=10,
+        request_timeout=500,
+        chunk_size=500,
     )
-    es.indices.refresh(elasticsearch_index) # actually updates the count.
+    es.indices.refresh(elasticsearch_index)  # actually updates the count.
     document_count = result[0]
     print(f"Index {elasticsearch_index} is ready. Added {document_count} documents.")

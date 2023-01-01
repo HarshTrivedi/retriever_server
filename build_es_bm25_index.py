@@ -290,9 +290,12 @@ def make_musique_documents(elasticsearch_index: str, metadata: Dict = None):
 def make_hotpotqa_2wikimultihopqa_musique_documents(elasticsearch_index: str, metadata: Dict = None):
     assert metadata is None
     metadata = {"idx": 1}
-    make_hotpotqa_documents(elasticsearch_index, metadata)
-    make_2wikimultihopqa_documents(elasticsearch_index, metadata)
-    make_musique_documents(elasticsearch_index, metadata)
+    for document in make_hotpotqa_documents(elasticsearch_index, metadata):
+        yield document
+    for document in make_2wikimultihopqa_documents(elasticsearch_index, metadata)
+        yield document
+    for document in make_musique_documents(elasticsearch_index, metadata)
+        yield document
 
 
 def make_natcq_docs_documents(elasticsearch_index: str, metadata: Dict = None):

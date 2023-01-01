@@ -2,8 +2,8 @@
 Build ES (Elasticsearch) BM25 Index.
 """
 
-from typing import List
-import argparse, elasticsearch, json
+from typing import Dict
+import argparse, json
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from typing import Any
@@ -18,7 +18,6 @@ import bz2
 import base58
 import _jsonnet
 from bs4 import BeautifulSoup
-import pandas as pd
 import os
 import random
 
@@ -35,11 +34,12 @@ def hash_object(o: Any) -> str:
         return base58.b58encode(m.digest()).decode()
 
 
-def make_hotpotqa_documents(elasticsearch_index: str):
+def make_hotpotqa_documents(elasticsearch_index: str, metadata: Dict = None):
     raw_glob_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "hotpotqa-wikpedia-paragraphs/*/wiki_*.bz2"
     )
-    _idx = 1
+    metadata = metadata or {"_idx": 1}
+    assert "_idx" in metadata
     for filepath in tqdm(glob.glob(raw_glob_filepath)):
         for datum in bz2.BZ2File(filepath).readlines():
             instance = json.loads(datum.strip())
@@ -63,18 +63,19 @@ def make_hotpotqa_documents(elasticsearch_index: str):
             document = {
                 "_op_type": 'create',
                 '_index': elasticsearch_index,
-                '_id': _idx,
+                '_id': metadata["_idx"],
                 '_source': es_paragraph,
             }
             yield (document)
-            _idx += 1
+            metadata["_idx"] += 1
 
 
-def make_strategyqa_documents(elasticsearch_index: str):
+def make_strategyqa_documents(elasticsearch_index: str, metadata: Dict = None):
     raw_glob_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "strategyqa-wikipedia-paragraphs/strategyqa-wikipedia-paragraphs.jsonl"
     )
-    _idx = 1
+    metadata = metadata or {"_idx": 1}
+    assert "_idx" in metadata
     with open(raw_glob_filepath, "r") as file:
         for line in tqdm(file):
             instance = json.loads(line.strip())
@@ -98,18 +99,19 @@ def make_strategyqa_documents(elasticsearch_index: str):
             document = {
                 "_op_type": 'create',
                 '_index': elasticsearch_index,
-                '_id': _idx,
+                '_id': metadata["_idx"],
                 '_source': es_paragraph,
             }
             yield (document)
-            _idx += 1
+            metadata["_idx"] += 1
 
 
-def make_iirc_documents(elasticsearch_index: str):
+def make_iirc_documents(elasticsearch_index: str, metadata: Dict = None):
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "iirc-wikipedia-paragraphs/context_articles.json"
     )
-    _idx = 1
+    metadata = metadata or {"_idx": 1}
+    assert "_idx" in metadata
 
     random.seed(13370) # Don't change.
 
@@ -147,20 +149,21 @@ def make_iirc_documents(elasticsearch_index: str):
                 document = {
                     "_op_type": 'create',
                     '_index': elasticsearch_index,
-                    '_id': _idx,
+                    '_id': metadata["_idx"],
                     '_source': es_paragraph,
                 }
                 yield (document)
-                _idx += 1
+                metadata["_idx"] += 1
 
 
-def make_2wikimultihopqa_documents(elasticsearch_index: str):
+def make_2wikimultihopqa_documents(elasticsearch_index: str, metadata: Dict = None):
     raw_filepaths = [
         os.path.join(WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/train.json"),
         os.path.join(WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/dev.json"),
         os.path.join(WIKIPEDIA_CORPUSES_PATH, "2wikimultihopqa-wikipedia-paragraphs/test.json"),
     ]
-    _idx = 1
+    metadata = metadata or {"_idx": 1}
+    assert "_idx" in metadata
 
     used_full_ids = set()
     for raw_filepath in raw_filepaths:
@@ -195,14 +198,14 @@ def make_2wikimultihopqa_documents(elasticsearch_index: str):
                     document = {
                         "_op_type": 'create',
                         '_index': elasticsearch_index,
-                        '_id': _idx,
+                        '_id': metadata["_idx"],
                         '_source': es_paragraph,
                     }
                     yield (document)
-                    _idx += 1
+                    metadata["_idx"] += 1
 
 
-def make_musique_documents(elasticsearch_index: str):
+def make_musique_documents(elasticsearch_index: str, metadata: Dict = None):
     raw_filepaths = [
         os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_ans_v1.0_dev.jsonl"),
         os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_ans_v1.0_test.jsonl"),
@@ -211,7 +214,8 @@ def make_musique_documents(elasticsearch_index: str):
         os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_full_v1.0_test.jsonl"),
         os.path.join(WIKIPEDIA_CORPUSES_PATH, "musique-wikipedia-paragraphs/musique_full_v1.0_train.jsonl"),
     ]
-    _idx = 1
+    metadata = metadata or {"_idx": 1}
+    assert "_idx" in metadata
 
     used_full_ids = set()
     for raw_filepath in raw_filepaths:
@@ -248,18 +252,22 @@ def make_musique_documents(elasticsearch_index: str):
                     document = {
                         "_op_type": 'create',
                         '_index': elasticsearch_index,
-                        '_id': _idx,
+                        '_id': metadata["_idx"],
                         '_source': es_paragraph,
                     }
                     yield (document)
-                    _idx += 1
+                    metadata["_idx"] += 1
 
+
+def make_hotpotqa_2wikimultihopqa_musique_documents(elasticsearch_index: str):
+    pass
 
 def make_natcq_docs_documents(elasticsearch_index: str):
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
     )
-    _idx = 1
+    metadata = metadata or {"_idx": 1}
+    assert "idx" in metadata
 
     random.seed(13370) # Don't change.
 
@@ -338,11 +346,11 @@ def make_natcq_docs_documents(elasticsearch_index: str):
                     document = {
                         "_op_type": 'create',
                         '_index': elasticsearch_index,
-                        '_id': _idx,
+                        '_id': metadata["_idx"],
                         '_source': es_document,
                     }
                     yield (document)
-                    _idx += 1
+                    metadata["_idx"] += 1
 
                     indexed_document_ids.add(document_id)
 
@@ -352,7 +360,8 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str):
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
     )
-    _idx = 1
+    metadata = metadata or {"_idx": 1}
+    assert "idx" in metadata
 
     random.seed(13370) # Don't change.
 
@@ -433,11 +442,11 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str):
                     document = {
                         "_op_type": 'create',
                         '_index': elasticsearch_index,
-                        '_id': _idx,
+                        '_id': metadata["_idx"],
                         '_source': es_document,
                     }
                     yield (document)
-                    _idx += 1
+                    metadata["_idx"] += 1
 
                     indexed_sub_document_ids.add(sub_document_id)
 
@@ -446,7 +455,8 @@ def make_natcq_pages_documents(elasticsearch_index: str):
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
     )
-    _idx = 1
+    metadata = metadata or {"_idx": 1}
+    assert "idx" in metadata
 
     random.seed(13370) # Don't change.
 
@@ -477,11 +487,11 @@ def make_natcq_pages_documents(elasticsearch_index: str):
             document = {
                 "_op_type": "create",
                 "_index": elasticsearch_index,
-                "_id": _idx,
+                "_id": metadata["_idx"],
                 "_source": es_document,
             }
             yield (document)
-            _idx += 1
+            metadata["_idx"] += 1
 
 
 if __name__ == "__main__":

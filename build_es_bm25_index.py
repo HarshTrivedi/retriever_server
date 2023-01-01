@@ -292,9 +292,9 @@ def make_hotpotqa_2wikimultihopqa_musique_documents(elasticsearch_index: str, me
     metadata = {"idx": 1}
     for document in make_hotpotqa_documents(elasticsearch_index, metadata):
         yield document
-    for document in make_2wikimultihopqa_documents(elasticsearch_index, metadata)
+    for document in make_2wikimultihopqa_documents(elasticsearch_index, metadata):
         yield document
-    for document in make_musique_documents(elasticsearch_index, metadata)
+    for document in make_musique_documents(elasticsearch_index, metadata):
         yield document
 
 

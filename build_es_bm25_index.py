@@ -290,10 +290,13 @@ def make_musique_documents(elasticsearch_index: str, metadata: Dict = None):
 def make_hotpotqa_2wikimultihopqa_musique_documents(elasticsearch_index: str, metadata: Dict = None):
     assert metadata is None
     metadata = {"idx": 1}
+    print("Indexing HotpotQA documents...")
     for document in make_hotpotqa_documents(elasticsearch_index, metadata):
         yield document
+    print("Indexing 2WikiMultihopQA documents...")
     for document in make_2wikimultihopqa_documents(elasticsearch_index, metadata):
         yield document
+    print("Indexing MuSiQue documents...")
     for document in make_musique_documents(elasticsearch_index, metadata):
         yield document
 

@@ -287,7 +287,7 @@ def make_musique_documents(elasticsearch_index: str, metadata: Dict = None):
                     metadata["idx"] += 1
 
 
-def make_hotpotqa_2wikimultihopqa_musique_documents(elasticsearch_index: str, metadata: Dict = None):
+def make_hwm_documents(elasticsearch_index: str, metadata: Dict = None):
     assert metadata is None
     metadata = {"idx": 1}
     print("Indexing HotpotQA documents...")
@@ -580,7 +580,7 @@ if __name__ == "__main__":
             "iirc",
             "2wikimultihopqa",
             "musique_ans",
-            "hotpotqa_2wikimultihopqa_musique",
+            "hwm",
             "natcq_docs",
             "natcq_chunked_docs",
             "natcq_pages",
@@ -694,8 +694,8 @@ if __name__ == "__main__":
         make_documents = make_2wikimultihopqa_documents
     elif args.dataset_name == "musique_ans":
         make_documents = make_musique_documents
-    elif args.dataset_name == "hotpotqa_2wikimultihopqa_musique":
-        make_documents = make_hotpotqa_2wikimultihopqa_musique_documents
+    elif args.dataset_name == "hwm":
+        make_documents = make_hwm_documents
     elif args.dataset_name == "natcq_docs":
         make_documents = make_natcq_docs_documents
     elif args.dataset_name == "natcq_chunked_docs":

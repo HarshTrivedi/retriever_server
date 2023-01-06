@@ -155,4 +155,4 @@ if __name__ == "__main__":
         "Who is the 44th president of USA.", corpus_name, 10
     )
     for result in results:
-        print(result)
+        print(json.dumps(result, indent=4))

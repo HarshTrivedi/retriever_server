@@ -71,9 +71,10 @@ class ElasticsearchRetriever:
 
         if query_title_field_too:
 
-            # This assert is a new change after arxiving ircot done primarily to account for natcq queries.
-            assert not allowed_titles, \
-                "Can't query title field when the allowed titles are passed."
+            # # This assert is a new change after arxiving ircot done primarily to account for natcq queries.
+            # # EDIT: removing as it was done in the IRCoT exps.
+            # assert not allowed_titles, \
+            #     "Can't query title field when the allowed titles are passed."
 
             query["query"]["bool"]["should"].append({"match": {"title": query_text}})
 

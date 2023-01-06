@@ -88,12 +88,26 @@ class ContrieverRetriever:
         self,
         query_text: str,
         corpus_name: str,
-        max_hits_count: int
+        max_hits_count: int,
+        buffer_count: int = 300,
+        allowed_titles: List[str] = None,
     ) -> List[Dict]:
 
         query_embeddings = embed_queries(self.config, [query_text], self.model, self.tokenizer)
-        paragraph_ids, _ = self.index.search_knn(query_embeddings, max_hits_count)[0]
-        paragraphs = [self.paragraph_id_map[paragraph_id] for paragraph_id in paragraph_ids]
+
+        if allowed_titles is None:
+            paragraph_ids, _ = self.index.search_knn(query_embeddings, max_hits_count)[0]
+            paragraphs = [self.paragraph_id_map[paragraph_id] for paragraph_id in paragraph_ids]
+        else:
+            assert buffer_count > max_hits_count
+            normalize_title = lambda title: title.strip().lower().replace(" ", "")
+            allowed_titles = [normalize_title(title) for title in allowed_titles]
+            paragraph_ids, _ = self.index.search_knn(query_embeddings, buffer_count)[0]
+            paragraphs = [
+                self.paragraph_id_map[paragraph_id] for paragraph_id in paragraph_ids
+                if normalize_title(self.paragraph_id_map[paragraph_id]["title"]) in allowed_titles
+            ][:max_hits_count]
+
         assert corpus_name == self._corpus_name, \
             f"Mismatching corpus_names ({corpus_name} != {self._corpus_name})"
 

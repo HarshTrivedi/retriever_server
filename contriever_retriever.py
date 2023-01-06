@@ -137,6 +137,8 @@ if __name__ == "__main__":
 
     retriever = ContrieverRetriever(corpus_name=corpus_name)
     print("\n\nRetrieving Paragraphs ...")
-    results = retriever.retrieve_paragraphs("Who is the 44th president of USA.")
+    results = retriever.retrieve_paragraphs(
+        "Who is the 44th president of USA.", corpus_name, 10
+    )
     for result in results:
         print(result)

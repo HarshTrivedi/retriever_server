@@ -62,6 +62,9 @@ def main():
         if os.path.exists(log_path):
             os.remove(log_path)
 
+        if os.path.exists(config_path):
+            os.remove(config_path)
+
     elif args.command == "status":
 
         if os.path.exists(pid_path):

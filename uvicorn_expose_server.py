@@ -100,6 +100,9 @@ def main():
             if os.path.exists(log_path):
                 os.remove(log_path)
 
+            if os.path.exists(uv_config_path): # yes, the uv_ prefix is correct here.
+                os.remove(uv_config_path)
+
             print(f"Successfully stopped {name} server.")
 
     elif args.command == "status":

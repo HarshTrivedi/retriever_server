@@ -161,7 +161,7 @@ if __name__ == "__main__":
     retriever = ContrieverRetriever(corpus_name=corpus_name)
     print("\n\nRetrieving Paragraphs ...")
     results = retriever.retrieve_paragraphs(
-        "Who is the 44th president of USA.", corpus_name, 10
+        "Computer vision is an interdisciplinary field", corpus_name, 10, allowed_titles=["Computer vision"]
     )
     for result in results:
         print(json.dumps(result, indent=4))

@@ -22,6 +22,7 @@ def main():
             exit("expose pid file aleady exists. Turn off expose first.")
 
         command = f"nohup lt --port {args.port} > {log_path} &"
+        print(command)
         subprocess.call(command, shell=True)
 
         time.sleep(3)
@@ -30,6 +31,7 @@ def main():
             exit("The expose server did not start correctly. Couldn't find the log file.")
 
         command += f"cat {log_path}"
+        print(command)
         subprocess.call(command, shell=True)
 
     elif args.command == "stop":
@@ -38,6 +40,7 @@ def main():
             exit("expose pid file not found. Recheck if it's running or turn it off manually.")
 
         command = f"pkill -F {pid_path}"
+        print(command)
         subprocess.call(command, shell=True)
 
         if os.path.exists(pid_path):
@@ -52,6 +55,7 @@ def main():
         
         print("\nHere is output of lsof filtered for expose processes.")
         command = "lsof -i -P -n | grep LISTEN | grep lt"
+        print(command)
         subprocess.call(command, shell=True)
 
     elif args.command == "log":
@@ -60,6 +64,7 @@ def main():
             print("expose log file does not exist.")
         else:
             command = f"cat {log_path}"
+            print(command)
             subprocess.call(command, shell=True)
 
 if __name__ == '__main__':

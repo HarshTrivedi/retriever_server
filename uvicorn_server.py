@@ -21,6 +21,7 @@ def main():
             exit("uvicorn pid file aleady exists. Turn off uvicorn first.")
 
         command = f"nohup uvicorn retriever_server:app --port {args.port} > {log_path} &"
+        print(command)
         subprocess.call(command, shell=True)
 
     elif args.command == "stop":
@@ -29,6 +30,7 @@ def main():
             exit("uvicorn pid file not found. Recheck if it's running or turn it off manually.")
 
         command = f"pkill -F {pid_path}"
+        print(command)
         subprocess.call(command, shell=True)
 
         if os.path.exists(pid_path):
@@ -43,6 +45,7 @@ def main():
         
         print("\nHere is output of lsof filtered for uvicorn processes.")
         command = "lsof -i -P -n | grep LISTEN | grep uvicorn"
+        print(command)
         subprocess.call(command, shell=True)
 
     elif args.command == "log":
@@ -51,6 +54,7 @@ def main():
             print("uvicorn log file does not exist.")
         else:
             command = f"cat {log_path}"
+            print(command)
             subprocess.call(command, shell=True)
 
 

@@ -21,20 +21,21 @@ def main():
         if os.path.exists(pid_path):
             exit(f"expose pid file ({pid_path}) aleady exists. Turn off expose first.")
 
-        command = f"nohup lt --port {args.port} > {log_path} 2>&1 &"
-        print(command)
-        subprocess.call(command, shell=True)
+        command = f"nohup lt --port {args.port} > {log_path} 2>&1 & \necho $! > {pid_path}"
+        subprocess.Popen(command, shell=True)
 
-        command = f"echo $! > {pid_path}"
-        print(command)
-        subprocess.call(command, shell=True)
-
-        time.sleep(3)
-
+        time.sleep(1)
+        if not os.path.exists(pid_path):
+            exit(f"The expose server started but the pid file ({pid_path}) couldn not be found.")
         if not os.path.exists(log_path):
-            exit("The expose server did not start correctly. Couldn't find the log file.")
+            exit(f"The uvicorn server started but the log file ({log_path}) couldn not be found.")
 
-        command += f"cat {log_path}"
+        with open(pid_path, "r") as file:
+            pid = file.read().strip()
+        print(f"The expose server has started with pid: {pid}.")
+
+        print("Here is the output from the server. Terminating output won't affect the process.")
+        command = f"cat {log_path}"
         print(command)
         subprocess.call(command, shell=True)
 

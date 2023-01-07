@@ -27,6 +27,8 @@ def main():
         time.sleep(1)
         if not os.path.exists(pid_path):
             exit(f"The uvicorn server started but the pid file ({pid_path}) couldn not be found.")
+        if not os.path.exists(log_path):
+            exit(f"The uvicorn server started but the log file ({log_path}) couldn not be found.")
 
         with open(pid_path, "r") as file:
             pid = file.read().strip()
@@ -36,7 +38,6 @@ def main():
         command = f"tail -f {log_path}"
         print(command)
         subprocess.call(command, shell=True)
-
 
     elif args.command == "stop":
 

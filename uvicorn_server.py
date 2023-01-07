@@ -37,7 +37,8 @@ def main():
         print("Here are the tailed logs. Terminating logs won't affect the process.")
         command = f"tail -f {log_path}"
         print(command)
-        subprocess.call(command, shell=True)
+        # IMP to use os.system here, o/w terminating it will terminate child processed too.
+        os.system(command, shell=True)
 
     elif args.command == "stop":
 

@@ -19,7 +19,7 @@ def main():
     if args.command == "start":
 
         if os.path.exists(log_path):
-            exit("expose pid file aleady exists. Turn off expose first.")
+            exit(f"expose pid file ({pid_path}) aleady exists. Turn off expose first.")
 
         command = f"nohup lt --port {args.port} > {log_path} &"
         print(command)
@@ -37,7 +37,7 @@ def main():
     elif args.command == "stop":
 
         if not os.path.exists(pid_path):
-            exit("expose pid file not found. Recheck if it's running or turn it off manually.")
+            exit(f"expose pid file ({pid_path}) not found. Recheck if it's running or turn it off manually.")
 
         command = f"pkill -F {pid_path}"
         print(command)
@@ -49,9 +49,9 @@ def main():
     elif args.command == "status":
 
         if os.path.exists(pid_path):
-            print("expose pid file does exist.")
+            print(f"expose pid file ({pid_path}) does exist.")
         else:
-            print("expose pid file does NOT exist.")
+            print(f"expose pid file ({pid_path}) does NOT exist.")
         
         print("\nHere is output of lsof filtered for expose processes.")
         command = "lsof -i -P -n | grep LISTEN | grep lt"

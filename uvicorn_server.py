@@ -18,7 +18,7 @@ def main():
     if args.command == "start":
 
         if os.path.exists(log_path):
-            exit("uvicorn pid file aleady exists. Turn off uvicorn first.")
+            exit(f"uvicorn pid file ({pid_path}) aleady exists. Turn off uvicorn first.")
 
         command = f"nohup uvicorn retriever_server:app --port {args.port} > {log_path} &"
         print(command)
@@ -27,7 +27,7 @@ def main():
     elif args.command == "stop":
 
         if not os.path.exists(pid_path):
-            exit("uvicorn pid file not found. Recheck if it's running or turn it off manually.")
+            exit(f"uvicorn pid file ({pid_path}) not found. Recheck if it's running or turn it off manually.")
 
         command = f"pkill -F {pid_path}"
         print(command)
@@ -39,9 +39,9 @@ def main():
     elif args.command == "status":
 
         if os.path.exists(pid_path):
-            print("uvicorn pid file does exist.")
+            print(f"uvicorn pid file ({pid_path}) does exist.")
         else:
-            print("uvicorn pid file does NOT exist.")
+            print(f"uvicorn pid file ({pid_path}) does NOT exist.")
         
         print("\nHere is output of lsof filtered for uvicorn processes.")
         command = "lsof -i -P -n | grep LISTEN | grep uvicorn"

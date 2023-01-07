@@ -1,12 +1,8 @@
-from typing import List, Dict, Union
+from typing import List, Dict
 import argparse
-import json
 
-from tqdm import tqdm
 from collections import OrderedDict
-import elasticsearch
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
 
 
 class ElasticsearchRetriever:

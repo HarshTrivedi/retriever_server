@@ -29,7 +29,7 @@ def main():
         if os.path.exists(uv_pid_path):
             print(f"uvicorn pid file ({uv_pid_path}) aleady exists. Turn off uvicorn first.")
         if os.path.exists(ex_pid_path):
-            uvicorn_expose_server.py(f"expose pid file ({ex_pid_path}) aleady exists. Turn off expose first.")
+            print(f"expose pid file ({ex_pid_path}) aleady exists. Turn off expose first.")
 
         # Start the uvicorn server
         command = f"nohup uvicorn retriever_server:app --port {args.port} > {uv_log_path} 2>&1 & \necho $! > {uv_pid_path}"

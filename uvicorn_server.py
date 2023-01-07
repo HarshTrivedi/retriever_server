@@ -67,7 +67,7 @@ def main():
         if not os.path.exists(log_path):
             print("uvicorn log file does not exist.")
         else:
-            command = f"cat {log_path}"
+            command = f"tail -f {log_path}"
             print(command)
             subprocess.call(command, shell=True)
 

@@ -88,7 +88,7 @@ class ContrieverRetriever:
         paragraphs = src.data.load_passages(self.config.paragraphs_path)
         self.paragraph_id_map = {x["id"]: x for x in tqdm(paragraphs)}
         self.paragraph_title_to_index_ids = defaultdict(list)
-        db_id_to_index_id = {db_id: index_id for index_id, db_id in tqdm(enumerate(self.index_id_to_db_id))}
+        db_id_to_index_id = {db_id: index_id for index_id, db_id in tqdm(enumerate(self.index.index_id_to_db_id))}
         for paragraph in tqdm(paragraphs):
             title = normalize_title(paragraph["title"])
             index_id = db_id_to_index_id[paragraph["id"]]

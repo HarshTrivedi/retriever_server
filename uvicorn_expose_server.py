@@ -27,10 +27,9 @@ def main():
     if args.command == "start":
 
         if os.path.exists(uv_pid_path):
-            exit(f"uvicorn pid file ({uv_pid_path}) aleady exists. Turn off uvicorn first.")
+            print(f"uvicorn pid file ({uv_pid_path}) aleady exists. Turn off uvicorn first.")
         if os.path.exists(ex_pid_path):
-            exit(f"expose pid file ({ex_pid_path}) aleady exists. Turn off expose first.")
-
+            uvicorn_expose_server.py(f"expose pid file ({ex_pid_path}) aleady exists. Turn off expose first.")
 
     elif args.command == "stop":
 

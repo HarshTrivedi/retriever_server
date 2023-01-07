@@ -20,13 +20,22 @@ def main():
         if os.path.exists(pid_path):
             exit(f"uvicorn pid file ({pid_path}) aleady exists. Turn off uvicorn first.")
 
-        command = f"nohup uvicorn retriever_server:app --port {args.port} > {log_path} 2>&1 &"
-        print(command)
-        subprocess.call(command, shell=True)
+        command = f"nohup uvicorn retriever_server:app --port {args.port} > {log_path} 2>&1 & \necho $! > {pid_path}"
+        subprocess.Popen(command, shell=True)
 
-        command = f"echo $! > {pid_path}"
+        time.sleep(1)
+        if not os.path.exist(pid_path):
+            exit(f"The uvicorn server started but the pid file ({pid_path}) couldn not be found.")
+
+        with open(pid_path, "r") as file:
+            pid = file.read().strip()
+        print(f"The uvicorn server has started with pid: {pid}.")
+
+        print("Here are the tailed logs. Terminating logs won't affect the process.")
+        command = f"tail -f {log_path}"
         print(command)
-        subprocess.call(command, shell=True)
+        os.subprocess(command, shell=True)
+
 
     elif args.command == "stop":
 
@@ -49,7 +58,7 @@ def main():
             print(f"uvicorn pid file ({pid_path}) does exist.")
         else:
             print(f"uvicorn pid file ({pid_path}) does NOT exist.")
-        
+
         print("\nHere is output of lsof filtered for uvicorn processes.")
         command = "lsof -i -P -n | grep LISTEN | grep uvicorn"
         print(command)

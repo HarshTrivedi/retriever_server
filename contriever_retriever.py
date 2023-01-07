@@ -137,7 +137,7 @@ class ContrieverRetriever:
                 "id": paragraph_id,
                 "title": paragraph["title"].strip(),
                 "paragraph_text": paragraph["text"].strip(),
-                "score": score,
+                "score": float(score),
                 "is_abstract": False,
                 "url": None,
                 "corpus_name": self._corpus_name,

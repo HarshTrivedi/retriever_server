@@ -1,5 +1,6 @@
 from typing import List, Dict
 from dataclasses import dataclass
+from collections import defaultdict
 import argparse
 import glob
 import os
@@ -7,6 +8,7 @@ import sys
 import json
 import time
 
+from tqdm import tqdm
 import _jsonnet
 
 CONTRIEVER_DATA_PATH = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))["CONTRIEVER_DATA_PATH"]
@@ -16,6 +18,10 @@ sys.path.insert(0, "contriever") # Make sure to clone the repository and install
 import src.contriever
 import src.index
 from passage_retrieval import embed_queries, index_encoded_data
+
+
+def normalize_title(title):
+    return title.strip().lower().replace(" ", "")
 
 
 @dataclass
@@ -79,7 +85,10 @@ class ContrieverRetriever:
         # load paragraphs
         print("Loading contriever paragraphs...")
         paragraphs = src.data.load_passages(self.config.paragraphs_path)
-        self.paragraph_id_map = {x["id"]: x for x in paragraphs}
+        self.paragraph_id_map = {x["id"]: x for x in tqdm(paragraphs)}
+        self.paragraph_title_to_ids = defaultdict(list)
+        for paragraph in tqdm(paragraphs):
+            self.paragraph_title_to_ids[normalize_title(paragraph["title"])].append(int(paragraph["id"]))
         del paragraphs
         print("...Done.")
 
@@ -89,7 +98,6 @@ class ContrieverRetriever:
         query_text: str,
         corpus_name: str,
         max_hits_count: int,
-        buffer_count: int = 300,
         allowed_titles: List[str] = None,
     ) -> List[Dict]:
 
@@ -99,14 +107,11 @@ class ContrieverRetriever:
             paragraph_ids, _ = self.index.search_knn(query_embeddings, max_hits_count)[0]
             paragraphs = [self.paragraph_id_map[paragraph_id] for paragraph_id in paragraph_ids]
         else:
-            assert buffer_count > max_hits_count
-            normalize_title = lambda title: title.strip().lower().replace(" ", "")
-            allowed_titles = [normalize_title(title) for title in allowed_titles]
-            paragraph_ids, _ = self.index.search_knn(query_embeddings, buffer_count)[0]
-            paragraphs = [
-                self.paragraph_id_map[paragraph_id] for paragraph_id in paragraph_ids
-                if normalize_title(self.paragraph_id_map[paragraph_id]["title"]) in allowed_titles
-            ][:max_hits_count]
+            # NOTE: faiss > 1.7.3 is needed for this.
+            allowed_ids = [
+                id_ for title in allowed_titles for id_ in self.paragraph_title_to_ids[normalize_title(title)]
+            ]
+            paragraph_ids, _ = self.index.search_knn(query_embeddings, max_hits_count, allowed_ids)[0]
 
         assert corpus_name == self._corpus_name, \
             f"Mismatching corpus_names ({corpus_name} != {self._corpus_name})"

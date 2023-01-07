@@ -69,7 +69,7 @@ def main():
 
     elif args.command == "log":
 
-        if os.path.exists(log_path):
+        if not os.path.exists(log_path):
             print("expose log file does not exist.")
         else:
             command = f"cat {log_path}"

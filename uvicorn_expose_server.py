@@ -38,7 +38,8 @@ def main():
         ):
 
             if not os.path.exists(pid_path):
-                exit(f"{name} pid file ({pid_path}) not found. Recheck if it's running or turn it off manually.")
+                print(f"{name} pid file ({pid_path}) not found. Recheck if it's running or turn it off manually.")
+                continue
 
             command = f"pkill -F {pid_path}"
             print(command)

@@ -3,6 +3,8 @@
 
 import os
 import time
+import json
+import _jsonnet
 import argparse
 import subprocess
 
@@ -25,6 +27,9 @@ def main():
     ex_log_path = os.path.expanduser(f"~/.ex_{args.port}.log")
 
     if args.command == "start":
+
+        if not os.path.exists(".retriever_config.jsonnet"):
+            exit("The .retriever_config.jsonnet is not available.")
 
         if os.path.exists(uv_pid_path):
             print(f"uvicorn pid file ({uv_pid_path}) aleady exists. Turn off uvicorn first.")
@@ -62,6 +67,9 @@ def main():
         with open(ex_pid_path, "r") as file:
             pid = file.read().strip()
         print(f"The expose server has started with pid: {pid}.")
+
+        print("Used retriever args:")
+        print(json.dumps(json.loads(_jsonnet.evaluate_file(".retriever_config.jsonnet")), indent=4))
 
         print("Here is the output from the server. Terminating output won't affect the process.")
         command = f"cat {ex_log_path}"

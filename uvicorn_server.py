@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os
 import time
+import json
+import _jsonnet
 import argparse
 import subprocess
 
@@ -19,6 +21,9 @@ def main():
 
     if args.command == "start":
 
+        if not os.path.exists(".retriever_config.jsonnet"):
+            exit("The .retriever_config.jsonnet is not available.")
+
         if os.path.exists(pid_path):
             exit(f"uvicorn pid file ({pid_path}) aleady exists. Turn off uvicorn first.")
 
@@ -34,6 +39,9 @@ def main():
         with open(pid_path, "r") as file:
             pid = file.read().strip()
         print(f"The uvicorn server has started with pid: {pid}. See the logs by: './uvicorn_server.py -p {args.port} log'")
+
+        print("Used retriever args:")
+        print(json.dumps(json.loads(_jsonnet.evaluate_file(".retriever_config.jsonnet")), indent=4))
 
     elif args.command == "stop":
 

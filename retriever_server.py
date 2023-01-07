@@ -1,7 +1,7 @@
 import json
 import _jsonnet
 from time import perf_counter
-from fastapi import FastAPI, status, Response, Request
+from fastapi import FastAPI, Request
 
 from unified_retriever import UnifiedRetriever
 

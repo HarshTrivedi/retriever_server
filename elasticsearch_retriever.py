@@ -48,7 +48,7 @@ class ElasticsearchRetriever:
             assert corpus_name != None, \
             "The corpus_name is initialized as auto. So you need to pass it at runtime."
         else:
-            assert corpus_name == None, \
+            assert corpus_name in (None, self._corpus_name), \
             "The corpus_name is not initialized as auto. So you can't pass it at runtime."
 
         index_name = f"{corpus_name or self._corpus_name}-wikipedia"
@@ -156,7 +156,7 @@ class ElasticsearchRetriever:
             assert corpus_name != None, \
             "The corpus_name is initialized as auto. So you need to pass it at runtime."
         else:
-            assert corpus_name == None, \
+            assert corpus_name in (None, self._corpus_name), \
             "The corpus_name is not initialized as auto. So you can't pass it at runtime."
 
         index_name = f"{corpus_name or self._corpus_name}-wikipedia"
@@ -204,7 +204,7 @@ class ElasticsearchRetriever:
             assert corpus_name != None, \
             "The corpus_name is initialized as auto. So you need to pass it at runtime."
         else:
-            assert corpus_name == None, \
+            assert corpus_name in (None, self._corpus_name), \
             "The corpus_name is not initialized as auto. So you can't pass it at runtime."
 
         index_name = f"{corpus_name or self._corpus_name}-wikipedia"

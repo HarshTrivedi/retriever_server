@@ -32,7 +32,7 @@ def main():
             uvicorn_expose_server.py(f"expose pid file ({ex_pid_path}) aleady exists. Turn off expose first.")
 
         # Start the uvicorn server
-        command = f"nohup uvicorn retriever_server:app --port {args.port} > {log_path} 2>&1 & \necho $! > {pid_path}"
+        command = f"nohup uvicorn retriever_server:app --port {args.port} > {uv_log_path} 2>&1 & \necho $! > {uv_pid_path}"
         subprocess.Popen(command, shell=True)
 
         time.sleep(1)

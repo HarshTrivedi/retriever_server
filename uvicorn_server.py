@@ -25,7 +25,7 @@ def main():
         subprocess.Popen(command, shell=True)
 
         time.sleep(1)
-        if not os.path.exist(pid_path):
+        if not os.path.exists(pid_path):
             exit(f"The uvicorn server started but the pid file ({pid_path}) couldn not be found.")
 
         with open(pid_path, "r") as file:

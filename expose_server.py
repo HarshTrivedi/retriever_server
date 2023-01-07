@@ -21,7 +21,7 @@ def main():
         if os.path.exists(log_path):
             exit("expose pid file aleady exists. Turn off expose first.")
 
-        command += f"nohup lt --port {args.port} > {log_path} &"
+        command = f"nohup lt --port {args.port} > {log_path} &"
         subprocess.call(command, shell=True)
 
         time.sleep(3)

@@ -87,9 +87,13 @@ class ContrieverRetriever:
         print("Loading contriever paragraphs...")
         paragraphs = src.data.load_passages(self.config.paragraphs_path)
         self.paragraph_id_map = {x["id"]: x for x in tqdm(paragraphs)}
-        self.paragraph_title_to_ids = defaultdict(list)
+        self.paragraph_title_to_index_ids = defaultdict(list)
+        db_id_to_index_id = {db_id: index_id for index_id, db_id in tqdm(enumerate(self.index_id_to_db_id))}
         for paragraph in tqdm(paragraphs):
-            self.paragraph_title_to_ids[normalize_title(paragraph["title"])].append(int(paragraph["id"]))
+            title = normalize_title(paragraph["title"])
+            index_id = db_id_to_index_id[paragraph["id"]]
+            self.paragraph_title_to_index_ids[title].append(index_id)
+        del db_id_to_index_id
         del paragraphs
         print("...Done.")
 
@@ -105,16 +109,24 @@ class ContrieverRetriever:
         query_embeddings = embed_queries(self.config, [query_text], self.model, self.tokenizer)
 
         if allowed_titles is None:
-            paragraph_ids, _ = self.index.search_knn(query_embeddings, max_hits_count)[0]
+            paragraph_ids, scores = self.index.search_knn(query_embeddings, max_hits_count)[0]
         else:
             # NOTE: faiss > 1.7.3 is needed for this.
-            allowed_ids = [
-                id_ for title in allowed_titles for id_ in self.paragraph_title_to_ids[normalize_title(title)]
+            allowed_titles = [normalize_title(title) for title in allowed_titles]
+            allowed_index_ids = [
+                id_ for title in allowed_titles for id_ in self.paragraph_title_to_index_ids[title]
             ]
-            allowed_ids = np.array(allowed_ids, dtype=np.int64)
-            paragraph_ids, _ = self.index.search_knn(
-                query_embeddings, max_hits_count, allowed_ids=allowed_ids
+            allowed_index_ids = np.array(allowed_index_ids, dtype=np.int64)
+            paragraph_ids, scores = self.index.search_knn(
+                query_embeddings, max_hits_count, allowed_index_ids=allowed_index_ids
             )[0]
+            paragraph_ids_scores = [
+                (paragraph_id, score) for paragraph_id, score in zip(paragraph_ids, scores)
+                if normalize_title(self.paragraph_id_map[paragraph_id]["title"]) in allowed_titles
+            ]
+            paragraph_ids = [paragraph_id for paragraph_id, _ in paragraph_ids_scores]
+            scores = [score for _, score in paragraph_ids_scores]
+
         paragraphs = [self.paragraph_id_map[paragraph_id] for paragraph_id in paragraph_ids]
 
         assert corpus_name == self._corpus_name, \
@@ -125,11 +137,12 @@ class ContrieverRetriever:
                 "id": paragraph_id,
                 "title": paragraph["title"].strip(),
                 "paragraph_text": paragraph["text"].strip(),
+                "score": score,
                 "is_abstract": False,
                 "url": None,
                 "corpus_name": self._corpus_name,
             }
-            for paragraph_id, paragraph in zip(paragraph_ids, paragraphs)
+            for paragraph_id, paragraph, score in zip(paragraph_ids, paragraphs, scores)
             if len(paragraph["text"].strip().split()) >= 5
         ]
 

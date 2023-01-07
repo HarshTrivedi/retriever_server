@@ -20,7 +20,11 @@ def main():
         if os.path.exists(pid_path):
             exit(f"uvicorn pid file ({pid_path}) aleady exists. Turn off uvicorn first.")
 
-        command = f"nohup uvicorn retriever_server:app --port {args.port} > {log_path} &"
+        command = f"nohup uvicorn retriever_server:app --port {args.port} > {log_path} 2>&1 &"
+        print(command)
+        subprocess.call(command, shell=True)
+
+        command = f"echo $! > {log_path}"
         print(command)
         subprocess.call(command, shell=True)
 

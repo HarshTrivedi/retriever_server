@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import time
 import argparse
@@ -10,7 +11,7 @@ def main():
         "command", type=str, help="start, stop, check status or see logs",
         choices=("start", "stop", "status", "log")
     )
-    parser.add_argument("port", type=int, help="port number", default=8000)
+    parser.add_argument("--port", "-p", type=int, help="port number", default=8000)
     args = parser.parse_args()
 
     pid_path = os.path.expanduser(f"~/.ex_{args.port}.pid")

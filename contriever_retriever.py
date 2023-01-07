@@ -105,13 +105,15 @@ class ContrieverRetriever:
 
         if allowed_titles is None:
             paragraph_ids, _ = self.index.search_knn(query_embeddings, max_hits_count)[0]
-            paragraphs = [self.paragraph_id_map[paragraph_id] for paragraph_id in paragraph_ids]
         else:
             # NOTE: faiss > 1.7.3 is needed for this.
             allowed_ids = [
                 id_ for title in allowed_titles for id_ in self.paragraph_title_to_ids[normalize_title(title)]
             ]
-            paragraph_ids, _ = self.index.search_knn(query_embeddings, max_hits_count, allowed_ids)[0]
+            paragraph_ids, _ = self.index.search_knn(
+                query_embeddings, max_hits_count, allowed_ids=allowed_ids
+            )[0]
+        paragraphs = [self.paragraph_id_map[paragraph_id] for paragraph_id in paragraph_ids]
 
         assert corpus_name == self._corpus_name, \
             f"Mismatching corpus_names ({corpus_name} != {self._corpus_name})"

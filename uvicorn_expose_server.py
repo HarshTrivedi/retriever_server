@@ -31,6 +31,43 @@ def main():
         if os.path.exists(ex_pid_path):
             uvicorn_expose_server.py(f"expose pid file ({ex_pid_path}) aleady exists. Turn off expose first.")
 
+        # Start the uvicorn server
+        command = f"nohup uvicorn retriever_server:app --port {args.port} > {log_path} 2>&1 & \necho $! > {pid_path}"
+        subprocess.Popen(command, shell=True)
+
+        time.sleep(1)
+        if not os.path.exists(uv_pid_path):
+            exit(f"The uvicorn server started but the pid file ({uv_pid_path}) couldn not be found.")
+        if not os.path.exists(uv_log_path):
+            exit(f"The uvicorn server started but the log file ({uv_log_path}) couldn not be found.")
+
+        with open(uv_pid_path, "r") as file:
+            pid = file.read().strip()
+        print(f"The uvicorn server has started with pid: {pid}. See the logs by: './uvicorn_server.py -p {args.port} log'")
+
+        # Wait for the uvicorn server to start properly (probably not necessary)
+        print("Waiting for 5s.")
+        time.sleep(5)
+
+        # Start the expose expose_server
+        command = f"nohup lt --port {args.port} > {ex_log_path} 2>&1 & \necho $! > {ex_pid_path}"
+        subprocess.Popen(command, shell=True)
+
+        time.sleep(1)
+        if not os.path.exists(ex_pid_path):
+            exit(f"The expose server started but the pid file ({ex_pid_path}) couldn not be found.")
+        if not os.path.exists(ex_log_path):
+            exit(f"The uvicorn server started but the log file ({ex_log_path}) couldn not be found.")
+
+        with open(ex_pid_path, "r") as file:
+            pid = file.read().strip()
+        print(f"The expose server has started with pid: {pid}.")
+
+        print("Here is the output from the server. Terminating output won't affect the process.")
+        command = f"cat {ex_log_path}"
+        print(command)
+        subprocess.call(command, shell=True)
+
     elif args.command == "stop":
 
         for name, pid_path, log_path, in zip(

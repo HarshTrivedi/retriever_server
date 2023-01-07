@@ -25,7 +25,7 @@ def main():
         print(command)
         subprocess.call(command, shell=True)
 
-        command = f"echo $! > {log_path}"
+        command = f"echo $! > {pid_path}"
         print(command)
         subprocess.call(command, shell=True)
 

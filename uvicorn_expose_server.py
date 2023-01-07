@@ -22,6 +22,7 @@ def main():
 
     uv_pid_path = os.path.expanduser(f"~/.uv_{args.port}.pid")
     uv_log_path = os.path.expanduser(f"~/.uv_{args.port}.log")
+    uv_config_path = os.path.expanduser(f"~/.uv_{args.port}.json")
 
     ex_pid_path = os.path.expanduser(f"~/.ex_{args.port}.pid")
     ex_log_path = os.path.expanduser(f"~/.ex_{args.port}.log")
@@ -69,7 +70,10 @@ def main():
         print(f"The expose server has started with pid: {pid}.")
 
         print("Used retriever args:")
-        print(json.dumps(json.loads(_jsonnet.evaluate_file(".retriever_config.jsonnet")), indent=4))
+        config = json.dumps(json.loads(_jsonnet.evaluate_file(".retriever_config.jsonnet")), indent=4)
+        print(config)
+        with open(uv_config_path, "w") as file:
+            file.write(config)
 
         print("Here is the output from the server. Terminating output won't affect the process.")
         command = f"cat {ex_log_path}"
@@ -105,6 +109,11 @@ def main():
                 print(f"{name} pid file ({pid_path}) does exist.")
             else:
                 print(f"{name} pid file ({pid_path}) does NOT exist.")
+
+        if os.path.exists(uv_config_path):
+            subprocess.call(f"cat {uv_config_path}", shell=True)
+        else:
+            print(f"The config path ({uv_config_path}) not found.")
 
     elif args.command == "address":
 

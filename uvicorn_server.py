@@ -18,6 +18,7 @@ def main():
 
     pid_path = os.path.expanduser(f"~/.uv_{args.port}.pid")
     log_path = os.path.expanduser(f"~/.uv_{args.port}.log")
+    config_path = os.path.expanduser(f"~/.uv_{args.port}.json")
 
     if args.command == "start":
 
@@ -41,7 +42,10 @@ def main():
         print(f"The uvicorn server has started with pid: {pid}. See the logs by: './uvicorn_server.py -p {args.port} log'")
 
         print("Used retriever args:")
-        print(json.dumps(json.loads(_jsonnet.evaluate_file(".retriever_config.jsonnet")), indent=4))
+        config = json.dumps(json.loads(_jsonnet.evaluate_file(".retriever_config.jsonnet")), indent=4)
+        print(config)
+        with open(config_path, "w") as file:
+            file.write(config)
 
     elif args.command == "stop":
 
@@ -69,6 +73,11 @@ def main():
         command = "lsof -i -P -n | grep LISTEN | grep uvicorn"
         print(command)
         subprocess.call(command, shell=True)
+
+        if os.path.exists(config_path):
+            subprocess.call(f"cat {config_path}", shell=True)
+        else:
+            print(f"The config path ({config_path}) not found.")
 
     elif args.command == "log":
 

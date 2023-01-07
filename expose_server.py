@@ -18,7 +18,7 @@ def main():
 
     if args.command == "start":
 
-        if os.path.exists(log_path):
+        if os.path.exists(pid_path):
             exit(f"expose pid file ({pid_path}) aleady exists. Turn off expose first.")
 
         command = f"nohup lt --port {args.port} > {log_path} &"
@@ -45,6 +45,9 @@ def main():
 
         if os.path.exists(pid_path):
             os.remove(pid_path)
+
+        if os.path.exists(log_path):
+            os.remove(log_path)
 
     elif args.command == "status":
 

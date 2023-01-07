@@ -33,7 +33,7 @@ class UnifiedRetriever:
     def __init__(
         self,
         # Elasticsearch init args:
-        dataset_name: str = "hotpotqa",
+        elasticsearch_dataset_name: str = "auto",
         elasticsearch_host: str = "http://localhost/",
         elasticsearch_port: int = 9200,
         # Blink init args:
@@ -42,21 +42,32 @@ class UnifiedRetriever:
         blink_fast: bool = False,
         blink_top_k: int = 1,
         # DPR init args:
+        dpr_dataset_name: str = "hotpotqa",
         dpr_faiss_index_type: str = "flat", # "flat" or "hnsw",
         dpr_query_model_path: str = "facebook/dpr-question_encoder-multiset-base",
         dpr_device: str = "cpu",
+        # Contriever init args:
+        contriever_dataset_name: str = "hotpotqa",
         # what to initialize:
         initialize_retrievers: Tuple[str, str] = ("blink", "elasticsearch", "dpr", "contriever"),
     ):
 
-        corpus_name = "musique" if dataset_name == "musique_ans" else dataset_name
-        self._limit_to_abstracts = corpus_name == "hotpotqa"
+        elasticsearch_corpus_name = (
+            "musique" if elasticsearch_dataset_name == "musique_ans" else elasticsearch_dataset_name
+        )
+        self._limit_to_abstracts = elasticsearch_corpus_name == "hotpotqa"
+        dpr_corpus_name = (
+            "musique" if dpr_dataset_name == "musique_ans" else dpr_dataset_name
+        )
+        contriever_corpus_name = (
+            "musique" if contriever_dataset_name == "musique_ans" else contriever_dataset_name
+        )
 
         self._elasticsearch_retriever = None
         if "elasticsearch" in initialize_retrievers:
             from elasticsearch_retriever import ElasticsearchRetriever
             self._elasticsearch_retriever = ElasticsearchRetriever(
-                corpus_name=corpus_name,
+                corpus_name=elasticsearch_corpus_name,
                 elasticsearch_host=elasticsearch_host,
                 elasticsearch_port=elasticsearch_port,
             )
@@ -77,7 +88,7 @@ class UnifiedRetriever:
         if "dpr" in initialize_retrievers:
             from dpr_retriever import DprRetriever
             self._dpr_retriever = DprRetriever(
-                corpus_name=corpus_name,
+                corpus_name=dpr_corpus_name,
                 index_type=dpr_faiss_index_type,
                 hf_query_model_name_or_path=dpr_query_model_path,
                 device=dpr_device,
@@ -86,7 +97,7 @@ class UnifiedRetriever:
         self._contriever_retriever = None
         if "contriever" in initialize_retrievers:
             from contriever_retriever import ContrieverRetriever
-            self._contriever_retriever = ContrieverRetriever(corpus_name=corpus_name)
+            self._contriever_retriever = ContrieverRetriever(corpus_name=contriever_corpus_name)
 
 
     def retrieve_from_elasticsearch(

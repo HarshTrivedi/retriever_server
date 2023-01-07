@@ -1,6 +1,7 @@
 from typing import List, Dict
 from dataclasses import dataclass
 from collections import defaultdict
+import numpy as np
 import argparse
 import glob
 import os
@@ -110,6 +111,7 @@ class ContrieverRetriever:
             allowed_ids = [
                 id_ for title in allowed_titles for id_ in self.paragraph_title_to_ids[normalize_title(title)]
             ]
+            allowed_ids = np.array(allowed_ids, dtype=np.int64)
             paragraph_ids, _ = self.index.search_knn(
                 query_embeddings, max_hits_count, allowed_ids=allowed_ids
             )[0]

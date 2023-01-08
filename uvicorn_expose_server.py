@@ -123,7 +123,7 @@ def main():
         if not os.path.exists(ex_log_path):
             print("expose log file does not exist, so the address can't be determined.")
         else:
-            command = f"cat {log_path}"
+            command = f"cat {ex_log_path}"
             print(command)
             subprocess.call(command, shell=True)
 

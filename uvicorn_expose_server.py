@@ -56,7 +56,7 @@ def main():
         time.sleep(5)
 
         # Start the expose expose_server
-        command = f"nohup lt --port {args.port} > {ex_log_path} 2>&1 & \necho $! > {ex_pid_path}"
+        command = f"nohup bore local {args.port} --to bore.pub > {ex_log_path} 2>&1 & \necho $! > {ex_pid_path}"
         subprocess.Popen(command, shell=True)
 
         time.sleep(1)

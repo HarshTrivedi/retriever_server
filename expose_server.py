@@ -22,7 +22,7 @@ def main():
         if os.path.exists(pid_path):
             exit(f"expose pid file ({pid_path}) aleady exists. Turn off expose first.")
 
-        command = f"nohup lt --port {args.port} > {log_path} 2>&1 & \necho $! > {pid_path}"
+        command = f"bore local {args.port} --to bore.pub > {log_path} 2>&1 & \necho $! > {pid_path}"
         subprocess.Popen(command, shell=True)
 
         time.sleep(1)
@@ -63,7 +63,7 @@ def main():
             print(f"expose pid file ({pid_path}) does NOT exist.")
         
         print("\nHere is output of lsof filtered for expose processes.")
-        command = "lsof -i -P -n | grep LISTEN | grep lt"
+        command = "lsof -i -P -n | grep LISTEN | grep bore"
         print(command)
         subprocess.call(command, shell=True)
 

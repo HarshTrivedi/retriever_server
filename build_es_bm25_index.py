@@ -199,7 +199,7 @@ def get_cleaned_wikipedia_page_to_es_chunked_document(
                 is_abstract = True
                 is_abstract_added = True
 
-            metadata = {
+            metadata_ = {
                 "page_id": page_id,
                 "document_type": document_type,
                 "document_path": section_path,
@@ -215,7 +215,7 @@ def get_cleaned_wikipedia_page_to_es_chunked_document(
                 "paragraph_text": sub_document_text,
                 "url": page_url,
                 "is_abstract": is_abstract,
-                "metadata": json.dumps(metadata),
+                "metadata": json.dumps(metadata_),
             }
             document = {
                 "_op_type": "create",

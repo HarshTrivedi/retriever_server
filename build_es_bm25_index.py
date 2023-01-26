@@ -36,6 +36,22 @@ def hash_object(o: Any) -> str:
         return base58.b58encode(m.digest()).decode()
 
 
+def fix_wikipedia_page(wikipedia_page: Dict):
+    # I had made a small mistake in converting the original format
+    # to the new format. It's not worth redoing the full processing again,
+    # so for now at least, I'm just correcting it posthoc.
+    for section in wikipedia_page["sections"]:
+        document_type_plural = {
+            "paragraph": "paragraphs", "infobox": "infoboxes", "table": "tables", "list": "lists"
+        }
+        for document_type in document_type_plural.keys():
+            for document in section[document_type_plural[document_type]]:
+                assert "chunked_lists" in document
+                if document_type == "list":
+                    continue
+                document[f"chunked_{document_type_plural[document_type]}"] = document.pop("chunked_lists")
+
+
 def get_cleaned_wikipedia_page_to_es_document(
     elasticsearch_index: str,
     wikipedia_page: Dict,
@@ -519,6 +535,7 @@ def make_natcq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
                 print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
             wikipedia_page = json.loads(line)
+            fix_wikipedia_page(wikipedia_page)
             for document in get_cleaned_wikipedia_page_to_es_document(
                 elasticsearch_index, wikipedia_page, indexed_document_ids, metadata,
                 show_repetition_warning=True
@@ -552,6 +569,7 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict =
                 print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
             wikipedia_page = json.loads(line)
+            fix_wikipedia_page(wikipedia_page)
             for document in get_cleaned_wikipedia_page_to_es_chunked_document(
                 elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata,
                 show_repetition_warning=True

@@ -582,7 +582,7 @@ def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
                 if line_index % 200000 == 0:
                     print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
-                wikipedia_page = json.loads(line)
+                wikipedia_page = json.loads(line)["context_data"]
                 for document in get_cleaned_wikipedia_page_to_es_document(
                     elasticsearch_index, wikipedia_page, indexed_document_ids, metadata
                 ):

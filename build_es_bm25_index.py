@@ -567,6 +567,242 @@ def make_natcq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
             metadata["idx"] += 1
 
 
+def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
+
+    natcq_path = "../natcq"
+
+    input_filepaths = [
+        os.path.join(natcq_path, "processed_datasets", "natcq", "dev.jsonl"),
+        os.path.join(natcq_path, "processed_datasets", "natcq", "train.jsonl")
+    ]
+    metadata = metadata or {"idx": 1}
+    assert "idx" in metadata
+
+    random.seed(13370)  # Don't change.
+
+    line_skip_count = 0
+
+    indexed_document_ids = set()
+
+    for input_filepath in input_filepaths:
+
+        with open(input_filepath, "r") as file:
+
+            for line_index, line in tqdm(enumerate(file)):
+
+                if len(line) > 1000000:
+                    line_skip_count += 1
+                    continue
+
+                if line_index % 200000 == 0:
+                    print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
+
+                page = json.loads(line)
+                page_title = page["title"]
+                page_id = page["id"]
+                page_url = page["url"]
+
+                is_abstract_added = False
+                for section in page["sections"]:
+
+                    section_index = section["index"]
+                    section_path = section["path"]
+
+                    document_infos = []
+                    plural = {
+                        "paragraph": "paragraphs",
+                        "list": "lists",
+                        "infobox": "infoboxes",
+                        "table": "tables",
+                    }
+                    for document_type in ["paragraph", "list", "infobox", "table"]:
+                        for document in section[plural[document_type]]:
+                            document_index = document["index"]
+                            document_text = document["text"]
+                            document_data = document["data"]
+                            document_id = document["id"]
+                            document_infos.append(
+                                [
+                                    document_id,
+                                    document_index,
+                                    document_text,
+                                    document_data,
+                                    document_type,
+                                ]
+                            )
+
+                    for document_info in document_infos:
+
+                        (
+                            document_id,
+                            document_index,
+                            document_text,
+                            document_data,
+                            document_type,
+                        ) = document_info
+
+                        if document_id in indexed_document_ids:
+                            print(
+                                "WARNING: Looks like a repeated document_id is being indexed."
+                            )
+
+                        is_abstract = False
+                        if not is_abstract_added:
+                            is_abstract = True
+                            is_abstract_added = True
+
+                        metadata = {
+                            "page_id": page_id,
+                            "document_type": document_type,
+                            "document_path": section_path,
+                            "document_data": document_data,
+                        }
+                        es_document = {
+                            "id": document_id,
+                            "title": page_title,
+                            "section_index": section_index,
+                            "section_path": section_path,
+                            "paragraph_type": document_type,
+                            "paragraph_index": document_index,
+                            "paragraph_text": document_text,
+                            "url": page_url,
+                            "is_abstract": is_abstract,
+                            "metadata": json.dumps(metadata),
+                        }
+                        document = {
+                            "_op_type": "create",
+                            "_index": elasticsearch_index,
+                            "_id": metadata["idx"],
+                            "_source": es_document,
+                        }
+                        yield (document)
+                        metadata["idx"] += 1
+
+                        indexed_document_ids.add(document_id)
+
+
+def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = None):
+
+    natcq_path = "../natcq"
+
+    input_filepaths = [
+        os.path.join(natcq_path, "processed_datasets", "natcq", "dev.jsonl"),
+        os.path.join(natcq_path, "processed_datasets", "natcq", "train.jsonl")
+    ]
+
+    metadata = metadata or {"idx": 1}
+    assert "idx" in metadata
+
+    random.seed(13370)  # Don't change.
+
+    line_skip_count = 0
+
+    indexed_sub_document_ids = set()
+
+    for input_filepath in input_filepaths:
+
+        with open(input_filepath, "r") as file:
+
+            for line_index, line in tqdm(enumerate(file)):
+
+                if len(line) > 1000000:
+                    line_skip_count += 1
+                    continue
+
+                if line_index % 200000 == 0:
+                    print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
+
+                page = json.loads(line)["context_data"]
+                # TODO: The rest is pretty much the same as natcq_chunked_docs. Abstract out.
+                page_title = page["title"]
+                page_id = page["id"]
+                page_url = page["url"]
+
+                is_abstract_added = False
+                for section in page["sections"]:
+
+                    section_index = section["index"]
+                    section_path = section["path"]
+
+                    sub_document_infos = []
+                    plural = {
+                        "paragraph": "paragraphs",
+                        "list": "lists",
+                        "infobox": "infoboxes",
+                        "table": "tables",
+                    }
+                    for document_type in ["paragraph", "list", "infobox", "table"]:
+                        for document in section[plural[document_type]]:
+                            document_index = document["index"]
+                            document_id = document["id"]
+
+                            for sub_document in document[
+                                f"chunked_{plural[document_type]}"
+                            ]:
+                                sub_document_id = sub_document["id"]
+                                sub_document_text = sub_document["text"]
+                                sub_document_infos.append(
+                                    [
+                                        document_type,
+                                        document_id,
+                                        document_index,
+                                        sub_document_id,
+                                        sub_document_index,
+                                        sub_document_text,
+                                    ]
+                                )
+
+                    for sub_document_info in sub_document_infos:
+
+                        (
+                            document_type,
+                            document_id,
+                            document_index,
+                            sub_document_id,
+                            sub_document_index,
+                            sub_document_text,
+                        ) = sub_document_info
+
+                        if sub_document_id in indexed_sub_document_ids:
+                            print(
+                                "WARNING: Looks like a repeated document_id is being indexed."
+                            )
+
+                        is_abstract = False
+                        if not is_abstract_added:
+                            is_abstract = True
+                            is_abstract_added = True
+
+                        metadata = {
+                            "page_id": page_id,
+                            "document_type": document_type,
+                            "document_path": section_path,
+                        }
+                        es_document = {
+                            "id": sub_document_id,
+                            "title": page_title,
+                            "section_index": section_index,
+                            "section_path": section_path,
+                            "paragraph_type": document_type,
+                            "paragraph_index": document_index,
+                            "paragraph_sub_index": sub_document_index,
+                            "paragraph_text": sub_document_text,
+                            "url": page_url,
+                            "is_abstract": is_abstract,
+                            "metadata": json.dumps(metadata),
+                        }
+                        document = {
+                            "_op_type": "create",
+                            "_index": elasticsearch_index,
+                            "_id": metadata["idx"],
+                            "_source": es_document,
+                        }
+                        yield (document)
+                        metadata["idx"] += 1
+
+                        indexed_sub_document_ids.add(sub_document_id)
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Index paragraphs in Elasticsearch")
@@ -583,7 +819,9 @@ if __name__ == "__main__":
             "hwm",
             "natcq_docs",
             "natcq_chunked_docs",
-            "natcq_pages",
+            "natq_docs",
+            "natq_chunked_docs",
+            "natcq_pages", # TODO: Not needed.
         ),
     )
     parser.add_argument(
@@ -700,7 +938,11 @@ if __name__ == "__main__":
         make_documents = make_natcq_docs_documents
     elif args.dataset_name == "natcq_chunked_docs":
         make_documents = make_natcq_chunked_docs_documents
-    elif args.dataset_name == "natcq_pages":
+    elif args.dataset_name == "natq_docs":
+        make_documents = make_natq_docs_documents
+    elif args.dataset_name == "natq_chunked_docs":
+        make_documents = make_natq_chunked_docs_documents
+    elif args.dataset_name == "natcq_pages": # TODO: Remove not needed now.
         make_documents = make_natcq_pages_documents
     else:
         raise Exception(f"Unknown dataset_name {args.dataset_name}")

@@ -579,11 +579,11 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict =
 
 def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
 
-    natq_path = "../natq"
+    natcq_path = "../natcq"
 
     input_filepaths = [
-        os.path.join(natq_path, "processed_datasets", "natq", "dev.jsonl"),
-        os.path.join(natq_path, "processed_datasets", "natq", "train.jsonl")
+        os.path.join(natcq_path, "processed_datasets", "natq", "dev.jsonl"),
+        os.path.join(natcq_path, "processed_datasets", "natq", "train.jsonl")
     ]
     metadata = metadata or {"idx": 1}
     assert "idx" in metadata
@@ -617,11 +617,11 @@ def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
 
 def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = None):
 
-    natq_path = "../natq"
+    natcq_path = "../natcq"
 
     input_filepaths = [
-        os.path.join(natq_path, "processed_datasets", "natq", "dev.jsonl"),
-        os.path.join(natq_path, "processed_datasets", "natq", "train.jsonl")
+        os.path.join(natcq_path, "processed_datasets", "natq", "dev.jsonl"),
+        os.path.join(natcq_path, "processed_datasets", "natq", "train.jsonl")
     ]
 
     metadata = metadata or {"idx": 1}

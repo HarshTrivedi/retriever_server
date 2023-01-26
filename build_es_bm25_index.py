@@ -547,6 +547,42 @@ def make_hwm_documents(elasticsearch_index: str, metadata: Dict = None):
         yield document
 
 
+def make_natcq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
+    raw_filepath = os.path.join(
+        WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
+    )
+    metadata = metadata or {"idx": 1}
+    assert "idx" in metadata
+
+    random.seed(13370)  # Don't change.
+
+    line_skip_count = 0
+
+    indexed_page_ids = set()
+
+    with gzip.open(raw_filepath, mode="rt") as file:
+
+        for line_index, line in tqdm(enumerate(file)):
+
+            if len(line) > 1000000:
+                line_skip_count += 1
+                continue
+
+            if line_index % 200000 == 0:
+                print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
+
+            wikipedia_page = json.loads(line)
+            document = get_cleaned_wikipedia_page_to_page_es_document(
+                elasticsearch_index,
+                wikipedia_page,
+                indexed_page_ids,
+                metadata,
+                show_repetition_warning=True
+            )
+            if document is not None:
+                yield document
+
+
 def make_natcq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
@@ -614,10 +650,14 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict =
                 yield document
 
 
-def make_natcq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
-    raw_filepath = os.path.join(
-        WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
-    )
+def make_natq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
+    natcq_path = "../natcq"
+
+    input_filepaths = [
+        os.path.join(natcq_path, "processed_datasets", "natq", "dev.jsonl"),
+        os.path.join(natcq_path, "processed_datasets", "natq", "train.jsonl")
+    ]
+
     metadata = metadata or {"idx": 1}
     assert "idx" in metadata
 
@@ -627,27 +667,29 @@ def make_natcq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
 
     indexed_page_ids = set()
 
-    with gzip.open(raw_filepath, mode="rt") as file:
+    for input_filepath in input_filepaths:
 
-        for line_index, line in tqdm(enumerate(file)):
+        with open(input_filepath, "r") as file:
 
-            if len(line) > 1000000:
-                line_skip_count += 1
-                continue
+            for line_index, line in tqdm(enumerate(file)):
 
-            if line_index % 200000 == 0:
-                print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
+                if len(line) > 1000000:
+                    line_skip_count += 1
+                    continue
 
-            wikipedia_page = json.loads(line)
-            document = get_cleaned_wikipedia_page_to_page_es_document(
-                elasticsearch_index,
-                wikipedia_page,
-                indexed_page_ids,
-                metadata,
-                show_repetition_warning=True
-            )
-            if document is not None:
-                yield document
+                if line_index % 200000 == 0:
+                    print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
+
+                wikipedia_page = json.loads(line)["context_data"]
+                document = get_cleaned_wikipedia_page_to_page_es_document(
+                    elasticsearch_index,
+                    wikipedia_page,
+                    indexed_page_ids,
+                    metadata,
+                    show_repetition_warning=True
+                )
+                if document is not None:
+                    yield document
 
 
 def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
@@ -724,48 +766,6 @@ def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = 
                     elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata,
                     show_repetition_warning=False
                 ):
-                    yield document
-
-
-def make_natq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
-    natcq_path = "../natcq"
-
-    input_filepaths = [
-        os.path.join(natcq_path, "processed_datasets", "natq", "dev.jsonl"),
-        os.path.join(natcq_path, "processed_datasets", "natq", "train.jsonl")
-    ]
-
-    metadata = metadata or {"idx": 1}
-    assert "idx" in metadata
-
-    random.seed(13370)  # Don't change.
-
-    line_skip_count = 0
-
-    indexed_page_ids = set()
-
-    for input_filepath in input_filepaths:
-
-        with open(input_filepath, "r") as file:
-
-            for line_index, line in tqdm(enumerate(file)):
-
-                if len(line) > 1000000:
-                    line_skip_count += 1
-                    continue
-
-                if line_index % 200000 == 0:
-                    print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
-
-                wikipedia_page = json.loads(line)["context_data"]
-                document = get_cleaned_wikipedia_page_to_page_es_document(
-                    elasticsearch_index,
-                    wikipedia_page,
-                    indexed_page_ids,
-                    metadata,
-                    show_repetition_warning=True
-                )
-                if document is not None:
                     yield document
 
 

@@ -163,6 +163,7 @@ def get_cleaned_wikipedia_page_to_es_chunked_document(
                     f"chunked_{plural[document_type]}"
                 ]:
                     sub_document_id = sub_document["id"]
+                    sub_document_index = sub_document["index"]
                     sub_document_text = sub_document["text"]
                     sub_document_infos.append(
                         [

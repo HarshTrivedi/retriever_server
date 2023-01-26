@@ -41,6 +41,7 @@ def get_cleaned_wikipedia_page_to_es_document(
     wikipedia_page: Dict,
     indexed_document_ids: Set[str],
     metadata: Dict,
+    show_repetition_warning: bool = False,
 ):
 
     page_title = wikipedia_page["title"]
@@ -87,9 +88,10 @@ def get_cleaned_wikipedia_page_to_es_document(
             ) = document_info
 
             if document_id in indexed_document_ids:
-                print(
-                    "WARNING: Looks like a repeated document_id is being indexed. Skipping it."
-                )
+                if show_repetition_warning:
+                    print(
+                        "WARNING: Looks like a repeated sub_document_id is being indexed. Skipping it."
+                    )
                 continue
 
             is_abstract = False
@@ -132,6 +134,7 @@ def get_cleaned_wikipedia_page_to_es_chunked_document(
     wikipedia_page: Dict,
     indexed_sub_document_ids: Set[str],
     metadata: Dict,
+    show_repetition_warning: bool = False,
 ):
 
     page_title = wikipedia_page["title"]
@@ -184,9 +187,10 @@ def get_cleaned_wikipedia_page_to_es_chunked_document(
             ) = sub_document_info
 
             if sub_document_id in indexed_sub_document_ids:
-                print(
-                    "WARNING: Looks like a repeated document_id is being indexed. Skipping it."
-                )
+                if show_repetition_warning:
+                    print(
+                        "WARNING: Looks like a repeated sub_document_id is being indexed. Skipping it."
+                    )
                 continue
 
             is_abstract = False
@@ -515,7 +519,8 @@ def make_natcq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
 
             wikipedia_page = json.loads(line)
             for document in get_cleaned_wikipedia_page_to_es_document(
-                elasticsearch_index, wikipedia_page, indexed_document_ids, metadata
+                elasticsearch_index, wikipedia_page, indexed_document_ids, metadata,
+                show_repetition_warning=True
             ):
                 yield document
 
@@ -547,7 +552,8 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict =
 
             wikipedia_page = json.loads(line)
             for document in get_cleaned_wikipedia_page_to_es_chunked_document(
-                elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata
+                elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata,
+                show_repetition_warning=True
             ):
                 yield document
 
@@ -584,7 +590,8 @@ def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
 
                 wikipedia_page = json.loads(line)["context_data"]
                 for document in get_cleaned_wikipedia_page_to_es_document(
-                    elasticsearch_index, wikipedia_page, indexed_document_ids, metadata
+                    elasticsearch_index, wikipedia_page, indexed_document_ids, metadata,
+                    show_repetition_warning=False
                 ):
                     yield document
 
@@ -622,7 +629,8 @@ def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = 
 
                 wikipedia_page = json.loads(line)["context_data"]
                 for document in get_cleaned_wikipedia_page_to_es_chunked_document(
-                    elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata
+                    elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata,
+                    show_repetition_warning=False
                 ):
                     yield document
 

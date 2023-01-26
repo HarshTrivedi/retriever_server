@@ -686,7 +686,7 @@ def make_natq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
                     wikipedia_page,
                     indexed_page_ids,
                     metadata,
-                    show_repetition_warning=True
+                    show_repetition_warning=False
                 )
                 if document is not None:
                     yield document

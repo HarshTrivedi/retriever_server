@@ -550,49 +550,6 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict =
             )
 
 
-def make_natcq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
-    raw_filepath = os.path.join(
-        WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
-    )
-    metadata = metadata or {"idx": 1}
-    assert "idx" in metadata
-
-    random.seed(13370)  # Don't change.
-
-    line_skip_count = 0
-
-    with gzip.open(raw_filepath, mode="rt") as file:
-
-        for line_index, line in tqdm(enumerate(file)):
-
-            if len(line) > 1000000:
-                line_skip_count += 1
-                continue
-
-            if line_index % 200000 == 0:
-                print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
-
-            page = json.loads(line)
-            page_title = page["title"]
-            page_id = page["id"]
-            page_url = page["url"]
-
-            es_document = {
-                "id": page_id,
-                "title": page_title,
-                "url": page_url,
-                "data": json.dumps(page),
-            }
-            document = {
-                "_op_type": "create",
-                "_index": elasticsearch_index,
-                "_id": metadata["idx"],
-                "_source": es_document,
-            }
-            yield (document)
-            metadata["idx"] += 1
-
-
 def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
 
     natcq_path = "../natcq"
@@ -684,7 +641,6 @@ if __name__ == "__main__":
             "natcq_chunked_docs",
             "natq_docs",
             "natq_chunked_docs",
-            "natcq_pages", # TODO: Not needed.
         ),
     )
     parser.add_argument(
@@ -756,14 +712,6 @@ if __name__ == "__main__":
             "analyzer": "english",
         }
 
-    if args.dataset_name == "natcq_pages":
-        paragraphs_index_settings["mappings"]["properties"].pop("paragraph_index")
-        paragraphs_index_settings["mappings"]["properties"].pop("paragraph_text")
-        paragraphs_index_settings["mappings"]["properties"].pop("is_abstract")
-        paragraphs_index_settings["mappings"]["properties"] = {
-            "data": {"type": "object", "index": False}
-        }
-
     index_exists = es.indices.exists(elasticsearch_index)
     print("Index already exists" if index_exists else "Index doesn't exist.")
 
@@ -805,8 +753,6 @@ if __name__ == "__main__":
         make_documents = make_natq_docs_documents
     elif args.dataset_name == "natq_chunked_docs":
         make_documents = make_natq_chunked_docs_documents
-    elif args.dataset_name == "natcq_pages": # TODO: Remove not needed now.
-        make_documents = make_natcq_pages_documents
     else:
         raise Exception(f"Unknown dataset_name {args.dataset_name}")
 

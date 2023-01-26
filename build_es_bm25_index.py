@@ -783,8 +783,10 @@ if __name__ == "__main__":
             "2wikimultihopqa",
             "musique_ans",
             "hwm",
+            "natcq_pages",
             "natcq_docs",
             "natcq_chunked_docs",
+            "natq_pages",
             "natq_docs",
             "natq_chunked_docs",
         ),
@@ -858,6 +860,14 @@ if __name__ == "__main__":
             "analyzer": "english",
         }
 
+    if args.dataset_name in ("natcq_pages", "natq_pages"):
+        paragraphs_index_settings["mappings"]["properties"].pop("paragraph_index")
+        paragraphs_index_settings["mappings"]["properties"].pop("paragraph_text")
+        paragraphs_index_settings["mappings"]["properties"].pop("is_abstract")
+        paragraphs_index_settings["mappings"]["properties"] = {
+            "data": {"type": "object", "index": False}
+        }
+
     index_exists = es.indices.exists(elasticsearch_index)
     print("Index already exists" if index_exists else "Index doesn't exist.")
 
@@ -891,10 +901,14 @@ if __name__ == "__main__":
         make_documents = make_musique_documents
     elif args.dataset_name == "hwm":
         make_documents = make_hwm_documents
+    elif args.dataset_name == "natcq_pages":
+        make_documents = make_natcq_pages_documents
     elif args.dataset_name == "natcq_docs":
         make_documents = make_natcq_docs_documents
     elif args.dataset_name == "natcq_chunked_docs":
         make_documents = make_natcq_chunked_docs_documents
+    elif args.dataset_name == "natq_pages":
+        make_documents = make_natq_pages_documents
     elif args.dataset_name == "natq_docs":
         make_documents = make_natq_docs_documents
     elif args.dataset_name == "natq_chunked_docs":

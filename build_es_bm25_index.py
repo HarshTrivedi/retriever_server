@@ -2,7 +2,7 @@
 Build ES (Elasticsearch) BM25 Index.
 """
 
-from typing import Dict
+from typing import Dict, Set
 import argparse, json
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
@@ -34,6 +34,194 @@ def hash_object(o: Any) -> str:
         dill.dump(o, buffer)
         m.update(buffer.getbuffer())
         return base58.b58encode(m.digest()).decode()
+
+
+def get_cleaned_wikipedia_page_to_es_document(
+    elasticsearch_index: str,
+    wikipedia_page: Dict,
+    indexed_document_ids: Set[str],
+    metadata: Dict,
+):
+
+    page_title = wikipedia_page["title"]
+    page_id = wikipedia_page["id"]
+    page_url = wikipedia_page["url"]
+
+    is_abstract_added = False
+    for section in wikipedia_page["sections"]:
+
+        section_index = section["index"]
+        section_path = section["path"]
+
+        document_infos = []
+        plural = {
+            "paragraph": "paragraphs",
+            "list": "lists",
+            "infobox": "infoboxes",
+            "table": "tables",
+        }
+        for document_type in ["paragraph", "list", "infobox", "table"]:
+            for document in section[plural[document_type]]:
+                document_index = document["index"]
+                document_text = document["text"]
+                document_data = document["data"]
+                document_id = document["id"]
+                document_infos.append(
+                    [
+                        document_id,
+                        document_index,
+                        document_text,
+                        document_data,
+                        document_type,
+                    ]
+                )
+
+        for document_info in document_infos:
+
+            (
+                document_id,
+                document_index,
+                document_text,
+                document_data,
+                document_type,
+            ) = document_info
+
+            if document_id in indexed_document_ids:
+                print(
+                    "WARNING: Looks like a repeated document_id is being indexed. Skipping it."
+                )
+                continue
+
+            is_abstract = False
+            if not is_abstract_added:
+                is_abstract = True
+                is_abstract_added = True
+
+            metadata_ = {
+                "page_id": page_id,
+                "document_type": document_type,
+                "document_path": section_path,
+                "document_data": document_data,
+            }
+            es_document = {
+                "id": document_id,
+                "title": page_title,
+                "section_index": section_index,
+                "section_path": section_path,
+                "paragraph_type": document_type,
+                "paragraph_index": document_index,
+                "paragraph_text": document_text,
+                "url": page_url,
+                "is_abstract": is_abstract,
+                "metadata": json.dumps(metadata_),
+            }
+            document = {
+                "_op_type": "create",
+                "_index": elasticsearch_index,
+                "_id": metadata["idx"],
+                "_source": es_document,
+            }
+            yield (document)
+            metadata["idx"] += 1
+
+            indexed_document_ids.add(document_id)
+
+
+def get_cleaned_wikipedia_page_to_es_chunked_document(
+    elasticsearch_index: str,
+    wikipedia_page: Dict,
+    indexed_sub_document_ids: Set[str],
+    metadata: Dict,
+):
+
+    page_title = wikipedia_page["title"]
+    page_id = wikipedia_page["id"]
+    page_url = wikipedia_page["url"]
+
+    is_abstract_added = False
+    for section in wikipedia_page["sections"]:
+
+        section_index = section["index"]
+        section_path = section["path"]
+
+        sub_document_infos = []
+        plural = {
+            "paragraph": "paragraphs",
+            "list": "lists",
+            "infobox": "infoboxes",
+            "table": "tables",
+        }
+        for document_type in ["paragraph", "list", "infobox", "table"]:
+            for document in section[plural[document_type]]:
+                document_index = document["index"]
+                document_id = document["id"]
+
+                for sub_document in document[
+                    f"chunked_{plural[document_type]}"
+                ]:
+                    sub_document_id = sub_document["id"]
+                    sub_document_text = sub_document["text"]
+                    sub_document_infos.append(
+                        [
+                            document_type,
+                            document_id,
+                            document_index,
+                            sub_document_id,
+                            sub_document_index,
+                            sub_document_text,
+                        ]
+                    )
+
+        for sub_document_info in sub_document_infos:
+
+            (
+                document_type,
+                document_id,
+                document_index,
+                sub_document_id,
+                sub_document_index,
+                sub_document_text,
+            ) = sub_document_info
+
+            if sub_document_id in indexed_sub_document_ids:
+                print(
+                    "WARNING: Looks like a repeated document_id is being indexed. Skipping it."
+                )
+                continue
+
+            is_abstract = False
+            if not is_abstract_added:
+                is_abstract = True
+                is_abstract_added = True
+
+            metadata = {
+                "page_id": page_id,
+                "document_type": document_type,
+                "document_path": section_path,
+            }
+            es_document = {
+                "id": sub_document_id,
+                "title": page_title,
+                "section_index": section_index,
+                "section_path": section_path,
+                "paragraph_type": document_type,
+                "paragraph_index": document_index,
+                "paragraph_sub_index": sub_document_index,
+                "paragraph_text": sub_document_text,
+                "url": page_url,
+                "is_abstract": is_abstract,
+                "metadata": json.dumps(metadata),
+            }
+            document = {
+                "_op_type": "create",
+                "_index": elasticsearch_index,
+                "_id": metadata["idx"],
+                "_source": es_document,
+            }
+            yield (document)
+            metadata["idx"] += 1
+
+            indexed_sub_document_ids.add(sub_document_id)
 
 
 def make_hotpotqa_documents(elasticsearch_index: str, metadata: Dict = None):
@@ -325,88 +513,10 @@ def make_natcq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
             if line_index % 200000 == 0:
                 print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
-            page = json.loads(line)
-            page_title = page["title"]
-            page_id = page["id"]
-            page_url = page["url"]
-
-            is_abstract_added = False
-            for section in page["sections"]:
-
-                section_index = section["index"]
-                section_path = section["path"]
-
-                document_infos = []
-                plural = {
-                    "paragraph": "paragraphs",
-                    "list": "lists",
-                    "infobox": "infoboxes",
-                    "table": "tables",
-                }
-                for document_type in ["paragraph", "list", "infobox", "table"]:
-                    for document in section[plural[document_type]]:
-                        document_index = document["index"]
-                        document_text = document["text"]
-                        document_data = document["data"]
-                        document_id = document["id"]
-                        document_infos.append(
-                            [
-                                document_id,
-                                document_index,
-                                document_text,
-                                document_data,
-                                document_type,
-                            ]
-                        )
-
-                for document_info in document_infos:
-
-                    (
-                        document_id,
-                        document_index,
-                        document_text,
-                        document_data,
-                        document_type,
-                    ) = document_info
-
-                    if document_id in indexed_document_ids:
-                        print(
-                            "WARNING: Looks like a repeated document_id is being indexed."
-                        )
-
-                    is_abstract = False
-                    if not is_abstract_added:
-                        is_abstract = True
-                        is_abstract_added = True
-
-                    metadata = {
-                        "page_id": page_id,
-                        "document_type": document_type,
-                        "document_path": section_path,
-                        "document_data": document_data,
-                    }
-                    es_document = {
-                        "id": document_id,
-                        "title": page_title,
-                        "section_index": section_index,
-                        "section_path": section_path,
-                        "paragraph_type": document_type,
-                        "paragraph_index": document_index,
-                        "paragraph_text": document_text,
-                        "url": page_url,
-                        "is_abstract": is_abstract,
-                        "metadata": json.dumps(metadata),
-                    }
-                    document = {
-                        "_op_type": "create",
-                        "_index": elasticsearch_index,
-                        "_id": metadata["idx"],
-                        "_source": es_document,
-                    }
-                    yield (document)
-                    metadata["idx"] += 1
-
-                    indexed_document_ids.add(document_id)
+            wikipedia_page = json.loads(line)
+            yield get_cleaned_wikipedia_page_to_es_document(
+                elasticsearch_index, wikipedia_page, indexed_document_ids, metadata
+            )
 
 
 def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = None):
@@ -434,94 +544,10 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict =
             if line_index % 200000 == 0:
                 print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
-            page = json.loads(line)
-            page_title = page["title"]
-            page_id = page["id"]
-            page_url = page["url"]
-
-            is_abstract_added = False
-            for section in page["sections"]:
-
-                section_index = section["index"]
-                section_path = section["path"]
-
-                sub_document_infos = []
-                plural = {
-                    "paragraph": "paragraphs",
-                    "list": "lists",
-                    "infobox": "infoboxes",
-                    "table": "tables",
-                }
-                for document_type in ["paragraph", "list", "infobox", "table"]:
-                    for document in section[plural[document_type]]:
-                        document_index = document["index"]
-                        document_id = document["id"]
-
-                        for sub_document in document[
-                            f"chunked_{plural[document_type]}"
-                        ]:
-                            sub_document_id = sub_document["id"]
-                            sub_document_text = sub_document["text"]
-                            sub_document_infos.append(
-                                [
-                                    document_type,
-                                    document_id,
-                                    document_index,
-                                    sub_document_id,
-                                    sub_document_index,
-                                    sub_document_text,
-                                ]
-                            )
-
-                for sub_document_info in sub_document_infos:
-
-                    (
-                        document_type,
-                        document_id,
-                        document_index,
-                        sub_document_id,
-                        sub_document_index,
-                        sub_document_text,
-                    ) = sub_document_info
-
-                    if sub_document_id in indexed_sub_document_ids:
-                        print(
-                            "WARNING: Looks like a repeated document_id is being indexed."
-                        )
-
-                    is_abstract = False
-                    if not is_abstract_added:
-                        is_abstract = True
-                        is_abstract_added = True
-
-                    metadata = {
-                        "page_id": page_id,
-                        "document_type": document_type,
-                        "document_path": section_path,
-                    }
-                    es_document = {
-                        "id": sub_document_id,
-                        "title": page_title,
-                        "section_index": section_index,
-                        "section_path": section_path,
-                        "paragraph_type": document_type,
-                        "paragraph_index": document_index,
-                        "paragraph_sub_index": sub_document_index,
-                        "paragraph_text": sub_document_text,
-                        "url": page_url,
-                        "is_abstract": is_abstract,
-                        "metadata": json.dumps(metadata),
-                    }
-                    document = {
-                        "_op_type": "create",
-                        "_index": elasticsearch_index,
-                        "_id": metadata["idx"],
-                        "_source": es_document,
-                    }
-                    yield (document)
-                    metadata["idx"] += 1
-
-                    indexed_sub_document_ids.add(sub_document_id)
+            wikipedia_page = json.loads(line)
+            yield get_cleaned_wikipedia_page_to_es_chunked_document(
+                elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata
+            )
 
 
 def make_natcq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
@@ -597,88 +623,10 @@ def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
                 if line_index % 200000 == 0:
                     print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
-                page = json.loads(line)
-                page_title = page["title"]
-                page_id = page["id"]
-                page_url = page["url"]
-
-                is_abstract_added = False
-                for section in page["sections"]:
-
-                    section_index = section["index"]
-                    section_path = section["path"]
-
-                    document_infos = []
-                    plural = {
-                        "paragraph": "paragraphs",
-                        "list": "lists",
-                        "infobox": "infoboxes",
-                        "table": "tables",
-                    }
-                    for document_type in ["paragraph", "list", "infobox", "table"]:
-                        for document in section[plural[document_type]]:
-                            document_index = document["index"]
-                            document_text = document["text"]
-                            document_data = document["data"]
-                            document_id = document["id"]
-                            document_infos.append(
-                                [
-                                    document_id,
-                                    document_index,
-                                    document_text,
-                                    document_data,
-                                    document_type,
-                                ]
-                            )
-
-                    for document_info in document_infos:
-
-                        (
-                            document_id,
-                            document_index,
-                            document_text,
-                            document_data,
-                            document_type,
-                        ) = document_info
-
-                        if document_id in indexed_document_ids:
-                            print(
-                                "WARNING: Looks like a repeated document_id is being indexed."
-                            )
-
-                        is_abstract = False
-                        if not is_abstract_added:
-                            is_abstract = True
-                            is_abstract_added = True
-
-                        metadata = {
-                            "page_id": page_id,
-                            "document_type": document_type,
-                            "document_path": section_path,
-                            "document_data": document_data,
-                        }
-                        es_document = {
-                            "id": document_id,
-                            "title": page_title,
-                            "section_index": section_index,
-                            "section_path": section_path,
-                            "paragraph_type": document_type,
-                            "paragraph_index": document_index,
-                            "paragraph_text": document_text,
-                            "url": page_url,
-                            "is_abstract": is_abstract,
-                            "metadata": json.dumps(metadata),
-                        }
-                        document = {
-                            "_op_type": "create",
-                            "_index": elasticsearch_index,
-                            "_id": metadata["idx"],
-                            "_source": es_document,
-                        }
-                        yield (document)
-                        metadata["idx"] += 1
-
-                        indexed_document_ids.add(document_id)
+                wikipedia_page = json.loads(line)
+                yield get_cleaned_wikipedia_page_to_es_document(
+                    elasticsearch_index, wikipedia_page, indexed_document_ids, metadata
+                )
 
 
 def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = None):
@@ -712,95 +660,10 @@ def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = 
                 if line_index % 200000 == 0:
                     print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
-                page = json.loads(line)["context_data"]
-                # TODO: The rest is pretty much the same as natcq_chunked_docs. Abstract out.
-                page_title = page["title"]
-                page_id = page["id"]
-                page_url = page["url"]
-
-                is_abstract_added = False
-                for section in page["sections"]:
-
-                    section_index = section["index"]
-                    section_path = section["path"]
-
-                    sub_document_infos = []
-                    plural = {
-                        "paragraph": "paragraphs",
-                        "list": "lists",
-                        "infobox": "infoboxes",
-                        "table": "tables",
-                    }
-                    for document_type in ["paragraph", "list", "infobox", "table"]:
-                        for document in section[plural[document_type]]:
-                            document_index = document["index"]
-                            document_id = document["id"]
-
-                            for sub_document in document[
-                                f"chunked_{plural[document_type]}"
-                            ]:
-                                sub_document_id = sub_document["id"]
-                                sub_document_text = sub_document["text"]
-                                sub_document_infos.append(
-                                    [
-                                        document_type,
-                                        document_id,
-                                        document_index,
-                                        sub_document_id,
-                                        sub_document_index,
-                                        sub_document_text,
-                                    ]
-                                )
-
-                    for sub_document_info in sub_document_infos:
-
-                        (
-                            document_type,
-                            document_id,
-                            document_index,
-                            sub_document_id,
-                            sub_document_index,
-                            sub_document_text,
-                        ) = sub_document_info
-
-                        if sub_document_id in indexed_sub_document_ids:
-                            print(
-                                "WARNING: Looks like a repeated document_id is being indexed."
-                            )
-
-                        is_abstract = False
-                        if not is_abstract_added:
-                            is_abstract = True
-                            is_abstract_added = True
-
-                        metadata = {
-                            "page_id": page_id,
-                            "document_type": document_type,
-                            "document_path": section_path,
-                        }
-                        es_document = {
-                            "id": sub_document_id,
-                            "title": page_title,
-                            "section_index": section_index,
-                            "section_path": section_path,
-                            "paragraph_type": document_type,
-                            "paragraph_index": document_index,
-                            "paragraph_sub_index": sub_document_index,
-                            "paragraph_text": sub_document_text,
-                            "url": page_url,
-                            "is_abstract": is_abstract,
-                            "metadata": json.dumps(metadata),
-                        }
-                        document = {
-                            "_op_type": "create",
-                            "_index": elasticsearch_index,
-                            "_id": metadata["idx"],
-                            "_source": es_document,
-                        }
-                        yield (document)
-                        metadata["idx"] += 1
-
-                        indexed_sub_document_ids.add(sub_document_id)
+                wikipedia_page = json.loads(line)["context_data"]
+                yield get_cleaned_wikipedia_page_to_es_chunked_document(
+                    elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata
+                )
 
 
 if __name__ == "__main__":

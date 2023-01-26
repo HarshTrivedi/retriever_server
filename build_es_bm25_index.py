@@ -52,7 +52,44 @@ def fix_wikipedia_page(wikipedia_page: Dict):
                 document[f"chunked_{document_type_plural[document_type]}"] = document.pop("chunked_lists")
 
 
-def get_cleaned_wikipedia_page_to_es_document(
+def get_cleaned_wikipedia_page_to_page_es_document(
+    elasticsearch_index: str,
+    wikipedia_page: Dict,
+    indexed_page_ids: Set[str],
+    metadata: Dict,
+    show_repetition_warning: bool = False,
+):
+    page_title = wikipedia_page["title"]
+    page_id = wikipedia_page["id"]
+    page_url = wikipedia_page["url"]
+
+    if page_id in indexed_page_ids:
+        if show_repetition_warning:
+            print(
+                "WARNING: Looks like a repeated page_id is being indexed. Skipping it."
+            )
+        return None
+
+    es_document = {
+        "id": page_id,
+        "title": page_title,
+        "url": page_url,
+        "data": json.dumps(wikipedia_page),
+    }
+    document = {
+        "_op_type": "create",
+        "_index": elasticsearch_index,
+        "_id": metadata["idx"],
+        "_source": es_document,
+    }
+    metadata["idx"] += 1
+
+    indexed_page_ids.add(page_id)
+
+    return document
+
+
+def yield_cleaned_wikipedia_page_to_doc_es_documents(
     elasticsearch_index: str,
     wikipedia_page: Dict,
     indexed_document_ids: Set[str],
@@ -145,7 +182,7 @@ def get_cleaned_wikipedia_page_to_es_document(
             indexed_document_ids.add(document_id)
 
 
-def get_cleaned_wikipedia_page_to_es_chunked_document(
+def yield_cleaned_wikipedia_page_to_chunked_doc_es_documents(
     elasticsearch_index: str,
     wikipedia_page: Dict,
     indexed_sub_document_ids: Set[str],
@@ -536,7 +573,7 @@ def make_natcq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
 
             wikipedia_page = json.loads(line)
             fix_wikipedia_page(wikipedia_page)
-            for document in get_cleaned_wikipedia_page_to_es_document(
+            for document in yield_cleaned_wikipedia_page_to_doc_es_documents(
                 elasticsearch_index, wikipedia_page, indexed_document_ids, metadata,
                 show_repetition_warning=True
             ):
@@ -570,10 +607,46 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict =
 
             wikipedia_page = json.loads(line)
             fix_wikipedia_page(wikipedia_page)
-            for document in get_cleaned_wikipedia_page_to_es_chunked_document(
+            for document in yield_cleaned_wikipedia_page_to_chunked_doc_es_documents(
                 elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata,
                 show_repetition_warning=True
             ):
+                yield document
+
+
+def make_natcq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
+    raw_filepath = os.path.join(
+        WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
+    )
+    metadata = metadata or {"idx": 1}
+    assert "idx" in metadata
+
+    random.seed(13370)  # Don't change.
+
+    line_skip_count = 0
+
+    indexed_page_ids = set()
+
+    with gzip.open(raw_filepath, mode="rt") as file:
+
+        for line_index, line in tqdm(enumerate(file)):
+
+            if len(line) > 1000000:
+                line_skip_count += 1
+                continue
+
+            if line_index % 200000 == 0:
+                print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
+
+            wikipedia_page = json.loads(line)
+            document = get_cleaned_wikipedia_page_to_page_es_document(
+                elasticsearch_index,
+                wikipedia_page,
+                indexed_page_ids,
+                metadata,
+                show_repetition_warning=True
+            )
+            if document is not None:
                 yield document
 
 
@@ -608,7 +681,7 @@ def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
                     print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
                 wikipedia_page = json.loads(line)["context_data"]
-                for document in get_cleaned_wikipedia_page_to_es_document(
+                for document in yield_cleaned_wikipedia_page_to_doc_es_documents(
                     elasticsearch_index, wikipedia_page, indexed_document_ids, metadata,
                     show_repetition_warning=False
                 ):
@@ -647,10 +720,52 @@ def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = 
                     print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
                 wikipedia_page = json.loads(line)["context_data"]
-                for document in get_cleaned_wikipedia_page_to_es_chunked_document(
+                for document in yield_cleaned_wikipedia_page_to_chunked_doc_es_documents(
                     elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata,
                     show_repetition_warning=False
                 ):
+                    yield document
+
+
+def make_natq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
+    natcq_path = "../natcq"
+
+    input_filepaths = [
+        os.path.join(natcq_path, "processed_datasets", "natq", "dev.jsonl"),
+        os.path.join(natcq_path, "processed_datasets", "natq", "train.jsonl")
+    ]
+
+    metadata = metadata or {"idx": 1}
+    assert "idx" in metadata
+
+    random.seed(13370)  # Don't change.
+
+    line_skip_count = 0
+
+    indexed_page_ids = set()
+
+    for input_filepath in input_filepaths:
+
+        with open(input_filepath, "r") as file:
+
+            for line_index, line in tqdm(enumerate(file)):
+
+                if len(line) > 1000000:
+                    line_skip_count += 1
+                    continue
+
+                if line_index % 200000 == 0:
+                    print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
+
+                wikipedia_page = json.loads(line)["context_data"]
+                document = get_cleaned_wikipedia_page_to_page_es_document(
+                    elasticsearch_index,
+                    wikipedia_page,
+                    indexed_page_ids,
+                    metadata,
+                    show_repetition_warning=True
+                )
+                if document is not None:
                     yield document
 
 

@@ -548,7 +548,7 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict =
             wikipedia_page = json.loads(line)
             for document in get_cleaned_wikipedia_page_to_es_chunked_document(
                 elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata
-            )
+            ):
                 yield document
 
 
@@ -586,7 +586,7 @@ def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
                 for document in get_cleaned_wikipedia_page_to_es_document(
                     elasticsearch_index, wikipedia_page, indexed_document_ids, metadata
                 ):
-                yield document
+                    yield document
 
 
 def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = None):
@@ -623,7 +623,7 @@ def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = 
                 wikipedia_page = json.loads(line)["context_data"]
                 for document in get_cleaned_wikipedia_page_to_es_chunked_document(
                     elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata
-                )
+                ):
                     yield document
 
 

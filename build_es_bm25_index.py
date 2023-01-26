@@ -514,9 +514,10 @@ def make_natcq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
                 print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
             wikipedia_page = json.loads(line)
-            yield get_cleaned_wikipedia_page_to_es_document(
+            for document in get_cleaned_wikipedia_page_to_es_document(
                 elasticsearch_index, wikipedia_page, indexed_document_ids, metadata
-            )
+            ):
+                yield document
 
 
 def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = None):
@@ -545,9 +546,10 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict =
                 print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
             wikipedia_page = json.loads(line)
-            yield get_cleaned_wikipedia_page_to_es_chunked_document(
+            for document in get_cleaned_wikipedia_page_to_es_chunked_document(
                 elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata
             )
+                yield document
 
 
 def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
@@ -581,9 +583,10 @@ def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
                     print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
                 wikipedia_page = json.loads(line)
-                yield get_cleaned_wikipedia_page_to_es_document(
+                for document in get_cleaned_wikipedia_page_to_es_document(
                     elasticsearch_index, wikipedia_page, indexed_document_ids, metadata
-                )
+                ):
+                yield document
 
 
 def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = None):
@@ -618,9 +621,10 @@ def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = 
                     print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
 
                 wikipedia_page = json.loads(line)["context_data"]
-                yield get_cleaned_wikipedia_page_to_es_chunked_document(
+                for document in get_cleaned_wikipedia_page_to_es_chunked_document(
                     elasticsearch_index, wikipedia_page, indexed_sub_document_ids, metadata
                 )
+                    yield document
 
 
 if __name__ == "__main__":

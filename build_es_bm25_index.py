@@ -46,6 +46,8 @@ def fix_wikipedia_page(wikipedia_page: Dict):
         }
         for document_type in document_type_plural.keys():
             for document in section[document_type_plural[document_type]]:
+                if f"chunked_{document_type_plural[document_type]}" in document:
+                    continue
                 assert "chunked_lists" in document
                 if document_type == "list":
                     continue

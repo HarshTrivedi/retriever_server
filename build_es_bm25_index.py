@@ -837,8 +837,7 @@ if __name__ == "__main__":
     elasticsearch_index = f"{args.dataset_name}-wikipedia"
     es = Elasticsearch(
         [{"host": elastic_host, "port": elastic_port}],
-        # max_retries=10,
-        max_retries=0, # changed to 0 for official_dpr, o/w it was taking too much time.
+        max_retries=2, # it's exp backoff starting 2, more than 2 retries will be too much.
         timeout=500,
         retry_on_timeout=True,
     )
@@ -956,10 +955,9 @@ if __name__ == "__main__":
     result = bulk(
         es,
         make_documents(elasticsearch_index),
-        raise_on_error=False,
-        raise_on_exception=False,
-        # max_retries=10,
-        max_retries=0, # changed to 0 for official_dpr, o/w it was taking too much time.
+        raise_on_error=True, # set to true o/w it'll fail silently and only show less docs.
+        raise_on_exception=True, # set to true o/w it'll fail silently and only show less docs.
+        max_retries=2, # it's exp backoff starting 2, more than 2 retries will be too much.
         request_timeout=500,
         chunk_size=500,
     )

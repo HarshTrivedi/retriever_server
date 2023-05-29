@@ -9,6 +9,7 @@ from elasticsearch.helpers import bulk
 from typing import Any
 import hashlib
 import io
+import csv
 import dill
 import gzip
 from tqdm import tqdm
@@ -549,6 +550,34 @@ def make_hwm_documents(elasticsearch_index: str, metadata: Dict = None):
         yield document
 
 
+def make_official_dpr_corpus_documents(elasticsearch_index: str, metadata: Dict = None):
+    input_filepath = os.path.join(
+        WIKIPEDIA_CORPUSES_PATH, "official-dpr-corpus", "psgs_w100.tsv.gz"
+    )
+    metadata = metadata or {"idx": 1}
+    assert "idx" in metadata
+
+    with gzip.open(input_filepath, "rt") as file:
+        reader = csv.DictReader(file, delimiter="\t")
+        for row in tqdm(reader):
+            es_paragraph = {
+                "id": row["id"],
+                "title": row["title"].strip(),
+                "paragraph_index": 0,
+                "paragraph_text": row["text"].strip(),
+                "url": "",
+                "is_abstract": False,
+            }
+            document = {
+                "_op_type": "create",
+                "_index": elasticsearch_index,
+                "_id": metadata["idx"],
+                "_source": es_paragraph,
+            }
+            yield (document)
+            metadata["idx"] += 1
+
+
 def make_natcq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
     raw_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
@@ -903,6 +932,8 @@ if __name__ == "__main__":
         make_documents = make_musique_documents
     elif args.dataset_name == "hwm":
         make_documents = make_hwm_documents
+    elif args.dataset_name == "official_dpr_corpus":
+        make_official_dpr_corpus_documents
     elif args.dataset_name == "natcq_pages":
         make_documents = make_natcq_pages_documents
     elif args.dataset_name == "natcq_docs":

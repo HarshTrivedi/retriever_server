@@ -814,6 +814,7 @@ if __name__ == "__main__":
             "2wikimultihopqa",
             "musique_ans",
             "hwm",
+            "official_dpr_corpus",
             "natcq_pages",
             "natcq_docs",
             "natcq_chunked_docs",
@@ -933,7 +934,7 @@ if __name__ == "__main__":
     elif args.dataset_name == "hwm":
         make_documents = make_hwm_documents
     elif args.dataset_name == "official_dpr_corpus":
-        make_official_dpr_corpus_documents
+        make_documents = make_official_dpr_corpus_documents
     elif args.dataset_name == "natcq_pages":
         make_documents = make_natcq_pages_documents
     elif args.dataset_name == "natcq_docs":

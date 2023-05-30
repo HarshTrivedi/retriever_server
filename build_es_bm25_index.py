@@ -564,7 +564,7 @@ def make_official_dpr_corpus_documents(elasticsearch_index: str, metadata: Dict 
                 "id": row["id"],
                 "title": row["title"].strip(),
                 "paragraph_index": 0,
-                "paragraph_text": row["text"].strip(),
+                "paragraph_text": " :: ".join([row["title"].strip(), row["text"].strip()]),
                 "url": "",
                 "is_abstract": False,
             }

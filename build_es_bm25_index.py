@@ -550,7 +550,7 @@ def make_hwm_documents(elasticsearch_index: str, metadata: Dict = None):
         yield document
 
 
-def make_official_dpr_corpus_documents(elasticsearch_index: str, metadata: Dict = None):
+def make_official_dpr_docs_documents(elasticsearch_index: str, metadata: Dict = None):
     input_filepath = os.path.join(
         WIKIPEDIA_CORPUSES_PATH, "official-dpr-corpus", "psgs_w100.tsv.gz"
     )
@@ -814,7 +814,7 @@ if __name__ == "__main__":
             "2wikimultihopqa",
             "musique_ans",
             "hwm",
-            "official_dpr_corpus",
+            "official_dpr_docs",
             "natcq_pages",
             "natcq_docs",
             "natcq_chunked_docs",
@@ -933,8 +933,8 @@ if __name__ == "__main__":
         make_documents = make_musique_documents
     elif args.dataset_name == "hwm":
         make_documents = make_hwm_documents
-    elif args.dataset_name == "official_dpr_corpus":
-        make_documents = make_official_dpr_corpus_documents
+    elif args.dataset_name == "official_dpr_docs":
+        make_documents = make_official_dpr_docs_documents
     elif args.dataset_name == "natcq_pages":
         make_documents = make_natcq_pages_documents
     elif args.dataset_name == "natcq_docs":

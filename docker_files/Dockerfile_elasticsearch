@@ -7,4 +7,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 CMD []
-ENTRYPOINT ["/./net/nfs.cirrascale/aristo/harsht/elasticsearch-7.10.2/bin/elasticsearchcould"]
+ENTRYPOINT ["/./net/nfs.cirrascale/aristo/harsht/elasticsearch-7.10.2/bin/elasticsearch"]

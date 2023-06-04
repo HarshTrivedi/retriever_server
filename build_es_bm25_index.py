@@ -598,20 +598,11 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict =
 
     random.seed(13370)  # Don't change.
 
-    line_skip_count = 0
-
     indexed_sub_document_ids = set()
 
     with gzip.open(raw_filepath, mode="rt") as file:
 
-        for line_index, line in tqdm(enumerate(file)):
-
-            if len(line) > 1000000:
-                line_skip_count += 1
-                continue
-
-            if line_index % 200000 == 0:
-                print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
+        for line in tqdm(file):
 
             wikipedia_page = json.loads(line)
             fix_wikipedia_page(wikipedia_page)
@@ -634,22 +625,13 @@ def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = 
 
     random.seed(13370)  # Don't change.
 
-    line_skip_count = 0
-
     indexed_sub_document_ids = set()
 
     for input_filepath in input_filepaths:
 
         with open(input_filepath, "r") as file:
 
-            for line_index, line in tqdm(enumerate(file)):
-
-                if len(line) > 1000000:
-                    line_skip_count += 1
-                    continue
-
-                if line_index % 200000 == 0:
-                    print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
+            for line in tqdm(file):
 
                 wikipedia_page = json.loads(line)["context_data"]
                 for document in yield_cleaned_wikipedia_page_to_chunked_doc_es_documents(

@@ -36,7 +36,7 @@ nohup beaker session create \
 --image beaker://{user_name}/{image_name} \
 --workspace {beaker_workspace} \
 --port 9200:9200 \
---name elasticsearch
+--name elasticsearch \
 > {nohup_file_path} &
         '''.strip()
         print(f"Running: {command}")

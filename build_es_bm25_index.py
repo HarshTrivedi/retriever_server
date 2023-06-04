@@ -37,6 +37,11 @@ def hash_object(o: Any) -> str:
         return base58.b58encode(m.digest()).decode()
 
 
+def combine_title_and_text(title: str, text: str) -> str:
+    # don't strip as it may lose the structure
+    return " :::\n\n".join([title, text])
+
+
 def fix_wikipedia_page(wikipedia_page: Dict):
     # I had made a small mistake in converting the original format
     # to the new format. It's not worth redoing the full processing again,
@@ -255,6 +260,8 @@ def yield_cleaned_wikipedia_page_to_chunked_doc_es_documents(
                 is_abstract = True
                 is_abstract_added = True
 
+            # merging two fields because querying combined field works better+faster in ES.
+            main_text = combine_title_and_text(page_title, sub_document_text)
             metadata_ = {
                 "page_id": page_id,
                 "document_type": document_type,
@@ -268,7 +275,7 @@ def yield_cleaned_wikipedia_page_to_chunked_doc_es_documents(
                 "paragraph_type": document_type,
                 "paragraph_index": document_index,
                 "paragraph_sub_index": sub_document_index,
-                "paragraph_text": sub_document_text,
+                "paragraph_text": main_text,
                 "url": page_url,
                 "is_abstract": is_abstract,
                 "metadata": json.dumps(metadata_),
@@ -560,11 +567,14 @@ def make_official_dpr_docs_documents(elasticsearch_index: str, metadata: Dict = 
     with gzip.open(input_filepath, "rt") as file:
         reader = csv.DictReader(file, delimiter="\t")
         for row in tqdm(reader):
+
+            # merging two fields because querying combined field works better+faster in ES.
+            main_text = combine_title_and_text(row["title"].strip(), row["text"].strip())
             es_paragraph = {
                 "id": row["id"],
                 "title": row["title"].strip(),
                 "paragraph_index": 0,
-                "paragraph_text": " :: ".join([row["title"].strip(), row["text"].strip()]),
+                "paragraph_text": main_text,
                 "url": "",
                 "is_abstract": False,
             }
@@ -576,75 +586,6 @@ def make_official_dpr_docs_documents(elasticsearch_index: str, metadata: Dict = 
             }
             yield (document)
             metadata["idx"] += 1
-
-
-def make_natcq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
-    raw_filepath = os.path.join(
-        WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
-    )
-    metadata = metadata or {"idx": 1}
-    assert "idx" in metadata
-
-    random.seed(13370)  # Don't change.
-
-    line_skip_count = 0
-
-    indexed_page_ids = set()
-
-    with gzip.open(raw_filepath, mode="rt") as file:
-
-        for line_index, line in tqdm(enumerate(file)):
-
-            if len(line) > 1000000:
-                line_skip_count += 1
-                continue
-
-            if line_index % 200000 == 0:
-                print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
-
-            wikipedia_page = json.loads(line)
-            document = get_cleaned_wikipedia_page_to_page_es_document(
-                elasticsearch_index,
-                wikipedia_page,
-                indexed_page_ids,
-                metadata,
-                show_repetition_warning=True
-            )
-            if document is not None:
-                yield document
-
-
-def make_natcq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
-    raw_filepath = os.path.join(
-        WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
-    )
-    metadata = metadata or {"idx": 1}
-    assert "idx" in metadata
-
-    random.seed(13370)  # Don't change.
-
-    line_skip_count = 0
-
-    indexed_document_ids = set()
-
-    with gzip.open(raw_filepath, mode="rt") as file:
-
-        for line_index, line in tqdm(enumerate(file)):
-
-            if len(line) > 1000000:
-                line_skip_count += 1
-                continue
-
-            if line_index % 200000 == 0:
-                print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
-
-            wikipedia_page = json.loads(line)
-            fix_wikipedia_page(wikipedia_page)
-            for document in yield_cleaned_wikipedia_page_to_doc_es_documents(
-                elasticsearch_index, wikipedia_page, indexed_document_ids, metadata,
-                show_repetition_warning=True
-            ):
-                yield document
 
 
 def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = None):
@@ -681,93 +622,13 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict =
                 yield document
 
 
-def make_natq_pages_documents(elasticsearch_index: str, metadata: Dict = None):
-    natcq_path = "../natcq"
-
-    input_filepaths = [
-        os.path.join(natcq_path, "processed_datasets", "natq", "dev.jsonl"),
-        os.path.join(natcq_path, "processed_datasets", "natq", "train.jsonl")
-    ]
-
-    metadata = metadata or {"idx": 1}
-    assert "idx" in metadata
-
-    random.seed(13370)  # Don't change.
-
-    line_skip_count = 0
-
-    indexed_page_ids = set()
-
-    for input_filepath in input_filepaths:
-
-        with open(input_filepath, "r") as file:
-
-            for line_index, line in tqdm(enumerate(file)):
-
-                if len(line) > 1000000:
-                    line_skip_count += 1
-                    continue
-
-                if line_index % 200000 == 0:
-                    print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
-
-                wikipedia_page = json.loads(line)["context_data"]
-                document = get_cleaned_wikipedia_page_to_page_es_document(
-                    elasticsearch_index,
-                    wikipedia_page,
-                    indexed_page_ids,
-                    metadata,
-                    show_repetition_warning=False
-                )
-                if document is not None:
-                    yield document
-
-
-def make_natq_docs_documents(elasticsearch_index: str, metadata: Dict = None):
-
-    natcq_path = "../natcq"
-
-    input_filepaths = [
-        os.path.join(natcq_path, "processed_datasets", "natq", "dev.jsonl"),
-        os.path.join(natcq_path, "processed_datasets", "natq", "train.jsonl")
-    ]
-    metadata = metadata or {"idx": 1}
-    assert "idx" in metadata
-
-    random.seed(13370)  # Don't change.
-
-    line_skip_count = 0
-
-    indexed_document_ids = set()
-
-    for input_filepath in input_filepaths:
-
-        with open(input_filepath, "r") as file:
-
-            for line_index, line in tqdm(enumerate(file)):
-
-                if len(line) > 1000000:
-                    line_skip_count += 1
-                    continue
-
-                if line_index % 200000 == 0:
-                    print(f"Completed {line_index} lines. Skipped {line_skip_count} lines.")
-
-                wikipedia_page = json.loads(line)["context_data"]
-                for document in yield_cleaned_wikipedia_page_to_doc_es_documents(
-                    elasticsearch_index, wikipedia_page, indexed_document_ids, metadata,
-                    show_repetition_warning=False
-                ):
-                    yield document
-
-
 def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = None):
 
-    natcq_path = "../natcq"
+    natq_path = "../natcq"
 
     input_filepaths = [
-        os.path.join(natcq_path, "processed_datasets", "natq", "dev.jsonl"),
-        os.path.join(natcq_path, "processed_datasets", "natq", "train.jsonl")
+        os.path.join(natq_path, "processed_datasets", "open_natq", "dev.jsonl"),
+        os.path.join(natq_path, "processed_datasets", "open_natq", "train.jsonl")
     ]
 
     metadata = metadata or {"idx": 1}
@@ -815,11 +676,7 @@ if __name__ == "__main__":
             "musique_ans",
             "hwm",
             "official_dpr_docs",
-            "natcq_pages",
-            "natcq_docs",
             "natcq_chunked_docs",
-            "natq_pages",
-            "natq_docs",
             "natq_chunked_docs",
         ),
     )
@@ -873,7 +730,7 @@ if __name__ == "__main__":
         }
     }
 
-    if args.dataset_name in ("natcq_docs", "natcq_chunked_docs"):
+    if args.dataset_name in ("natcq_chunked_docs", "natq_chunked_docs"):
         paragraphs_index_settings["mappings"]["properties"] = {
             "metadata": {"type": "object", "index": False}
         }
@@ -886,18 +743,9 @@ if __name__ == "__main__":
             "analyzer": "english",
         }
 
-    if args.dataset_name in ("natcq_chunked_docs"):
         paragraphs_index_settings["mappings"]["properties"]["paragraph_sub_index"] = {
             "type": "text",
             "analyzer": "english",
-        }
-
-    if args.dataset_name in ("natcq_pages", "natq_pages"):
-        paragraphs_index_settings["mappings"]["properties"].pop("paragraph_index")
-        paragraphs_index_settings["mappings"]["properties"].pop("paragraph_text")
-        paragraphs_index_settings["mappings"]["properties"].pop("is_abstract")
-        paragraphs_index_settings["mappings"]["properties"] = {
-            "data": {"type": "object", "index": False}
         }
 
     index_exists = es.indices.exists(elasticsearch_index)
@@ -935,16 +783,8 @@ if __name__ == "__main__":
         make_documents = make_hwm_documents
     elif args.dataset_name == "official_dpr_docs":
         make_documents = make_official_dpr_docs_documents
-    elif args.dataset_name == "natcq_pages":
-        make_documents = make_natcq_pages_documents
-    elif args.dataset_name == "natcq_docs":
-        make_documents = make_natcq_docs_documents
     elif args.dataset_name == "natcq_chunked_docs":
         make_documents = make_natcq_chunked_docs_documents
-    elif args.dataset_name == "natq_pages":
-        make_documents = make_natq_pages_documents
-    elif args.dataset_name == "natq_docs":
-        make_documents = make_natq_docs_documents
     elif args.dataset_name == "natq_chunked_docs":
         make_documents = make_natq_chunked_docs_documents
     else:

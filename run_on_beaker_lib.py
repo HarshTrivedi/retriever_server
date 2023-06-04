@@ -35,6 +35,7 @@ def make_image(
     command = f"docker build -t {image_name} {directory} -f {dockerfile_path} {build_args_str}".strip()
     print(f"Running: {command}")
     subprocess.run(command, shell=True, stdout=open(os.devnull, 'wb'))
+    print("Completed building docker image.")
 
     command = f"beaker image inspect --format json {user_name}/{image_name}"
     try:
@@ -43,7 +44,7 @@ def make_image(
         image_is_present = False
 
     if image_is_present and not update_if_exists:
-        print("Image already exists.")
+        print("Beaker image already exists.")
         return
 
     if image_is_present:

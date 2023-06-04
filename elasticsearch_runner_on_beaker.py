@@ -35,6 +35,8 @@ def main():
 nohup beaker session create \
 --image beaker://{user_name}/{image_name} \
 --workspace {beaker_workspace} \
+--env JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+--port 9200:9200 \
 > {nohup_file_path} &
         '''.strip()
         print(f"Running: {command}")

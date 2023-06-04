@@ -31,7 +31,7 @@ def make_image(
         build_args_str += " ".join([f"{key}={value}" for key, value in build_args.items()])
 
     directory = os.path.dirname(os.path.realpath(__file__))
-    dockerfile_path = os.path.join("dockerfiles", docker_file_name)
+    dockerfile_path = os.path.join("docker_files", docker_file_name)
     command = f"docker build -t {image_name} {directory} -f {dockerfile_path} {build_args_str}".strip()
     print(f"Running: {command}")
     subprocess.run(command, shell=True, stdout=open(os.devnull, 'wb'))

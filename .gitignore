@@ -136,3 +136,4 @@ wikipedia_corpuses
 set_env.sh
 .beaker_experiment_specs
 .history
+.*.nohup

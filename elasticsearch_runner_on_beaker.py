@@ -22,7 +22,7 @@ def main():
 
     if args.command == "start":
         image_name = "elasticsearch"
-        docker_file_name = "docker_files/Dockerfile_elasticsearch"
+        docker_file_name = "Dockerfile_elasticsearch"
         make_image(
             image_name=image_name, docker_file_name=docker_file_name, update_if_exists=args.force
         )

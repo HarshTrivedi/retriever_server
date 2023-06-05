@@ -1,8 +1,8 @@
 {
     ######## Elasticsearch init args: #########
-    "dataset_name": "auto",
-    "elastic_host": "http://localhost/",
-    "elastic_port": 9200,
+    "elasticsearch_dataset_name": "auto",
+    "elasticsearch_host": "http://localhost/",
+    "elasticsearch_port": 9200,
 
     ######## Blink init args: #################
     # blink_models_path is set in .global_config.jsonnet

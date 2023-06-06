@@ -25,7 +25,7 @@ import random
 
 global_config = json.loads(_jsonnet.evaluate_file(".global_config.jsonnet"))
 WIKIPEDIA_CORPUSES_PATH = global_config["WIKIPEDIA_CORPUSES_PATH"]
-OPEN_NATQ_PATH = global_config["OPEN_NATQ_PATH"] # set default to '../natcq/processed_datasets/open_natq'?
+NATQ_PATH = global_config["NATQ_PATH"] # set default to '../natcq/processed_datasets/natq'?
 
 
 def hash_object(o: Any) -> str:
@@ -616,8 +616,8 @@ def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict =
 def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = None):
 
     input_filepaths = [
-        os.path.join(OPEN_NATQ_PATH, "dev.jsonl"),
-        os.path.join(OPEN_NATQ_PATH, "train.jsonl")
+        os.path.join(NATQ_PATH, "dev.jsonl"),
+        os.path.join(NATQ_PATH, "train.jsonl")
     ]
 
     metadata = metadata or {"idx": 1}

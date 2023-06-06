@@ -12,7 +12,7 @@ def main():
             "TRANSFORMERS_CACHE": "~/.cache",
             "ELASTICSEARCH_PATH": "~/elasticsearch-7.10.2/bin/elasticsearch",
             "BLINK_MODELS_PATH": "BLINK/models",
-            "OPEN_NATQ_PATH": "../natcq/processed_datasets/open_natq/",
+            "NATQ_PATH": "../natcq/processed_datasets/natq/",
             "CONTRIEVER_DATA_PATH": "",
         }
 
@@ -24,7 +24,7 @@ def main():
             "TRANSFORMERS_CACHE": "/net/nfs.cirrascale/aristo/harsht/.hf_cache",
             "ELASTICSEARCH_PATH": "/net/nfs.cirrascale/aristo/harsht/elasticsearch-7.10.2/bin/elasticsearch",
             "BLINK_MODELS_PATH": "/net/nfs.cirrascale/aristo/harsht/blink_models",
-            "OPEN_NATQ_PATH": "/net/nfs.cirrascale/aristo/harsht/natcq_processed_datasets/open_natq",
+            "NATQ_PATH": "/net/nfs.cirrascale/aristo/harsht/natcq_processed_datasets/natq",
             "CONTRIEVER_DATA_PATH": "",
         }
 
@@ -36,7 +36,7 @@ def main():
             "TRANSFORMERS_CACHE": "~/.cache",
             "ELASTICSEARCH_PATH": "elasticsearch",
             "BLINK_MODELS_PATH": "BLINK/models",
-            "OPEN_NATQ_PATH": "../natcq/processed_datasets/open_natq/",
+            "NATQ_PATH": "../natcq/processed_datasets/natq/",
             "CONTRIEVER_DATA_PATH": "",
         }
 

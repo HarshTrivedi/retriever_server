@@ -263,7 +263,9 @@ def yield_cleaned_wikipedia_page_to_chunked_doc_es_documents(
                 is_abstract_added = True
 
             # merging two fields because querying combined field works better+faster in ES.
-            main_text = combine_title_and_text(page_title, sub_document_text)
+            # Also use section_path, don't use title as it provides more context.
+            # I am using it in the dpr as well.
+            main_text = combine_title_and_text(section_path, sub_document_text)
             metadata_ = {
                 "page_id": page_id,
                 "document_type": document_type,

@@ -39,6 +39,8 @@ def hash_object(o: Any) -> str:
 
 def combine_title_and_text(title: str, text: str) -> str:
     # don't strip as it may lose the structure
+    # NOTE: This is used in natcq project also.
+    # so make sure to change it there also if it's changed here.
     return " :::\n\n".join([title, text])
 
 

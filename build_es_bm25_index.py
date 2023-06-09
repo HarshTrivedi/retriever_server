@@ -674,6 +674,7 @@ if __name__ == "__main__":
             "official_dpr_docs",
             "natcq_chunked_docs",
             "natq_chunked_docs",
+            "natcq_page_titles",
         ),
     )
     parser.add_argument(

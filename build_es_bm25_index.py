@@ -626,37 +626,6 @@ def make_natq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = 
                     yield document
 
 
-def make_natcq_page_titles_documents(elasticsearch_index: str, metadata: Dict = None):
-
-    raw_filepath = os.path.join(
-        WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
-    )
-    metadata = metadata or {"idx": 1}
-    assert "idx" in metadata
-
-    random.seed(13370)  # Don't change.
-
-    with gzip.open(raw_filepath, mode="rt") as file:
-        for line in tqdm(file):
-            wikipedia_page = json.loads(line)
-            es_paragraph = {
-                "id": wikipedia_page["id"],
-                "title": wikipedia_page["title"],
-                "paragraph_index": 0,
-                "paragraph_text": "",
-                "url": "",
-                "is_abstract": False,
-            }
-            document = {
-                "_op_type": "create",
-                "_index": elasticsearch_index,
-                "_id": metadata["idx"],
-                "_source": es_paragraph,
-            }
-            yield (document)
-            metadata["idx"] += 1
-
-
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Index paragraphs in Elasticsearch")
@@ -674,7 +643,6 @@ if __name__ == "__main__":
             "official_dpr_docs",
             "natcq_chunked_docs",
             "natq_chunked_docs",
-            "natcq_page_titles",
         ),
     )
     parser.add_argument(
@@ -784,8 +752,6 @@ if __name__ == "__main__":
         make_documents = make_natcq_chunked_docs_documents
     elif args.dataset_name == "natq_chunked_docs":
         make_documents = make_natq_chunked_docs_documents
-    elif args.dataset_name == "natcq_page_titles":
-        make_documents = make_natcq_page_titles_documents
     else:
         raise Exception(f"Unknown dataset_name {args.dataset_name}")
 

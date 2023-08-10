@@ -81,97 +81,37 @@ def get_cleaned_wikipedia_page_to_page_es_document(
     return document
 
 
-def yield_cleaned_wikipedia_page_to_doc_es_documents(
+def yield_cleaned_wikipedia_page_to_page_titles_documents(
     elasticsearch_index: str,
     wikipedia_page: Dict,
-    indexed_document_ids: Set[str],
+    indexed_page_ids: Set[str],
     metadata: Dict,
     show_repetition_warning: bool = False,
 ):
-
     page_title = wikipedia_page["title"]
     page_id = wikipedia_page["id"]
     page_url = wikipedia_page["url"]
-
-    is_abstract_added = False
-    for section in wikipedia_page["sections"]:
-
-        section_index = section["index"]
-        section_path = section["path"]
-
-        document_infos = []
-        plural = {
-            "paragraph": "paragraphs",
-            "list": "lists",
-            "infobox": "infoboxes",
-            "table": "tables",
+    if page_id not in indexed_page_ids:
+        es_document = {
+            "id": page_id,
+            "title": page_title,
+            "paragraph_index": 0,
+            "paragraph_text": "",
+            "url": page_url,
+            "is_abstract": True,
+            "metadata": "",
         }
-        for document_type in ["paragraph", "list", "infobox", "table"]:
-            for document in section[plural[document_type]]:
-                document_index = document["index"]
-                document_text = document["text"]
-                document_data = document["data"]
-                document_id = document["id"]
-                document_infos.append(
-                    [
-                        document_id,
-                        document_index,
-                        document_text,
-                        document_data,
-                        document_type,
-                    ]
-                )
-
-        for document_info in document_infos:
-
-            (
-                document_id,
-                document_index,
-                document_text,
-                document_data,
-                document_type,
-            ) = document_info
-
-            if document_id in indexed_document_ids:
-                if show_repetition_warning:
-                    print(
-                        "WARNING: Looks like a repeated sub_document_id is being indexed. Skipping it."
-                    )
-                continue
-
-            is_abstract = False
-            if not is_abstract_added:
-                is_abstract = True
-                is_abstract_added = True
-
-            metadata_ = {
-                "page_id": page_id,
-                "document_type": document_type,
-                "document_path": section_path,
-                "document_data": document_data,
-            }
-            es_document = {
-                "id": document_id,
-                "title": page_title,
-                "section_index": section_index,
-                "section_path": section_path,
-                "paragraph_type": document_type,
-                "paragraph_index": document_index,
-                "paragraph_text": document_text,
-                "url": page_url,
-                "is_abstract": is_abstract,
-                "metadata": json.dumps(metadata_),
-            }
-            document = {
-                "_op_type": "create",
-                "_index": elasticsearch_index,
-                "_id": metadata["idx"],
-                "_source": es_document,
-            }
-            yield (document)
-            metadata["idx"] += 1
-
-            indexed_document_ids.add(document_id)
+        document = {
+            "_op_type": "create",
+            "_index": elasticsearch_index,
+            "_id": metadata["idx"],
+            "_source": es_document,
+        }
+        yield (document)
+        metadata["idx"] += 1
+        indexed_page_ids.add(page_id)
+    elif show_repetition_warning:
+        print("WARNING: Looks like a repeated page_id is being indexed. Skipping it.")
 
 
 def yield_cleaned_wikipedia_page_to_chunked_doc_es_documents(
@@ -574,6 +514,58 @@ def make_official_dpr_docs_documents(elasticsearch_index: str, metadata: Dict = 
             metadata["idx"] += 1
 
 
+def make_natcq_page_titles_documents(elasticsearch_index: str, metadata: Dict = None):
+
+    raw_filepath = os.path.join(
+        WIKIPEDIA_CORPUSES_PATH, "natcq-wikipedia-paragraphs/wikipedia_corpus.jsonl.gz"
+    )
+    metadata = metadata or {"idx": 1}
+    assert "idx" in metadata
+
+    random.seed(13370)  # Don't change.
+
+    indexed_page_ids = set()
+
+    with gzip.open(raw_filepath, mode="rt") as file:
+
+        for line in tqdm(file):
+
+            wikipedia_page = json.loads(line)
+            for document in yield_cleaned_wikipedia_page_to_page_titles_documents(
+                elasticsearch_index, wikipedia_page, indexed_page_ids, metadata,
+                show_repetition_warning=True
+            ):
+                yield document
+
+
+def make_natq_page_titles_documents(elasticsearch_index: str, metadata: Dict = None):
+
+    input_filepaths = [
+        os.path.join(NATQ_PATH, "dev.jsonl"),
+        os.path.join(NATQ_PATH, "train.jsonl")
+    ]
+
+    metadata = metadata or {"idx": 1}
+    assert "idx" in metadata
+
+    random.seed(13370)  # Don't change.
+
+    indexed_page_ids = set()
+
+    for input_filepath in input_filepaths:
+
+        with open(input_filepath, "r") as file:
+
+            for line in tqdm(file):
+
+                wikipedia_page = json.loads(line)["context_data"]
+                for document in yield_cleaned_wikipedia_page_to_page_titles_documents(
+                    elasticsearch_index, wikipedia_page, indexed_page_ids, metadata,
+                    show_repetition_warning=False
+                ):
+                    yield document
+
+
 def make_natcq_chunked_docs_documents(elasticsearch_index: str, metadata: Dict = None):
 
     raw_filepath = os.path.join(
@@ -641,6 +633,8 @@ if __name__ == "__main__":
             "musique_ans",
             "hwm",
             "official_dpr_docs",
+            "natcq_page_titles",
+            "natq_page_titles",
             "natcq_chunked_docs",
             "natq_chunked_docs",
         ),
@@ -748,6 +742,10 @@ if __name__ == "__main__":
         make_documents = make_hwm_documents
     elif args.dataset_name == "official_dpr_docs":
         make_documents = make_official_dpr_docs_documents
+    elif args.dataset_name == "natcq_page_titles":
+        make_documents = make_natcq_page_titles_documents
+    elif args.dataset_name == "natq_page_titles":
+        make_documents = make_natq_page_titles_documents
     elif args.dataset_name == "natcq_chunked_docs":
         make_documents = make_natcq_chunked_docs_documents
     elif args.dataset_name == "natq_chunked_docs":

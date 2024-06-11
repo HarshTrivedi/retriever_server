@@ -8,9 +8,13 @@ def main() -> None:
         "retrieval_method": "retrieve_from_elasticsearch",
         "query_text": "barack obama",
         "max_hits_count": 10,
+        "corpus_name": "natcq_chunked_docs-wikipedia",
     }
     result = requests.post(url, json=params)
-    print(json.dumps(result.json(), indent=4))
+    if result.status_code == 200:
+        print(json.dumps(result.json(), indent=4))
+    else:
+        print("Something went wrong!")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ def main() -> None:
         "retrieval_method": "retrieve_from_elasticsearch",
         "query_text": "barack obama",
         "max_hits_count": 10,
-        "corpus_name": "natcq_chunked_docs-wikipedia",
+        "corpus_name": "natcq_chunked_docs",
     }
     result = requests.post(url, json=params)
     if result.status_code == 200:

@@ -52,7 +52,8 @@ class ElasticsearchRetriever:
         query = {
             "size": max_buffer_count,
             # what records are needed in result
-            "_source": ["id", "title", "paragraph_text", "url", "is_abstract", "paragraph_index"],
+            "_source": ["id", "title", "paragraph_text", "url", "is_abstract", "paragraph_index", #],
+                        "section_index", "section_path", "paragraph_type", "paragraph_sub_index", "metadata"],  # NOTE: These have been added temporarily for Natcq project 20 Feb 2025.
             "query": {
                 "bool": {
                     "should": [],
